@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StreamIndia - Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --dark: #1f2937;
+            --dark-light: #374151;
+            --gray: #6b7280;
+            --gray-light: #e5e7eb;
+            --white: #ffffff;
+            --sidebar-width: 260px;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f3f4f6;
+            color: var(--dark);
+        }
+
+        /* Login Page */
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        }
+
+        .login-box {
+            background: white;
+            padding: 3rem;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .login-box h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        .login-box p {
+            color: var(--gray);
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--gray-light);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        /* Admin Dashboard Layout */
+        .admin-container {
+            display: none;
+        }
+
+        .admin-container.active {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: var(--dark);
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h2 {
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+
+        .menu-item {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .menu-item:hover,
+        .menu-item.active {
+            background: rgba(99, 102, 241, 0.2);
+            color: white;
+            border-left: 4px solid var(--primary);
+        }
+
+        .menu-item-icon {
+            font-size: 1.2rem;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .topbar h1 {
+            font-size: 1.75rem;
+            color: var(--dark);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+        }
+
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .stat-card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-card-icon.primary { background: rgba(99, 102, 241, 0.1); color: var(--primary); }
+        .stat-card-icon.success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .stat-card-icon.warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .stat-card-icon.danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-card p {
+            color: var(--gray);
+            font-size: 0.9rem;
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header h2 {
+            font-size: 1.25rem;
+            color: var(--dark);
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--dark);
+            background: #f9fafb;
+        }
+
+        tr:hover {
+            background: #f9fafb;
+        }
+
+        /* Badges */
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-success { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .badge-warning { background: rgba(245, 158, 11, 0.1); color: var(--warning); }
+        .badge-danger { background: rgba(239, 68, 68, 0.1); color: var(--danger); }
+        .badge-info { background: rgba(59, 130, 246, 0.1); color: var(--info); }
+
+        /* Buttons */
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-warning { background: var(--warning); color: white; }
+        .btn-secondary { background: var(--gray); color: white; }
+
+        .btn-success:hover { background: #059669; }
+        .btn-danger:hover { background: #dc2626; }
+        .btn-warning:hover { background: #d97706; }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray);
+        }
+
+        .close-modal:hover {
+            color: var(--dark);
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .form-group-full {
+            grid-column: 1 / -1;
+        }
+
+        textarea.form-control {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        select.form-control {
+            cursor: pointer;
+        }
+
+        /* File Upload */
+        .file-upload {
+            border: 2px dashed var(--gray-light);
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        /* Image Preview */
+        .image-preview {
+            margin-top: 1rem;
+            max-width: 200px;
+            border-radius: 8px;
+        }
+
+        /* Alert */
+        .alert {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-danger {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--danger);
+            border-left: 4px solid var(--danger);
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .spinner {
+            border: 4px solid var(--gray-light);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Page -->
+    <div id="loginPage" class="login-container">
+        <div class="login-box">
+            <h1>Welcome Back</h1>
+            <p>Sign in to StreamIndia Admin Panel</p>
+            
+            <div id="loginAlert" style="display: none;"></div>
+            
+            <form id="loginForm">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" class="form-control" id="loginUsername" required autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" class="form-control" id="loginPassword" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary">Sign In</button>
+            </form>
+            
+            <p style="margin-top: 1.5rem; font-size: 0.875rem; color: var(--gray);">
+                Default credentials: admin / admin123
+            </p>
+        </div>
+    </div>
+
+    <!-- Admin Dashboard -->
+    <div id="adminPanel" class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h2>StreamIndia</h2>
+            </div>
+            <nav class="sidebar-menu">
+                <a href="#" class="menu-item active" data-section="dashboard">
+                    <span class="menu-item-icon">📊</span>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="menu-item" data-section="content">
+                    <span class="menu-item-icon">🎬</span>
+                    <span>Content</span>
+                </a>
+                <a href="#" class="menu-item" data-section="navigation">
+                    <span class="menu-item-icon">🧭</span>
+                    <span>Navigation</span>
+                </a>
+                <a href="#" class="menu-item" data-section="advertisements">
+                    <span class="menu-item-icon">📢</span>
+                    <span>Advertisements</span>
+                </a>
+                <a href="#" class="menu-item" data-section="settings">
+                    <span class="menu-item-icon">⚙️</span>
+                    <span>Settings</span>
+                </a>
+                <a href="#" class="menu-item" id="logoutBtn">
+                    <span class="menu-item-icon">🚪</span>
+                    <span>Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <div class="topbar">
+                <h1 id="pageTitle">Dashboard</h1>
+                <div class="user-info">
+                    <span id="adminUsername"></span>
+                    <div class="user-avatar" id="adminAvatar">A</div>
+                </div>
+            </div>
+
+            <!-- Dashboard Section -->
+            <section id="dashboardSection" class="content-section active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div>
+                                <h3 id="totalContent">0</h3>
+                                <p>Total Content</p>
+                            </div>
+                            <div class="stat-card-icon primary">🎬</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div>
+                                <h3 id="publishedContent">0</h3>
+                                <p>Published</p>
+                            </div>
+                            <div class="stat-card-icon success">✓</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div>
+                                <h3 id="totalViews">0</h3>
+                                <p>Total Views</p>
+                            </div>
+                            <div class="stat-card-icon warning">👁️</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div>
+                                <h3 id="totalAds">0</h3>
+                                <p>Active Ads</p>
+                            </div>
+                            <div class="stat-card-icon danger">📢</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Recent Content</h2>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th>Views</th>
+                                    <th>Created</th>
+                                </tr>
+                            </thead>
+                            <tbody id="recentContentTable">
+                                <tr><td colspan="4" class="loading"><div class="spinner"></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Content Management Section -->
+            <section id="contentSection" class="content-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Content Management</h2>
+                        <button class="btn btn-primary btn-sm" onclick="openContentModal()">+ Add Content</button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th>Category</th>
+                                    <th>Status</th>
+                                    <th>Views</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contentTable">
+                                <tr><td colspan="6" class="loading"><div class="spinner"></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Navigation Management Section -->
+            <section id="navigationSection" class="content-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Navigation Menu</h2>
+                        <button class="btn btn-primary btn-sm" onclick="openNavModal()">+ Add Menu Item</button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Label</th>
+                                    <th>URL</th>
+                                    <th>Order</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="navigationTable">
+                                <tr><td colspan="5" class="loading"><div class="spinner"></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Advertisements Section -->
+            <section id="advertisementsSection" class="content-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Advertisements</h2>
+                        <button class="btn btn-primary btn-sm" onclick="openAdModal()">+ Add Advertisement</button>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Type</th>
+                                    <th>Position</th>
+                                    <th>Impressions</th>
+                                    <th>Clicks</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adsTable">
+                                <tr><td colspan="7" class="loading"><div class="spinner"></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settingsSection" class="content-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Site Settings</h2>
+                        <button class="btn btn-success btn-sm" onclick="saveSettings()">Save Settings</button>
+                    </div>
+                    <form id="settingsForm">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Site Name</label>
+                                <input type="text" class="form-control" id="site_name">
+                            </div>
+                            <div class="form-group">
+                                <label>Site Tagline</label>
+                                <input type="text" class="form-control" id="site_tagline">
+                            </div>
+                            <div class="form-group">
+                                <label>Primary Color</label>
+                                <input type="color" class="form-control" id="primary_color">
+                            </div>
+                            <div class="form-group">
+                                <label>Secondary Color</label>
+                                <input type="color" class="form-control" id="secondary_color">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Content Modal -->
+    <div id="contentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="contentModalTitle">Add Content</h2>
+                <button class="close-modal" onclick="closeContentModal()">✕</button>
+            </div>
+            <form id="contentForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Title *</label>
+                        <input type="text" class="form-control" id="contentTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Type *</label>
+                        <select class="form-control" id="contentType" required>
+                            <option value="movie">Movie</option>
+                            <option value="series">Series</option>
+                            <option value="video">Video</option>
+                            <option value="live">Live</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Category *</label>
+                        <input type="text" class="form-control" id="contentCategory" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Language</label>
+                        <input type="text" class="form-control" id="contentLanguage">
+                    </div>
+                    <div class="form-group">
+                        <label>Year</label>
+                        <input type="number" class="form-control" id="contentYear">
+                    </div>
+                    <div class="form-group">
+                        <label>Rating (0-10)</label>
+                        <input type="number" step="0.1" min="0" max="10" class="form-control" id="contentRating">
+                    </div>
+                    <div class="form-group form-group-full">
+                        <label>Description</label>
+                        <textarea class="form-control" id="contentDescription"></textarea>
+                    </div>
+                    <div class="form-group form-group-full">
+                        <label>Video URL *</label>
+                        <input type="url" class="form-control" id="contentVideoUrl" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Thumbnail URL</label>
+                        <input type="url" class="form-control" id="contentThumbnail">
+                    </div>
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select class="form-control" id="contentStatus">
+                            <option value="published">Published</option>
+                            <option value="draft">Draft</option>
+                            <option value="archived">Archived</option>
+                        </select>
+                    </div>
+                </div>
+                <div style="margin-top: 1.5rem; display: flex; gap: 1rem;">
+                    <button type="submit" class="btn btn-primary">Save Content</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeContentModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration
+        const API_URL = 'http://localhost:3000/api';
+        let authToken = localStorage.getItem('adminToken');
+        let currentAdmin = null;
+
+        // Check authentication on load
+        if (authToken) {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('adminPanel').classList.add('active');
+            loadDashboard();
+        }
+
+        // Login Form Handler
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/admin/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    authToken = data.token;
+                    currentAdmin = data.admin;
+                    localStorage.setItem('adminToken', authToken);
+                    
+                    document.getElementById('loginPage').style.display = 'none';
+                    document.getElementById('adminPanel').classList.add('active');
+                    loadDashboard();
+                } else {
+                    showAlert('loginAlert', data.error, 'danger');
+                }
+            } catch (error) {
+                showAlert('loginAlert', 'Connection error. Please check if the server is running.', 'danger');
+            }
+        });
+
+        // Logout
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('adminToken');
+            location.reload();
+        });
+
+        // Menu Navigation
+        document.querySelectorAll('.menu-item[data-section]').forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = item.dataset.section;
+                
+                // Update active menu
+                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+                item.classList.add('active');
+                
+                // Update active section
+                document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+                document.getElementById(section + 'Section').classList.add('active');
+                
+                // Update page title
+                document.getElementById('pageTitle').textContent = 
+                    item.querySelector('span:last-child').textContent;
+                
+                // Load section data
+                loadSectionData(section);
+            });
+        });
+
+        // Load Dashboard
+        async function loadDashboard() {
+            // Set admin info
+            if (currentAdmin) {
+                document.getElementById('adminUsername').textContent = currentAdmin.username;
+                document.getElementById('adminAvatar').textContent = currentAdmin.username[0].toUpperCase();
+            }
+
+            try {
+                const response = await fetch(`${API_URL}/admin/stats`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+
+                document.getElementById('totalContent').textContent = data.totalContent;
+                document.getElementById('publishedContent').textContent = data.publishedContent;
+                document.getElementById('totalViews').textContent = data.totalViews.toLocaleString();
+                document.getElementById('totalAds').textContent = data.totalAds;
+
+                // Recent content
+                const tbody = document.getElementById('recentContentTable');
+                tbody.innerHTML = data.recentContent.map(content => `
+                    <tr>
+                        <td>${content.title}</td>
+                        <td><span class="badge badge-info">${content.type}</span></td>
+                        <td>${content.views}</td>
+                        <td>${new Date(content.createdAt).toLocaleDateString()}</td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+            }
+        }
+
+        // Load Section Data
+        async function loadSectionData(section) {
+            switch(section) {
+                case 'content':
+                    loadContent();
+                    break;
+                case 'navigation':
+                    loadNavigation();
+                    break;
+                case 'advertisements':
+                    loadAdvertisements();
+                    break;
+                case 'settings':
+                    loadSettings();
+                    break;
+            }
+        }
+
+        // Load Content
+        async function loadContent() {
+            try {
+                const response = await fetch(`${API_URL}/content`);
+                const data = await response.json();
+
+                const tbody = document.getElementById('contentTable');
+                tbody.innerHTML = data.content.map(content => `
+                    <tr>
+                        <td>${content.title}</td>
+                        <td><span class="badge badge-info">${content.type}</span></td>
+                        <td>${content.category}</td>
+                        <td><span class="badge badge-${content.status === 'published' ? 'success' : 'warning'}">${content.status}</span></td>
+                        <td>${content.views}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" onclick="editContent('${content._id}')">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteContent('${content._id}')">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading content:', error);
+            }
+        }
+
+        // Content Modal
+        function openContentModal() {
+            document.getElementById('contentModal').classList.add('active');
+        }
+
+        function closeContentModal() {
+            document.getElementById('contentModal').classList.remove('active');
+            document.getElementById('contentForm').reset();
+        }
+
+        // Content Form Handler
+        document.getElementById('contentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const contentData = {
+                title: document.getElementById('contentTitle').value,
+                type: document.getElementById('contentType').value,
+                category: document.getElementById('contentCategory').value,
+                language: document.getElementById('contentLanguage').value,
+                year: document.getElementById('contentYear').value,
+                rating: document.getElementById('contentRating').value,
+                description: document.getElementById('contentDescription').value,
+                videoUrl: document.getElementById('contentVideoUrl').value,
+                thumbnail: document.getElementById('contentThumbnail').value,
+                status: document.getElementById('contentStatus').value
+            };
+
+            try {
+                const response = await fetch(`${API_URL}/content`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(contentData)
+                });
+
+                if (response.ok) {
+                    closeContentModal();
+                    loadContent();
+                    alert('Content added successfully!');
+                }
+            } catch (error) {
+                console.error('Error adding content:', error);
+            }
+        });
+
+        // Delete Content
+        async function deleteContent(id) {
+            if (!confirm('Are you sure you want to delete this content?')) return;
+
+            try {
+                await fetch(`${API_URL}/content/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                loadContent();
+            } catch (error) {
+                console.error('Error deleting content:', error);
+            }
+        }
+
+        // Load Navigation (placeholder)
+        function loadNavigation() {
+            // Similar implementation as content
+        }
+
+        // Load Advertisements (placeholder)
+        function loadAdvertisements() {
+            // Similar implementation as content
+        }
+
+        // Load Settings
+        async function loadSettings() {
+            try {
+                const response = await fetch(`${API_URL}/settings`);
+                const settings = await response.json();
+
+                Object.keys(settings).forEach(key => {
+                    const element = document.getElementById(key);
+                    if (element) {
+                        element.value = settings[key];
+                    }
+                });
+            } catch (error) {
+                console.error('Error loading settings:', error);
+            }
+        }
+
+        // Helper Functions
+        function showAlert(elementId, message, type) {
+            const alertDiv = document.getElementById(elementId);
+            alertDiv.className = `alert alert-${type}`;
+            alertDiv.textContent = message;
+            alertDiv.style.display = 'block';
+            setTimeout(() => alertDiv.style.display = 'none', 5000);
+        }
+    </script>
+</body>
+</html>
