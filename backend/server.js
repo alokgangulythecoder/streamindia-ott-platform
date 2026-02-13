@@ -670,6 +670,68 @@ app.post('/api/seed', async (req, res) => {
 });
 
 // ========================================
+// ROOT & ADMIN ROUTES
+// ========================================
+
+// Root route
+app.get('/', (req, res) => {
+    res.json({
+        message: 'StreamIndia Backend API',
+        version: '1.0.0',
+        status: 'running',
+        endpoints: {
+            admin: '/admin',
+            api: '/api',
+            seed: '/api/seed'
+        }
+    });
+});
+
+// Admin panel route
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+// Health check
+app.get('/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+```
+
+### **Step 5: Commit Changes**
+
+1. **Scroll to bottom** of the edit page
+2. **Commit message:** `Add root and admin routes`
+3. Click **"Commit changes"**
+
+### **Step 6: Wait for Auto-Deploy**
+
+1. **Go to Render.com** dashboard
+2. **Click on** `streamindia-backend` service
+3. **Watch the "Events" tab**
+4. You'll see: "Deploying..." → "Deploy live" (wait 3-5 minutes)
+
+### **Step 7: Test!**
+
+**After deployment completes:**
+
+**Test Root:**
+```
+https://streamindia-backend.onrender.com/
+```
+**Should show:** JSON with API info
+
+**Test Admin:**
+```
+https://streamindia-backend.onrender.com/admin
+```
+**Should show:** Admin login page
+
+**Test Seed:**
+```
+https://streamindia-backend.onrender.com/api/seed
+
+// ========================================
 // START SERVER
 // ========================================
 
