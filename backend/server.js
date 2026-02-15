@@ -646,14 +646,18 @@ app.post('/api/seed', async (req, res) => {
         }
 
         // Create default settings
-        const defaultSettings = [
-            { key: 'site_name', value: 'StreamIndia', category: 'general' },
-            { key: 'site_tagline', value: 'Premium Entertainment Platform', category: 'general' },
-            { key: 'primary_color', value: '#ff3366', category: 'theme' },
-            { key: 'secondary_color', value: '#7c3aed', category: 'theme' },
-            { key: 'enable_ads', value: true, category: 'monetization' },
-            { key: 'subscription_enabled', value: true, category: 'monetization' }
-        ];
+    const defaultSettings = [
+    { key: 'site_name', value: 'ClassicFlims', category: 'general' },
+    { key: 'site_tagline', value: 'Premium Classical Content Platform', category: 'general' },
+    { key: 'app_name', value: 'ClassicFlims', category: 'general' },
+    { key: 'app_tagline', value: 'Experience Classical Arts & Music', category: 'general' },
+    { key: 'primary_color', value: '#8B4513', category: 'theme' }, // Classical brown
+    { key: 'secondary_color', value: '#DAA520', category: 'theme' }, // Gold
+    { key: 'enable_ads', value: true, category: 'monetization' },
+    { key: 'subscription_enabled', value: true, category: 'monetization' },
+    { key: 'app_version', value: '1.0.0', category: 'app' },
+    { key: 'min_android_version', value: '21', category: 'app' }
+];
 
         for (const setting of defaultSettings) {
             await Settings.findOneAndUpdate(
