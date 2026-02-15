@@ -676,12 +676,14 @@ app.post('/api/seed', async (req, res) => {
 // Root route
 app.get('/', (req, res) => {
     res.json({
-        message: 'StreamIndia Backend API',
+        message: 'ClassicFlims Backend API',
         version: '1.0.0',
         status: 'running',
+        tagline: 'Premium Classical Content Platform',
         endpoints: {
             admin: '/admin',
             api: '/api',
+            health: '/health',
             seed: '/api/seed'
         }
     });
