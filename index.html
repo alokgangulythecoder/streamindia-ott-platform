@@ -964,8 +964,8 @@ function App() {
             }
 
             // Load YouTube videos (keeping existing functionality)
-            //const videos = await fetchYouTubeVideos(12);
-            //setYoutubeVideos(videos);
+            const videos = await fetchYouTubeVideos(12);
+            setYoutubeVideos(videos);
 
         } catch (error) {
             console.error('Error loading data:', error);
