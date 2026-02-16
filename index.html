@@ -747,54 +747,6 @@
             background-size: 1000px 100%;
             animation: shimmer 2s infinite;
         }
-
-    .ad-banner:hover {
-        transform: scale(1.02);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-    }
-
-    .ad-header {
-        position: sticky;
-        top: 80px;
-        z-index: 100;
-        animation: slideDown 0.5s ease;
-    }
-
-    .ad-sidebar {
-        position: sticky;
-        top: 100px;
-    }
-
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-
-    .ad-close-btn {
-        position: absolute;
-        top: 10px;
-        right: 10px;
-        background: rgba(0, 0, 0, 0.7);
-        color: white;
-        border: none;
-        width: 30px;
-        height: 30px;
-        border-radius: 50%;
-        cursor: pointer;
-        font-size: 1.2rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .ad-close-btn:hover {
-        background: var(--accent-primary);
     }
     </style>
 </head>
@@ -879,10 +831,6 @@ const api = {
         return await response.json();
     }
 };
-
-// ==========================================
-// UPDATED APP COMPONENT WITH BACKEND INTEGRATION
-// ==========================================
 
 // Replace the existing mockContent and App function with this:
 
