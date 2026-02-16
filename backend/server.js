@@ -4,89 +4,62 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
-const path = require('path');
 
 const app = express();
 
 // ========================================
-// ENVIRONMENT VARIABLES
+// CRITICAL: PORT CONFIGURATION
 // ========================================
 
 const PORT = process.env.PORT || 3000;
-const MONGODB_URI = process.env.MONGO_URI;
-const JWT_SECRET = process.env.JWT_SECRET || 'classicflims-secret-2025';
-const FRONTEND_URL = process.env.FRONTEND_URL || '*';
 
-console.log('🚀 Starting ClassicFlims Backend...');
+console.log('='.repeat(50));
+console.log('🚀 ClassicFlims Backend Starting...');
 console.log('📍 Port:', PORT);
-console.log('🌐 Frontend URL:', FRONTEND_URL);
+console.log('='.repeat(50));
 
 // ========================================
 // MIDDLEWARE
 // ========================================
 
-// CORS - Allow frontend to access backend
-app.use(cors({
-    origin: function(origin, callback) {
-        // Allow requests with no origin (mobile apps, Postman, etc.)
-        if (!origin) return callback(null, true);
-        
-        // Allow all Railway URLs and your frontend
-        if (
-            origin.includes('railway.app') || 
-            origin.includes('netlify.app') ||
-            origin.includes('localhost') ||
-            origin === FRONTEND_URL
-        ) {
-            return callback(null, true);
-        }
-        
-        // Allow all origins in development
-        return callback(null, true);
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
-// Body parsers
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static files (admin panel)
-app.use(express.static(path.join(__dirname, 'public')));
-
-// Request logging
+// Logging middleware
 app.use((req, res, next) => {
     console.log(`${req.method} ${req.path}`);
     next();
 });
 
 // ========================================
+// ENVIRONMENT VARIABLES
+// ========================================
+
+const MONGODB_URI = process.env.MONGO_URI;
+const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-me';
+
+console.log('🔧 MongoDB URI:', MONGODB_URI ? '✓ Set' : '✗ Missing');
+console.log('🔧 JWT Secret:', JWT_SECRET ? '✓ Set' : '✗ Missing');
+
+// ========================================
 // MONGODB CONNECTION
 // ========================================
 
-if (!MONGODB_URI) {
-    console.error('❌ MONGODB_URI environment variable is not set!');
-    console.error('Please set it in Railway dashboard');
-    process.exit(1);
+if (MONGODB_URI) {
+    console.log('🔄 Connecting to MongoDB...');
+    mongoose.connect(MONGODB_URI)
+        .then(() => {
+            console.log('✅ MongoDB Connected');
+            console.log('📊 Database:', mongoose.connection.name);
+        })
+        .catch((error) => {
+            console.error('❌ MongoDB Error:', error.message);
+            // Don't exit - let server start anyway
+        });
+} else {
+    console.warn('⚠️  No MongoDB URI - running without database');
 }
-
-console.log('🔄 Connecting to MongoDB...');
-
-mongoose.connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
-.then(() => {
-    console.log('✅ Connected to MongoDB');
-    console.log('📊 Database:', mongoose.connection.name);
-})
-.catch((error) => {
-    console.error('❌ MongoDB connection failed!');
-    console.error('Error:', error.message);
-    process.exit(1);
-});
 
 // ========================================
 // SCHEMAS
@@ -150,21 +123,11 @@ const settingsSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now }
 });
 
-const analyticsSchema = new mongoose.Schema({
-    contentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Content' },
-    type: { type: String, enum: ['view', 'like', 'share'], required: true },
-    userId: String,
-    ipAddress: String,
-    userAgent: String,
-    timestamp: { type: Date, default: Date.now }
-});
-
 const Admin = mongoose.model('Admin', adminSchema);
 const Content = mongoose.model('Content', contentSchema);
 const Navigation = mongoose.model('Navigation', navigationSchema);
 const Advertisement = mongoose.model('Advertisement', advertisementSchema);
 const Settings = mongoose.model('Settings', settingsSchema);
-const Analytics = mongoose.model('Analytics', analyticsSchema);
 
 // ========================================
 // AUTH MIDDLEWARE
@@ -172,11 +135,9 @@ const Analytics = mongoose.model('Analytics', analyticsSchema);
 
 const authMiddleware = (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1];
-    
     if (!token) {
         return res.status(401).json({ error: 'No token provided' });
     }
-    
     try {
         const decoded = jwt.verify(token, JWT_SECRET);
         req.admin = decoded;
@@ -187,7 +148,7 @@ const authMiddleware = (req, res, next) => {
 };
 
 // ========================================
-// ROOT ROUTES
+// BASIC ROUTES
 // ========================================
 
 app.get('/', (req, res) => {
@@ -195,18 +156,16 @@ app.get('/', (req, res) => {
         message: 'ClassicFlims Backend API',
         version: '1.0.0',
         status: 'running',
-        tagline: 'Premium Classic Films & Timeless Cinema',
         timestamp: new Date().toISOString(),
         endpoints: {
-            root: '/',
             health: '/health',
-            admin_panel: '/admin',
-            api_base: '/api',
-            seed: '/api/seed',
+            api: '/api',
+            admin_login: '/api/admin/login',
             content: '/api/content',
             navigation: '/api/navigation',
             advertisements: '/api/advertisements',
-            settings: '/api/settings'
+            settings: '/api/settings',
+            seed: '/api/seed'
         }
     });
 });
@@ -217,21 +176,7 @@ app.get('/health', (req, res) => {
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
         database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-        environment: process.env.NODE_ENV || 'development'
-    });
-});
-
-// Admin Panel Route
-app.get('/admin', (req, res) => {
-    const adminPath = path.join(__dirname, 'public', 'admin.html');
-    res.sendFile(adminPath, (err) => {
-        if (err) {
-            console.error('Error sending admin.html:', err);
-            res.status(404).json({ 
-                error: 'Admin panel not found',
-                message: 'Make sure admin.html exists in backend/public/ folder'
-            });
-        }
+        port: PORT
     });
 });
 
@@ -242,23 +187,19 @@ app.get('/admin', (req, res) => {
 app.post('/api/admin/login', async (req, res) => {
     try {
         const { username, password } = req.body;
-        
         const admin = await Admin.findOne({ username });
         if (!admin) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
-        
         const validPassword = await bcrypt.compare(password, admin.password);
         if (!validPassword) {
             return res.status(401).json({ error: 'Invalid credentials' });
         }
-        
         const token = jwt.sign(
             { id: admin._id, username: admin.username, role: admin.role },
             JWT_SECRET,
             { expiresIn: '24h' }
         );
-        
         res.json({
             token,
             admin: {
@@ -280,12 +221,11 @@ app.post('/api/admin/login', async (req, res) => {
 app.get('/api/content', async (req, res) => {
     try {
         const { category, type, status, search, page = 1, limit = 20 } = req.query;
-        
         const query = {};
         if (category) query.category = category;
         if (type) query.type = type;
         if (status) query.status = status;
-        else query.status = 'published'; // Default to published only
+        else query.status = 'published';
         if (search) query.title = { $regex: search, $options: 'i' };
         
         const content = await Content.find(query)
@@ -312,9 +252,7 @@ app.get('/api/content', async (req, res) => {
 app.get('/api/content/:id', async (req, res) => {
     try {
         const content = await Content.findById(req.params.id);
-        if (!content) {
-            return res.status(404).json({ error: 'Content not found' });
-        }
+        if (!content) return res.status(404).json({ error: 'Content not found' });
         res.json(content);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -337,9 +275,7 @@ app.put('/api/content/:id', authMiddleware, async (req, res) => {
             { ...req.body, updatedAt: Date.now() },
             { new: true }
         );
-        if (!content) {
-            return res.status(404).json({ error: 'Content not found' });
-        }
+        if (!content) return res.status(404).json({ error: 'Content not found' });
         res.json(content);
     } catch (error) {
         res.status(400).json({ error: error.message });
@@ -349,22 +285,8 @@ app.put('/api/content/:id', authMiddleware, async (req, res) => {
 app.delete('/api/content/:id', authMiddleware, async (req, res) => {
     try {
         const content = await Content.findByIdAndDelete(req.params.id);
-        if (!content) {
-            return res.status(404).json({ error: 'Content not found' });
-        }
-        res.json({ message: 'Content deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-app.get('/api/content/category/:category', async (req, res) => {
-    try {
-        const content = await Content.find({ 
-            category: req.params.category,
-            status: 'published'
-        }).sort({ createdAt: -1 });
-        res.json(content);
+        if (!content) return res.status(404).json({ error: 'Content not found' });
+        res.json({ message: 'Content deleted' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -387,16 +309,6 @@ app.post('/api/navigation', authMiddleware, async (req, res) => {
     try {
         const navigation = await Navigation.create(req.body);
         res.status(201).json(navigation);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
-
-app.put('/api/navigation/:id', authMiddleware, async (req, res) => {
-    try {
-        const navigation = await Navigation.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!navigation) return res.status(404).json({ error: 'Navigation not found' });
-        res.json(navigation);
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
@@ -433,16 +345,6 @@ app.post('/api/advertisements', authMiddleware, async (req, res) => {
     }
 });
 
-app.put('/api/advertisements/:id', authMiddleware, async (req, res) => {
-    try {
-        const ad = await Advertisement.findByIdAndUpdate(req.params.id, req.body, { new: true });
-        if (!ad) return res.status(404).json({ error: 'Ad not found' });
-        res.json(ad);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
-
 app.delete('/api/advertisements/:id', authMiddleware, async (req, res) => {
     try {
         await Advertisement.findByIdAndDelete(req.params.id);
@@ -465,16 +367,6 @@ app.get('/api/settings', async (req, res) => {
     }
 });
 
-app.get('/api/settings/:key', async (req, res) => {
-    try {
-        const setting = await Settings.findOne({ key: req.params.key });
-        if (!setting) return res.status(404).json({ error: 'Setting not found' });
-        res.json(setting);
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
 app.post('/api/settings', authMiddleware, async (req, res) => {
     try {
         const setting = await Settings.findOneAndUpdate(
@@ -488,50 +380,9 @@ app.post('/api/settings', authMiddleware, async (req, res) => {
     }
 });
 
-app.delete('/api/settings/:id', authMiddleware, async (req, res) => {
-    try {
-        await Settings.findByIdAndDelete(req.params.id);
-        res.json({ message: 'Setting deleted' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
 // ========================================
-// ANALYTICS
+// DASHBOARD STATS
 // ========================================
-
-app.post('/api/analytics/view', async (req, res) => {
-    try {
-        const { contentId } = req.body;
-        await Analytics.create({
-            contentId,
-            type: 'view',
-            ipAddress: req.ip,
-            userAgent: req.headers['user-agent']
-        });
-        await Content.findByIdAndUpdate(contentId, { $inc: { views: 1 } });
-        res.json({ message: 'View tracked' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-app.post('/api/analytics/like', async (req, res) => {
-    try {
-        const { contentId } = req.body;
-        await Analytics.create({
-            contentId,
-            type: 'like',
-            ipAddress: req.ip,
-            userAgent: req.headers['user-agent']
-        });
-        await Content.findByIdAndUpdate(contentId, { $inc: { likes: 1 } });
-        res.json({ message: 'Like tracked' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
 
 app.get('/api/dashboard/stats', authMiddleware, async (req, res) => {
     try {
@@ -561,7 +412,7 @@ app.get('/api/dashboard/stats', authMiddleware, async (req, res) => {
 
 app.post('/api/seed', async (req, res) => {
     try {
-        console.log('🌱 Starting database seed...');
+        console.log('🌱 Starting seed...');
         
         // Admin
         const adminCount = await Admin.countDocuments();
@@ -582,12 +433,10 @@ app.post('/api/seed', async (req, res) => {
             await Navigation.insertMany([
                 { label: 'Home', url: '/', icon: '🏠', order: 0, active: true },
                 { label: 'Classic Films', url: '/classic-films', icon: '🎬', order: 1, active: true },
-                { label: 'Golden Age', url: '/golden-age', icon: '🌟', order: 2, active: true },
-                { label: 'Film Noir', url: '/film-noir', icon: '🎭', order: 3, active: true },
-                { label: 'Documentaries', url: '/documentaries', icon: '📽️', order: 4, active: true },
-                { label: 'Silent Films', url: '/silent-films', icon: '🎪', order: 5, active: true }
+                { label: 'Film Noir', url: '/film-noir', icon: '🎭', order: 2, active: true },
+                { label: 'Documentaries', url: '/documentaries', icon: '📽️', order: 3, active: true }
             ]);
-            console.log('✅ Navigation created (6)');
+            console.log('✅ Navigation created');
         }
         
         // Settings
@@ -595,29 +444,11 @@ app.post('/api/seed', async (req, res) => {
         if (settingsCount === 0) {
             await Settings.insertMany([
                 { key: 'site_name', value: 'ClassicFlims', category: 'general' },
-                { key: 'site_tagline', value: 'Premium Classic Films & Timeless Cinema', category: 'general' },
+                { key: 'site_tagline', value: 'Premium Classic Films', category: 'general' },
                 { key: 'primary_color', value: '#1a1a1a', category: 'theme' },
-                { key: 'secondary_color', value: '#d4af37', category: 'theme' },
-                { key: 'accent_color', value: '#8b7355', category: 'theme' },
-                { key: 'enable_ads', value: true, category: 'monetization' },
-                { key: 'subscription_enabled', value: true, category: 'monetization' },
-                { key: 'app_version', value: '1.0.0', category: 'app' },
-                { key: 'maintenance_mode', value: false, category: 'general' }
+                { key: 'secondary_color', value: '#d4af37', category: 'theme' }
             ]);
-            console.log('✅ Settings created (9)');
-        }
-        
-        // Advertisements
-        const adCount = await Advertisement.countDocuments();
-        if (adCount === 0) {
-            await Advertisement.insertMany([
-                { title: 'Header Banner', type: 'banner', position: 'header', imageUrl: 'https://picsum.photos/1200/200?random=1', clickUrl: 'https://classicflims.up.railway.app', priority: 10, active: true },
-                { title: 'Sidebar Ad', type: 'banner', position: 'sidebar', imageUrl: 'https://picsum.photos/300/600?random=2', clickUrl: 'https://classicflims.up.railway.app', priority: 8, active: true },
-                { title: 'Footer Banner', type: 'banner', position: 'footer', imageUrl: 'https://picsum.photos/1200/100?random=3', clickUrl: 'https://classicflims.up.railway.app', priority: 6, active: true },
-                { title: 'Video Ad', type: 'video', position: 'player', imageUrl: 'https://picsum.photos/800/450?random=4', clickUrl: 'https://classicflims.up.railway.app', priority: 9, active: true },
-                { title: 'Popup Ad', type: 'popup', position: 'header', imageUrl: 'https://picsum.photos/600/400?random=5', clickUrl: 'https://classicflims.up.railway.app', priority: 7, active: false }
-            ]);
-            console.log('✅ Ads created (5)');
+            console.log('✅ Settings created');
         }
         
         // Content
@@ -643,7 +474,7 @@ app.post('/api/seed', async (req, res) => {
                 },
                 {
                     title: 'Citizen Kane',
-                    description: 'Following the death of publishing tycoon Charles Foster Kane, reporters scramble to uncover the meaning of his final utterance: Rosebud.',
+                    description: 'Following the death of publishing tycoon Charles Foster Kane, reporters scramble to uncover the meaning of his final utterance.',
                     type: 'movie',
                     category: 'Classic Hollywood',
                     language: 'English',
@@ -660,7 +491,7 @@ app.post('/api/seed', async (req, res) => {
                 },
                 {
                     title: 'The Maltese Falcon',
-                    description: 'San Francisco private detective Sam Spade takes on a case that involves him with three eccentric criminals and their quest for a priceless statuette.',
+                    description: 'A San Francisco private detective takes on a case that involves three eccentric criminals and their quest for a priceless statuette.',
                     type: 'movie',
                     category: 'Film Noir',
                     language: 'English',
@@ -674,70 +505,18 @@ app.post('/api/seed', async (req, res) => {
                     status: 'published',
                     views: 670,
                     likes: 543
-                },
-                {
-                    title: 'Double Indemnity',
-                    description: 'An insurance representative lets himself be talked into a murder/insurance fraud scheme that arouses suspicions.',
-                    type: 'movie',
-                    category: 'Film Noir',
-                    language: 'English',
-                    year: 1944,
-                    duration: '107 min',
-                    rating: 8.3,
-                    videoUrl: 'https://www.youtube.com/watch?v=S0z-F7BnqXA',
-                    thumbnailUrl: 'https://picsum.photos/400/600?random=13',
-                    featured: true,
-                    trending: false,
-                    status: 'published',
-                    views: 820,
-                    likes: 691
-                },
-                {
-                    title: 'The Wizard of Oz',
-                    description: 'Dorothy Gale is swept away from Kansas to a magical land of Oz and embarks on a quest with her new friends.',
-                    type: 'movie',
-                    category: 'Classic Hollywood',
-                    language: 'English',
-                    year: 1939,
-                    duration: '102 min',
-                    rating: 8.1,
-                    videoUrl: 'https://www.youtube.com/watch?v=PSZxmZmBfnU',
-                    thumbnailUrl: 'https://picsum.photos/400/600?random=14',
-                    featured: false,
-                    trending: true,
-                    status: 'published',
-                    views: 1540,
-                    likes: 1230
-                },
-                {
-                    title: 'Sunset Boulevard',
-                    description: 'A screenwriter develops a dangerous relationship with a faded film star determined to make a triumphant return.',
-                    type: 'movie',
-                    category: 'Film Noir',
-                    language: 'English',
-                    year: 1950,
-                    duration: '110 min',
-                    rating: 8.4,
-                    videoUrl: 'https://www.youtube.com/watch?v=wKRBj3-TszI',
-                    thumbnailUrl: 'https://picsum.photos/400/600?random=15',
-                    featured: true,
-                    trending: true,
-                    status: 'published',
-                    views: 750,
-                    likes: 612
                 }
             ]);
-            console.log('✅ Content created (6)');
+            console.log('✅ Content created');
         }
         
         res.json({ 
             message: 'Database seeded successfully',
             summary: {
                 admins: 1,
-                navigation: 6,
-                advertisements: 5,
-                settings: 9,
-                content: 6
+                navigation: 4,
+                settings: 4,
+                content: 3
             }
         });
     } catch (error) {
@@ -747,16 +526,20 @@ app.post('/api/seed', async (req, res) => {
 });
 
 // ========================================
-// ERROR HANDLERS
+// 404 HANDLER
 // ========================================
 
 app.use((req, res) => {
     res.status(404).json({ 
         error: 'Route not found',
         path: req.path,
-        message: 'The requested endpoint does not exist'
+        message: 'This endpoint does not exist'
     });
 });
+
+// ========================================
+// ERROR HANDLER
+// ========================================
 
 app.use((err, req, res, next) => {
     console.error('Error:', err);
@@ -767,15 +550,37 @@ app.use((err, req, res, next) => {
 });
 
 // ========================================
-// START SERVER
+// START SERVER - CRITICAL FOR RAILWAY
 // ========================================
 
-app.listen(PORT, '0.0.0.0', () => {
-    console.log('✅ Server started successfully!');
-    console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
-    console.log(`📍 Admin Panel: http://0.0.0.0:${PORT}/admin`);
+const server = app.listen(PORT, '0.0.0.0', () => {
+    console.log('='.repeat(50));
+    console.log('✅ SERVER STARTED SUCCESSFULLY!');
+    console.log(`🚀 Listening on http://0.0.0.0:${PORT}`);
     console.log(`📍 API: http://0.0.0.0:${PORT}/api`);
-    console.log('🎬 ClassicFlims Backend Ready!');
+    console.log(`🏥 Health: http://0.0.0.0:${PORT}/health`);
+    console.log('='.repeat(50));
+});
+
+// Handle server errors
+server.on('error', (error) => {
+    console.error('❌ Server error:', error);
+    if (error.code === 'EADDRINUSE') {
+        console.error(`Port ${PORT} is already in use`);
+        process.exit(1);
+    }
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+    console.log('SIGTERM received, shutting down gracefully');
+    server.close(() => {
+        console.log('Server closed');
+        mongoose.connection.close(false, () => {
+            console.log('MongoDB connection closed');
+            process.exit(0);
+        });
+    });
 });
 
 module.exports = app;
