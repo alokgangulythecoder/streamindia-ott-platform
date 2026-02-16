@@ -11,19 +11,8 @@ const app = express();
 
 // Middleware
 // CORS Configuration
-const corsOptions = {
-    origin: [
-        'https://classicflims.up.railway.app',  // Your frontend Railway URL
-        'http://localhost:3000',                 // For local development
-        'http://localhost:5173'                  // If using Vite
-    ],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-    credentials: true,  // If you're using cookies/sessions
-    optionsSuccessStatus: 200
-};
-app.use(cors(corsOptions));
-//app.use(cors());
+app.use(cors());
+app.options('*', cors());
 
 app.use(express.json());
 
