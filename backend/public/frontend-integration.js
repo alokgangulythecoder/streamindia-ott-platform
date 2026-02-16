@@ -3,7 +3,7 @@
 // Add this to your ott-streaming-app.html in the <script type="text/babel"> section
 
 const API_CONFIG = {
-    BASE_URL: 'http://localhost:3000/api',
+    BASE_URL: 'https://classicflims-ott-platform-production.up.railway.app/api',
     ENDPOINTS: {
         // Content
         CONTENT: '/content',
