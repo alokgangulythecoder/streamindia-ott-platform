@@ -191,7 +191,7 @@ app.get('/health', (req, res) => {
 // ========================================
 // ADMIN AUTH - CRITICAL: MUST BE BEFORE 404 HANDLER
 // ========================================
-app.post('/api/admin/login', async (req, res) => {
+app.post('/api/admin', async (req, res) => {
     try {
         console.log('🔐 Login attempt:', req.body.username);
         
