@@ -1,7 +1,7 @@
 // frontend-config.js - Frontend Configuration for Backend Integration
 
 // Add this to your ott-streaming-app.html in the <script type="text/babel"> section
-
+/*
 const API_CONFIG = {
     BASE_URL: 'https://classicflims-ott-platform-production.up.railway.app/api',
     ENDPOINTS: {
@@ -375,6 +375,7 @@ return (
         {sidebarAds.map(ad => (
             <AdBanner key={ad._id} ad={ad} position="sidebar" />
         ))}
+        */
 
         {/* ... rest of your content *\/}
     </div>
