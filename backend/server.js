@@ -80,15 +80,15 @@ async function connectDB() {
             maxPoolSize: 10,
             serverSelectionTimeoutMS: 10000,
             socketTimeoutMS: 45000,
-            dbName: 'test'  // ← COLLECTION NAME SET TO "test"
+            dbName: 'classicflims'  // ← COLLECTION NAME SET TO "classicflims"
         };
 
         console.log('🔄 Creating new MongoDB connection...');
-        console.log('📊 Database: test');
+        console.log('📊 Database: classicflims');
         
         cached.promise = mongoose.connect(MONGODB_URI, opts)
             .then((mongoose) => {
-                console.log('✅ MongoDB Connected to database: test');
+                console.log('✅ MongoDB Connected to database: classicflims');
                 return mongoose;
             });
     }
@@ -204,7 +204,7 @@ app.get('/', (req, res) => {
         message: 'StreamIndia Backend API',
         version: '1.0.0',
         status: 'running',
-        database: 'test',
+        database: 'classicflims',
         timestamp: new Date().toISOString(),
         endpoints: {
             health: '/health',
@@ -225,7 +225,7 @@ app.get('/health', (req, res) => {
         uptime: process.uptime(),
         database: {
             connected: mongoose.connection.readyState === 1,
-            name: 'test'
+            name: 'classicflims'
         },
         port: PORT
     });
@@ -600,7 +600,7 @@ app.post('/api/seed', async (req, res) => {
         await connectDB();
         
         console.log('🌱 Starting database seed...');
-        console.log('📊 Database: test');
+        console.log('📊 Database: classicflims');
         
         // 1. Seed Admin
         const adminCount = await Admin.countDocuments();
@@ -705,7 +705,7 @@ app.post('/api/seed', async (req, res) => {
         res.json({
             success: true,
             message: 'Database seeded successfully',
-            database: 'test',
+            database: 'classicflims',
             created: {
                 admin: adminCreated,
                 navigation: navCreated,
@@ -770,7 +770,7 @@ if (require.main === module) {
         console.log('✅ SERVER STARTED SUCCESSFULLY!');
         console.log(`🚀 Listening on http://0.0.0.0:${PORT}`);
         console.log(`📍 API: http://0.0.0.0:${PORT}/api`);
-        console.log(`📊 Database: test`);
+        console.log(`📊 Database: classicflims`);
         console.log('='.repeat(50));
     });
 }
