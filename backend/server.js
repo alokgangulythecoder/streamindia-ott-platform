@@ -20,7 +20,7 @@ app.use(express.static('public'));
 // Configuration
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'streamindia-secret-key-change-in-production';
-const MONGODB_URI = 'mongodb+srv://admin:L7yBWtFsHNCRLwhK@cluster0.ld2zdtw.mongodb.net/?appName=Clustor0/classicflims';
+const MONGODB_URI = process.env.MONGO_URL;
 
 // MongoDB Connection
 mongoose.connect(MONGODB_URI, {
