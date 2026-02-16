@@ -808,7 +808,7 @@
 <body>
     <div id="root"></div>
 
-    <script type="text/babel">
+<script type="text/babel">
     const { useState, useEffect, useRef } = React;
     const API_CONFIG = {
     BASE_URL: 'https://classicflims-ott-platform-production.up.railway.app/api',
@@ -1067,6 +1067,130 @@ function App() {
         </div>
     );
 }
+return (
+    <div className="app-container">
+        <div className="bg-ambience"></div>
+        
+        {/* Navigation */}
+        <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
+            <div className="logo">ClassicFlims</div>
+            <ul className="nav-menu">
+                {['Home', 'Movies', 'Series', 'Live', 'My List'].map(item => (
+                    <li 
+                        key={item}
+                        className={`nav-item ${activeNav === item ? 'active' : ''}`}
+                        onClick={() => setActiveNav(item)}
+                    >
+                        {item}
+                    </li>
+                ))}
+            </ul>
+            <div className="nav-actions">
+                <div className="search-icon">🔍</div>
+                <div className="profile-icon">👤</div>
+            </div>
+        </nav>
+
+        {/* Hero Section */}
+        <section className="hero-section">
+            <div className="hero-bg"></div>
+            <div className="hero-content">
+                <div className="hero-badge">
+                    <span>✨</span> NEW RELEASES
+                </div>
+                <h1 className="hero-title">Experience Classical Excellence</h1>
+                <p className="hero-description">
+                    Stream the finest collection of classical movies, operas, concerts, 
+                    and documentaries. Immerse yourself in timeless masterpieces.
+                </p>
+                <div className="hero-actions">
+                    <button className="btn btn-primary">
+                        ▶ Start Watching
+                    </button>
+                    <button className="btn btn-secondary">
+                        📚 Browse Catalog
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        {/* Header Ad */}
+        {headerAd && <AdBanner ad={headerAd} position="header" />}
+
+        {/* Content Sections */}
+        <div className="content-section">
+            {loading ? (
+                <div>Loading...</div>
+            ) : (
+                <>
+                    {/* Trending */}
+                    {backendContent.trending.length > 0 && (
+                        <>
+                            <div className="section-header">
+                                <h2 className="section-title">Trending Now</h2>
+                                <span className="view-all">View All →</span>
+                            </div>
+                            <div className="content-grid">
+                                {backendContent.trending.map(content => (
+                                    <ContentCard key={content._id} content={content} />
+                                ))}
+                            </div>
+                        </>
+                    )}
+
+                    {/* Movies */}
+                    {backendContent.movies.length > 0 && (
+                        <>
+                            <div className="section-header">
+                                <h2 className="section-title">Classical Movies</h2>
+                                <span className="view-all">View All →</span>
+                            </div>
+                            <div className="content-grid">
+                                {backendContent.movies.map(content => (
+                                    <ContentCard key={content._id} content={content} />
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </>
+            )}
+        </div>
+
+        {/* Player Modal */}
+        {playerOpen && (
+            <div className="player-modal">
+                <div className="player-container">
+                    <button className="player-close" onClick={() => setPlayerOpen(false)}>
+                        ✕
+                    </button>
+                    <div className="player-content">
+                        {selectedContent ? selectedContent.title : 'Loading...'}
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* Footer */}
+        <footer className="footer">
+            <div className="footer-content">
+                <div className="footer-section">
+                    <h3>About ClassicFlims</h3>
+                    <ul className="footer-links">
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div className="footer-bottom">
+                <p>© 2026 ClassicFlims. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+);
+}
+
+// Render the app
+ReactDOM.render(<App />, document.getElementById('root'));
 
     </script>
 </body>
