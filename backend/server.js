@@ -19,7 +19,7 @@ console.log('📍 Port:', PORT);
 // MIDDLEWARE - MUST BE BEFORE ROUTES
 // ========================================
 const allowedOrigins = [
-    'https://streamindia-ott-platform.vercel.app/',
+    'https://streamindia-ott-platform.vercel.app',
     'http://localhost:3000',
     'http://localhost:5173'
 ];
