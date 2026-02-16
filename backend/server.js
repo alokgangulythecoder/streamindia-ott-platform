@@ -11,8 +11,9 @@ const app = express();
 
 // Middleware
 // CORS Configuration
-app.use(cors());
 app.options('*', cors());
+app.use(cors());
+
 
 app.use(express.json());
 
