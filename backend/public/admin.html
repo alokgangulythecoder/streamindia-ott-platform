@@ -819,7 +819,69 @@
             </form>
         </div>
     </div>
+<!-- MISSING MODALS - ADD THESE -->
 
+<!-- Navigation Modal -->
+<div id="navigationModal" class="modal">
+    <div class="modal-content" style="max-width: 600px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid var(--gray-light);">
+            <h2>Add Navigation Item</h2>
+            <button onclick="document.getElementById('navigationModal').style.display='none'" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--gray);">&times;</button>
+        </div>
+        <form onsubmit="event.preventDefault(); fetch(API_URL + '/navigation', {method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken}, body: JSON.stringify({label: document.getElementById('navLabel').value, url: document.getElementById('navUrl').value, order: parseInt(document.getElementById('navOrder').value) || 0, icon: document.getElementById('navIcon').value, active: document.getElementById('navActive').checked})}).then(r => r.json()).then(d => {alert('✅ Navigation added!'); location.reload();}).catch(e => alert('Error: ' + e.message));">
+            <div class="form-group"><label>Label *</label><input type="text" class="form-control" id="navLabel" required></div>
+            <div class="form-group"><label>URL *</label><input type="text" class="form-control" id="navUrl" value="/" required></div>
+            <div class="form-group"><label>Order</label><input type="number" class="form-control" id="navOrder" value="0"></div>
+            <div class="form-group"><label>Icon</label><input type="text" class="form-control" id="navIcon" placeholder="🏠"></div>
+            <div class="form-group"><label><input type="checkbox" id="navActive" checked> Active</label></div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+</div>
+
+<!-- Advertisement Modal -->
+<div id="adModal" class="modal">
+    <div class="modal-content" style="max-width: 600px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid var(--gray-light);">
+            <h2>Add Advertisement</h2>
+            <button onclick="document.getElementById('adModal').style.display='none'" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--gray);">&times;</button>
+        </div>
+        <form onsubmit="event.preventDefault(); fetch(API_URL + '/advertisements', {method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken}, body: JSON.stringify({title: document.getElementById('adTitle').value, type: document.getElementById('adType').value, position: document.getElementById('adPosition').value, imageUrl: document.getElementById('adImageUrl').value, clickUrl: document.getElementById('adClickUrl').value, priority: parseInt(document.getElementById('adPriority').value) || 5, active: document.getElementById('adActive').checked})}).then(r => r.json()).then(d => {alert('✅ Advertisement added!'); location.reload();}).catch(e => alert('Error: ' + e.message));">
+            <div class="form-group"><label>Title *</label><input type="text" class="form-control" id="adTitle" required></div>
+            <div class="form-group"><label>Type</label><select class="form-control" id="adType"><option value="banner">Banner</option><option value="video">Video</option></select></div>
+            <div class="form-group"><label>Position</label><select class="form-control" id="adPosition"><option value="header">Header</option><option value="sidebar">Sidebar</option><option value="footer">Footer</option></select></div>
+            <div class="form-group"><label>Image URL *</label><input type="url" class="form-control" id="adImageUrl" required></div>
+            <div class="form-group"><label>Click URL</label><input type="url" class="form-control" id="adClickUrl"></div>
+            <div class="form-group"><label>Priority</label><input type="number" class="form-control" id="adPriority" value="5" min="0" max="10"></div>
+            <div class="form-group"><label><input type="checkbox" id="adActive" checked> Active</label></div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+</div>
+
+<!-- Settings Modal -->
+<div id="settingModal" class="modal">
+    <div class="modal-content" style="max-width: 600px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; padding-bottom: 1rem; border-bottom: 2px solid var(--gray-light);">
+            <h2>Add/Edit Setting</h2>
+            <button onclick="document.getElementById('settingModal').style.display='none'" style="background: none; border: none; font-size: 2rem; cursor: pointer; color: var(--gray);">&times;</button>
+        </div>
+        <form onsubmit="event.preventDefault(); fetch(API_URL + '/settings', {method: 'POST', headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer ' + authToken}, body: JSON.stringify({key: document.getElementById('settingKey').value, value: document.getElementById('settingValue').value, category: document.getElementById('settingCategory').value, description: document.getElementById('settingDescription').value})}).then(r => r.json()).then(d => {alert('✅ Setting saved!'); location.reload();}).catch(e => alert('Error: ' + e.message));">
+            <div class="form-group"><label>Key *</label><input type="text" class="form-control" id="settingKey" placeholder="site_name" required></div>
+            <div class="form-group"><label>Value *</label><input type="text" class="form-control" id="settingValue" required></div>
+            <div class="form-group"><label>Category</label><select class="form-control" id="settingCategory"><option value="general">General</option><option value="theme">Theme</option><option value="monetization">Monetization</option></select></div>
+            <div class="form-group"><label>Description</label><textarea class="form-control" id="settingDescription" rows="2"></textarea></div>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </form>
+    </div>
+</div>
+
+<script>
+// Add modal open functions
+function openNavigationModal() { document.getElementById('navigationModal').style.display = 'flex'; }
+function openAdModal() { document.getElementById('adModal').style.display = 'flex'; }
+function openSettingModal() { document.getElementById('settingModal').style.display = 'flex'; }
+</script>
     <script>
         // API Configuration
        const API_URL = window.location.hostname === 'localhost' 
