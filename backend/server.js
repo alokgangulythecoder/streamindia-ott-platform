@@ -1,211 +1,266 @@
-// server.js - Main Backend Server with Admin Panel
+require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
-const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 
 const app = express();
 
-// Middleware
+// ========================================
+// ENVIRONMENT VARIABLES
+// ========================================
+
+const PORT = process.env.PORT || 3000;
+const MONGODB_URI = process.env.MONGO_URI;
+const JWT_SECRET = process.env.JWT_SECRET || 'classicflims-secret-2025';
+const FRONTEND_URL = process.env.FRONTEND_URL || '*';
+
+console.log('🚀 Starting ClassicFlims Backend...');
+console.log('📍 Port:', PORT);
+console.log('🌐 Frontend URL:', FRONTEND_URL);
+
+// ========================================
+// MIDDLEWARE
+// ========================================
+
+// CORS - Allow frontend to access backend
+app.use(cors({
+    origin: function(origin, callback) {
+        // Allow requests with no origin (mobile apps, Postman, etc.)
+        if (!origin) return callback(null, true);
+        
+        // Allow all Railway URLs and your frontend
+        if (
+            origin.includes('railway.app') || 
+            origin.includes('netlify.app') ||
+            origin.includes('localhost') ||
+            origin === FRONTEND_URL
+        ) {
+            return callback(null, true);
+        }
+        
+        // Allow all origins in development
+        return callback(null, true);
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// Body parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
-app.use('/uploads', express.static('uploads'));
-app.use(express.static('public'));
 
-// Configuration
-const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || 'streamindia-secret-key-change-in-production';
-const MONGODB_URI = process.env.MONGO_URI || process.env.MONGO_URL';
+// Serve static files (admin panel)
+app.use(express.static(path.join(__dirname, 'public')));
 
-// MongoDB Connection
-mongoose.connect(MONGODB_URI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-}).then(() => {
-    console.log('✅ Connected to MongoDB');
-}).catch(err => {
-    console.error('❌ MongoDB connection error:', err);
+// Request logging
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.path}`);
+    next();
 });
 
 // ========================================
-// SCHEMAS & MODELS
+// MONGODB CONNECTION
 // ========================================
 
-// Admin User Schema
+if (!MONGODB_URI) {
+    console.error('❌ MONGODB_URI environment variable is not set!');
+    console.error('Please set it in Railway dashboard');
+    process.exit(1);
+}
+
+console.log('🔄 Connecting to MongoDB...');
+
+mongoose.connect(MONGODB_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
+.then(() => {
+    console.log('✅ Connected to MongoDB');
+    console.log('📊 Database:', mongoose.connection.name);
+})
+.catch((error) => {
+    console.error('❌ MongoDB connection failed!');
+    console.error('Error:', error.message);
+    process.exit(1);
+});
+
+// ========================================
+// SCHEMAS
+// ========================================
+
 const adminSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    role: { type: String, enum: ['admin', 'editor', 'viewer'], default: 'admin' },
-    createdAt: { type: Date, default: Date.now },
-    lastLogin: { type: Date }
+    role: { type: String, default: 'admin' },
+    createdAt: { type: Date, default: Date.now }
 });
 
-const Admin = mongoose.model('Admin', adminSchema);
-
-// Content Schema
 const contentSchema = new mongoose.Schema({
     title: { type: String, required: true },
-    description: { type: String },
-    type: { type: String, enum: ['movie', 'series', 'video', 'live'], required: true },
-    category: { type: String, required: true },
-    language: { type: String },
-    year: { type: Number },
-    duration: { type: String },
-    rating: { type: Number, min: 0, max: 10 },
-    badge: { type: String },
-    genre: { type: String },
-    thumbnail: { type: String },
-    poster: { type: String },
-    videoUrl: { type: String },
-    trailerUrl: { type: String },
-    cast: [{ type: String }],
-    director: { type: String },
-    tags: [{ type: String }],
+    description: String,
+    type: { type: String, enum: ['movie', 'series', 'documentary', 'live'], required: true },
+    category: String,
+    language: String,
+    year: Number,
+    duration: String,
+    rating: Number,
+    videoUrl: { type: String, required: true },
+    thumbnailUrl: String,
     featured: { type: Boolean, default: false },
     trending: { type: Boolean, default: false },
-    status: { type: String, enum: ['draft', 'published', 'archived'], default: 'published' },
+    status: { type: String, enum: ['published', 'draft', 'archived'], default: 'published' },
     views: { type: Number, default: 0 },
     likes: { type: Number, default: 0 },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
 });
 
-const Content = mongoose.model('Content', contentSchema);
-
-// Navigation Menu Schema
 const navigationSchema = new mongoose.Schema({
     label: { type: String, required: true },
-    url: { type: String },
+    url: { type: String, required: true },
+    icon: String,
     order: { type: Number, default: 0 },
-    parent: { type: mongoose.Schema.Types.ObjectId, ref: 'Navigation' },
     active: { type: Boolean, default: true },
-    icon: { type: String }
+    createdAt: { type: Date, default: Date.now }
 });
 
-const Navigation = mongoose.model('Navigation', navigationSchema);
-
-// Advertisement Schema
 const advertisementSchema = new mongoose.Schema({
     title: { type: String, required: true },
-    type: { type: String, enum: ['banner', 'video', 'popup', 'sidebar'], required: true },
-    position: { type: String, enum: ['header', 'footer', 'sidebar', 'content', 'modal'], required: true },
-    imageUrl: { type: String },
-    videoUrl: { type: String },
-    clickUrl: { type: String },
-    duration: { type: Number }, // For video ads (in seconds)
-    skipAfter: { type: Number }, // Seconds before skip button appears
-    startDate: { type: Date },
-    endDate: { type: Date },
+    type: { type: String, enum: ['banner', 'video', 'popup'], default: 'banner' },
+    position: { type: String, enum: ['header', 'sidebar', 'footer', 'player'], default: 'header' },
+    imageUrl: { type: String, required: true },
+    clickUrl: String,
+    priority: { type: Number, default: 5 },
     active: { type: Boolean, default: true },
     impressions: { type: Number, default: 0 },
     clicks: { type: Number, default: 0 },
-    priority: { type: Number, default: 0 }
+    createdAt: { type: Date, default: Date.now }
 });
 
-const Advertisement = mongoose.model('Advertisement', advertisementSchema);
-
-// Settings Schema
 const settingsSchema = new mongoose.Schema({
     key: { type: String, required: true, unique: true },
-    value: { type: mongoose.Schema.Types.Mixed },
-    category: { type: String },
-    description: { type: String },
+    value: mongoose.Schema.Types.Mixed,
+    category: { type: String, default: 'general' },
+    description: String,
     updatedAt: { type: Date, default: Date.now }
 });
 
+const analyticsSchema = new mongoose.Schema({
+    contentId: { type: mongoose.Schema.Types.ObjectId, ref: 'Content' },
+    type: { type: String, enum: ['view', 'like', 'share'], required: true },
+    userId: String,
+    ipAddress: String,
+    userAgent: String,
+    timestamp: { type: Date, default: Date.now }
+});
+
+const Admin = mongoose.model('Admin', adminSchema);
+const Content = mongoose.model('Content', contentSchema);
+const Navigation = mongoose.model('Navigation', navigationSchema);
+const Advertisement = mongoose.model('Advertisement', advertisementSchema);
 const Settings = mongoose.model('Settings', settingsSchema);
+const Analytics = mongoose.model('Analytics', analyticsSchema);
 
 // ========================================
-// FILE UPLOAD CONFIGURATION
+// AUTH MIDDLEWARE
 // ========================================
 
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        const uploadPath = 'uploads/';
-        if (!fs.existsSync(uploadPath)) {
-            fs.mkdirSync(uploadPath, { recursive: true });
-        }
-        cb(null, uploadPath);
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-    }
-});
-
-const upload = multer({
-    storage: storage,
-    limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit
-    fileFilter: (req, file, cb) => {
-        const allowedTypes = /jpeg|jpg|png|gif|mp4|webm|avi/;
-        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
-        const mimetype = allowedTypes.test(file.mimetype);
-        
-        if (mimetype && extname) {
-            return cb(null, true);
-        } else {
-            cb(new Error('Invalid file type. Only images and videos allowed.'));
-        }
-    }
-});
-
-// ========================================
-// AUTHENTICATION MIDDLEWARE
-// ========================================
-
-const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-
+const authMiddleware = (req, res, next) => {
+    const token = req.headers.authorization?.split(' ')[1];
+    
     if (!token) {
-        return res.status(401).json({ error: 'Access token required' });
+        return res.status(401).json({ error: 'No token provided' });
     }
-
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) {
-            return res.status(403).json({ error: 'Invalid or expired token' });
-        }
-        req.user = user;
+    
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.admin = decoded;
         next();
-    });
+    } catch (error) {
+        return res.status(401).json({ error: 'Invalid token' });
+    }
 };
 
 // ========================================
-// ADMIN AUTHENTICATION ROUTES
+// ROOT ROUTES
 // ========================================
 
-// Register Admin (First time setup)
-app.post('/api/admin/register', async (req, res) => {
-    try {
-        const { username, email, password, role } = req.body;
-
-        // Check if admin already exists
-        const existingAdmin = await Admin.findOne({ $or: [{ username }, { email }] });
-        if (existingAdmin) {
-            return res.status(400).json({ error: 'Username or email already exists' });
+app.get('/', (req, res) => {
+    res.json({
+        message: 'ClassicFlims Backend API',
+        version: '1.0.0',
+        status: 'running',
+        tagline: 'Premium Classic Films & Timeless Cinema',
+        timestamp: new Date().toISOString(),
+        endpoints: {
+            root: '/',
+            health: '/health',
+            admin_panel: '/admin',
+            api_base: '/api',
+            seed: '/api/seed',
+            content: '/api/content',
+            navigation: '/api/navigation',
+            advertisements: '/api/advertisements',
+            settings: '/api/settings'
         }
+    });
+});
 
-        // Hash password
-        const hashedPassword = await bcrypt.hash(password, 10);
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+        environment: process.env.NODE_ENV || 'development'
+    });
+});
 
-        // Create admin
-        const admin = new Admin({
-            username,
-            email,
-            password: hashedPassword,
-            role: role || 'admin'
-        });
+// Admin Panel Route
+app.get('/admin', (req, res) => {
+    const adminPath = path.join(__dirname, 'public', 'admin.html');
+    res.sendFile(adminPath, (err) => {
+        if (err) {
+            console.error('Error sending admin.html:', err);
+            res.status(404).json({ 
+                error: 'Admin panel not found',
+                message: 'Make sure admin.html exists in backend/public/ folder'
+            });
+        }
+    });
+});
 
-        await admin.save();
+// ========================================
+// ADMIN AUTH
+// ========================================
 
-        res.status(201).json({ 
-            message: 'Admin created successfully',
+app.post('/api/admin/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+        
+        const admin = await Admin.findOne({ username });
+        if (!admin) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        
+        const validPassword = await bcrypt.compare(password, admin.password);
+        if (!validPassword) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+        
+        const token = jwt.sign(
+            { id: admin._id, username: admin.username, role: admin.role },
+            JWT_SECRET,
+            { expiresIn: '24h' }
+        );
+        
+        res.json({
+            token,
             admin: {
                 id: admin._id,
                 username: admin.username,
@@ -218,94 +273,35 @@ app.post('/api/admin/register', async (req, res) => {
     }
 });
 
-// Login
-app.post('/api/admin/login', async (req, res) => {
-    try {
-        const { username, password } = req.body;
-
-        // Find admin
-        const admin = await Admin.findOne({ username });
-        if (!admin) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-        // Verify password
-        const validPassword = await bcrypt.compare(password, admin.password);
-        if (!validPassword) {
-            return res.status(401).json({ error: 'Invalid credentials' });
-        }
-
-        // Update last login
-        admin.lastLogin = new Date();
-        await admin.save();
-
-        // Generate JWT
-        const token = jwt.sign(
-            { id: admin._id, username: admin.username, role: admin.role },
-            JWT_SECRET,
-            { expiresIn: '24h' }
-        );
-
-        res.json({
-            message: 'Login successful',
-            token,
-            admin: {
-                id: admin._id,
-                username: admin.username,
-                email: admin.email,
-                role: admin.role,
-                lastLogin: admin.lastLogin
-            }
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
 // ========================================
-// CONTENT MANAGEMENT ROUTES
+// CONTENT ROUTES
 // ========================================
 
-// Get all content (with filters)
 app.get('/api/content', async (req, res) => {
     try {
-        const { 
-            type, category, language, status, 
-            featured, trending, search, 
-            limit = 50, page = 1 
-        } = req.query;
-
+        const { category, type, status, search, page = 1, limit = 20 } = req.query;
+        
         const query = {};
-        if (type) query.type = type;
         if (category) query.category = category;
-        if (language) query.language = language;
+        if (type) query.type = type;
         if (status) query.status = status;
-        if (featured !== undefined) query.featured = featured === 'true';
-        if (trending !== undefined) query.trending = trending === 'true';
-        if (search) {
-            query.$or = [
-                { title: { $regex: search, $options: 'i' } },
-                { description: { $regex: search, $options: 'i' } },
-                { tags: { $in: [new RegExp(search, 'i')] } }
-            ];
-        }
-
-        const skip = (parseInt(page) - 1) * parseInt(limit);
+        else query.status = 'published'; // Default to published only
+        if (search) query.title = { $regex: search, $options: 'i' };
         
         const content = await Content.find(query)
             .sort({ createdAt: -1 })
-            .limit(parseInt(limit))
-            .skip(skip);
-
+            .skip((page - 1) * limit)
+            .limit(parseInt(limit));
+        
         const total = await Content.countDocuments(query);
-
+        
         res.json({
             content,
             pagination: {
                 page: parseInt(page),
                 limit: parseInt(limit),
                 total,
-                pages: Math.ceil(total / parseInt(limit))
+                pages: Math.ceil(total / limit)
             }
         });
     } catch (error) {
@@ -313,7 +309,6 @@ app.get('/api/content', async (req, res) => {
     }
 });
 
-// Get single content by ID
 app.get('/api/content/:id', async (req, res) => {
     try {
         const content = await Content.findById(req.params.id);
@@ -326,162 +321,91 @@ app.get('/api/content/:id', async (req, res) => {
     }
 });
 
-// Create new content (Admin only)
-app.post('/api/content', authenticateToken, upload.fields([
-    { name: 'thumbnail', maxCount: 1 },
-    { name: 'poster', maxCount: 1 }
-]), async (req, res) => {
+app.post('/api/content', authMiddleware, async (req, res) => {
     try {
-        const contentData = { ...req.body };
-        
-        if (req.files) {
-            if (req.files.thumbnail) {
-                contentData.thumbnail = '/uploads/' + req.files.thumbnail[0].filename;
-            }
-            if (req.files.poster) {
-                contentData.poster = '/uploads/' + req.files.poster[0].filename;
-            }
-        }
-
-        // Parse arrays from string
-        if (contentData.cast && typeof contentData.cast === 'string') {
-            contentData.cast = JSON.parse(contentData.cast);
-        }
-        if (contentData.tags && typeof contentData.tags === 'string') {
-            contentData.tags = JSON.parse(contentData.tags);
-        }
-
-        const content = new Content(contentData);
-        await content.save();
-
-        res.status(201).json({
-            message: 'Content created successfully',
-            content
-        });
+        const content = await Content.create(req.body);
+        res.status(201).json(content);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(400).json({ error: error.message });
     }
 });
 
-// Update content (Admin only)
-app.put('/api/content/:id', authenticateToken, upload.fields([
-    { name: 'thumbnail', maxCount: 1 },
-    { name: 'poster', maxCount: 1 }
-]), async (req, res) => {
+app.put('/api/content/:id', authMiddleware, async (req, res) => {
     try {
-        const contentData = { ...req.body };
-        contentData.updatedAt = new Date();
-        
-        if (req.files) {
-            if (req.files.thumbnail) {
-                contentData.thumbnail = '/uploads/' + req.files.thumbnail[0].filename;
-            }
-            if (req.files.poster) {
-                contentData.poster = '/uploads/' + req.files.poster[0].filename;
-            }
-        }
-
-        // Parse arrays from string
-        if (contentData.cast && typeof contentData.cast === 'string') {
-            contentData.cast = JSON.parse(contentData.cast);
-        }
-        if (contentData.tags && typeof contentData.tags === 'string') {
-            contentData.tags = JSON.parse(contentData.tags);
-        }
-
         const content = await Content.findByIdAndUpdate(
             req.params.id,
-            contentData,
-            { new: true, runValidators: true }
+            { ...req.body, updatedAt: Date.now() },
+            { new: true }
         );
-
         if (!content) {
             return res.status(404).json({ error: 'Content not found' });
         }
-
-        res.json({
-            message: 'Content updated successfully',
-            content
-        });
+        res.json(content);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(400).json({ error: error.message });
     }
 });
 
-// Delete content (Admin only)
-app.delete('/api/content/:id', authenticateToken, async (req, res) => {
+app.delete('/api/content/:id', authMiddleware, async (req, res) => {
     try {
         const content = await Content.findByIdAndDelete(req.params.id);
         if (!content) {
             return res.status(404).json({ error: 'Content not found' });
         }
-
         res.json({ message: 'Content deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
-// Increment views
-app.post('/api/content/:id/view', async (req, res) => {
+app.get('/api/content/category/:category', async (req, res) => {
     try {
-        const content = await Content.findByIdAndUpdate(
-            req.params.id,
-            { $inc: { views: 1 } },
-            { new: true }
-        );
-        res.json({ views: content.views });
+        const content = await Content.find({ 
+            category: req.params.category,
+            status: 'published'
+        }).sort({ createdAt: -1 });
+        res.json(content);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
 // ========================================
-// NAVIGATION MANAGEMENT ROUTES
+// NAVIGATION ROUTES
 // ========================================
 
-// Get all navigation items
 app.get('/api/navigation', async (req, res) => {
     try {
-        const navigation = await Navigation.find({ active: true })
-            .sort({ order: 1 })
-            .populate('parent');
+        const navigation = await Navigation.find({ active: true }).sort({ order: 1 });
         res.json(navigation);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
-// Create navigation item (Admin only)
-app.post('/api/navigation', authenticateToken, async (req, res) => {
+app.post('/api/navigation', authMiddleware, async (req, res) => {
     try {
-        const navigation = new Navigation(req.body);
-        await navigation.save();
+        const navigation = await Navigation.create(req.body);
         res.status(201).json(navigation);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(400).json({ error: error.message });
     }
 });
 
-// Update navigation item (Admin only)
-app.put('/api/navigation/:id', authenticateToken, async (req, res) => {
+app.put('/api/navigation/:id', authMiddleware, async (req, res) => {
     try {
-        const navigation = await Navigation.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true }
-        );
+        const navigation = await Navigation.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!navigation) return res.status(404).json({ error: 'Navigation not found' });
         res.json(navigation);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(400).json({ error: error.message });
     }
 });
 
-// Delete navigation item (Admin only)
-app.delete('/api/navigation/:id', authenticateToken, async (req, res) => {
+app.delete('/api/navigation/:id', authMiddleware, async (req, res) => {
     try {
         await Navigation.findByIdAndDelete(req.params.id);
-        res.json({ message: 'Navigation item deleted' });
+        res.json({ message: 'Navigation deleted' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -491,74 +415,38 @@ app.delete('/api/navigation/:id', authenticateToken, async (req, res) => {
 // ADVERTISEMENT ROUTES
 // ========================================
 
-// Get active advertisements
 app.get('/api/advertisements', async (req, res) => {
     try {
-        const { position, type } = req.query;
-        const query = { 
-            active: true,
-            $or: [
-                { startDate: { $lte: new Date() }, endDate: { $gte: new Date() } },
-                { startDate: null, endDate: null }
-            ]
-        };
-        
-        if (position) query.position = position;
-        if (type) query.type = type;
-
-        const ads = await Advertisement.find(query).sort({ priority: -1 });
+        const ads = await Advertisement.find({ active: true }).sort({ priority: -1 });
         res.json(ads);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
-// Create advertisement (Admin only)
-app.post('/api/advertisements', authenticateToken, upload.fields([
-    { name: 'image', maxCount: 1 },
-    { name: 'video', maxCount: 1 }
-]), async (req, res) => {
+app.post('/api/advertisements', authMiddleware, async (req, res) => {
     try {
-        const adData = { ...req.body };
-        
-        if (req.files) {
-            if (req.files.image) {
-                adData.imageUrl = '/uploads/' + req.files.image[0].filename;
-            }
-            if (req.files.video) {
-                adData.videoUrl = '/uploads/' + req.files.video[0].filename;
-            }
-        }
-
-        const ad = new Advertisement(adData);
-        await ad.save();
+        const ad = await Advertisement.create(req.body);
         res.status(201).json(ad);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(400).json({ error: error.message });
     }
 });
 
-// Track ad impression
-app.post('/api/advertisements/:id/impression', async (req, res) => {
+app.put('/api/advertisements/:id', authMiddleware, async (req, res) => {
     try {
-        await Advertisement.findByIdAndUpdate(
-            req.params.id,
-            { $inc: { impressions: 1 } }
-        );
-        res.json({ success: true });
+        const ad = await Advertisement.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!ad) return res.status(404).json({ error: 'Ad not found' });
+        res.json(ad);
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(400).json({ error: error.message });
     }
 });
 
-// Track ad click
-app.post('/api/advertisements/:id/click', async (req, res) => {
+app.delete('/api/advertisements/:id', authMiddleware, async (req, res) => {
     try {
-        await Advertisement.findByIdAndUpdate(
-            req.params.id,
-            { $inc: { clicks: 1 } }
-        );
-        res.json({ success: true });
+        await Advertisement.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Ad deleted' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -568,59 +456,99 @@ app.post('/api/advertisements/:id/click', async (req, res) => {
 // SETTINGS ROUTES
 // ========================================
 
-// Get all settings
 app.get('/api/settings', async (req, res) => {
     try {
         const settings = await Settings.find();
-        const settingsObj = {};
-        settings.forEach(setting => {
-            settingsObj[setting.key] = setting.value;
-        });
-        res.json(settingsObj);
+        res.json(settings);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
-// Update setting (Admin only)
-app.put('/api/settings/:key', authenticateToken, async (req, res) => {
+app.get('/api/settings/:key', async (req, res) => {
     try {
-        const setting = await Settings.findOneAndUpdate(
-            { key: req.params.key },
-            { value: req.body.value, updatedAt: new Date() },
-            { upsert: true, new: true }
-        );
+        const setting = await Settings.findOne({ key: req.params.key });
+        if (!setting) return res.status(404).json({ error: 'Setting not found' });
         res.json(setting);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
+app.post('/api/settings', authMiddleware, async (req, res) => {
+    try {
+        const setting = await Settings.findOneAndUpdate(
+            { key: req.body.key },
+            { ...req.body, updatedAt: Date.now() },
+            { upsert: true, new: true }
+        );
+        res.json(setting);
+    } catch (error) {
+        res.status(400).json({ error: error.message });
+    }
+});
+
+app.delete('/api/settings/:id', authMiddleware, async (req, res) => {
+    try {
+        await Settings.findByIdAndDelete(req.params.id);
+        res.json({ message: 'Setting deleted' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // ========================================
-// ANALYTICS ROUTES
+// ANALYTICS
 // ========================================
 
-// Get dashboard stats (Admin only)
-app.get('/api/admin/stats', authenticateToken, async (req, res) => {
+app.post('/api/analytics/view', async (req, res) => {
+    try {
+        const { contentId } = req.body;
+        await Analytics.create({
+            contentId,
+            type: 'view',
+            ipAddress: req.ip,
+            userAgent: req.headers['user-agent']
+        });
+        await Content.findByIdAndUpdate(contentId, { $inc: { views: 1 } });
+        res.json({ message: 'View tracked' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/analytics/like', async (req, res) => {
+    try {
+        const { contentId } = req.body;
+        await Analytics.create({
+            contentId,
+            type: 'like',
+            ipAddress: req.ip,
+            userAgent: req.headers['user-agent']
+        });
+        await Content.findByIdAndUpdate(contentId, { $inc: { likes: 1 } });
+        res.json({ message: 'Like tracked' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/dashboard/stats', authMiddleware, async (req, res) => {
     try {
         const totalContent = await Content.countDocuments();
         const publishedContent = await Content.countDocuments({ status: 'published' });
         const totalViews = await Content.aggregate([
             { $group: { _id: null, total: { $sum: '$views' } } }
         ]);
-        const totalAds = await Advertisement.countDocuments({ active: true });
-
-        const recentContent = await Content.find()
-            .sort({ createdAt: -1 })
-            .limit(10)
-            .select('title type createdAt views');
-
+        const totalLikes = await Content.aggregate([
+            { $group: { _id: null, total: { $sum: '$likes' } } }
+        ]);
+        
         res.json({
             totalContent,
             publishedContent,
             totalViews: totalViews[0]?.total || 0,
-            totalAds,
-            recentContent
+            totalLikes: totalLikes[0]?.total || 0
         });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -628,93 +556,213 @@ app.get('/api/admin/stats', authenticateToken, async (req, res) => {
 });
 
 // ========================================
-// SEED DATA (Development Only)
+// SEED ROUTE
 // ========================================
 
 app.post('/api/seed', async (req, res) => {
     try {
-        // Create default admin if none exists
+        console.log('🌱 Starting database seed...');
+        
+        // Admin
         const adminCount = await Admin.countDocuments();
         if (adminCount === 0) {
             const hashedPassword = await bcrypt.hash('admin123', 10);
             await Admin.create({
                 username: 'admin',
-                email: 'admin@streamindia.com',
+                email: 'admin@classicflims.com',
                 password: hashedPassword,
                 role: 'admin'
             });
+            console.log('✅ Admin created');
         }
-
-        // Create default settings
-        const defaultSettings = [
-            { key: 'site_name', value: 'StreamIndia', category: 'general' },
-            { key: 'site_tagline', value: 'Premium Entertainment Platform', category: 'general' },
-            { key: 'primary_color', value: '#ff3366', category: 'theme' },
-            { key: 'secondary_color', value: '#7c3aed', category: 'theme' },
-            { key: 'enable_ads', value: true, category: 'monetization' },
-            { key: 'subscription_enabled', value: true, category: 'monetization' }
-        ];
-
-        for (const setting of defaultSettings) {
-            await Settings.findOneAndUpdate(
-                { key: setting.key },
-                setting,
-                { upsert: true }
-            );
+        
+        // Navigation
+        const navCount = await Navigation.countDocuments();
+        if (navCount === 0) {
+            await Navigation.insertMany([
+                { label: 'Home', url: '/', icon: '🏠', order: 0, active: true },
+                { label: 'Classic Films', url: '/classic-films', icon: '🎬', order: 1, active: true },
+                { label: 'Golden Age', url: '/golden-age', icon: '🌟', order: 2, active: true },
+                { label: 'Film Noir', url: '/film-noir', icon: '🎭', order: 3, active: true },
+                { label: 'Documentaries', url: '/documentaries', icon: '📽️', order: 4, active: true },
+                { label: 'Silent Films', url: '/silent-films', icon: '🎪', order: 5, active: true }
+            ]);
+            console.log('✅ Navigation created (6)');
         }
-
-        res.json({ message: 'Database seeded successfully' });
+        
+        // Settings
+        const settingsCount = await Settings.countDocuments();
+        if (settingsCount === 0) {
+            await Settings.insertMany([
+                { key: 'site_name', value: 'ClassicFlims', category: 'general' },
+                { key: 'site_tagline', value: 'Premium Classic Films & Timeless Cinema', category: 'general' },
+                { key: 'primary_color', value: '#1a1a1a', category: 'theme' },
+                { key: 'secondary_color', value: '#d4af37', category: 'theme' },
+                { key: 'accent_color', value: '#8b7355', category: 'theme' },
+                { key: 'enable_ads', value: true, category: 'monetization' },
+                { key: 'subscription_enabled', value: true, category: 'monetization' },
+                { key: 'app_version', value: '1.0.0', category: 'app' },
+                { key: 'maintenance_mode', value: false, category: 'general' }
+            ]);
+            console.log('✅ Settings created (9)');
+        }
+        
+        // Advertisements
+        const adCount = await Advertisement.countDocuments();
+        if (adCount === 0) {
+            await Advertisement.insertMany([
+                { title: 'Header Banner', type: 'banner', position: 'header', imageUrl: 'https://picsum.photos/1200/200?random=1', clickUrl: 'https://classicflims.up.railway.app', priority: 10, active: true },
+                { title: 'Sidebar Ad', type: 'banner', position: 'sidebar', imageUrl: 'https://picsum.photos/300/600?random=2', clickUrl: 'https://classicflims.up.railway.app', priority: 8, active: true },
+                { title: 'Footer Banner', type: 'banner', position: 'footer', imageUrl: 'https://picsum.photos/1200/100?random=3', clickUrl: 'https://classicflims.up.railway.app', priority: 6, active: true },
+                { title: 'Video Ad', type: 'video', position: 'player', imageUrl: 'https://picsum.photos/800/450?random=4', clickUrl: 'https://classicflims.up.railway.app', priority: 9, active: true },
+                { title: 'Popup Ad', type: 'popup', position: 'header', imageUrl: 'https://picsum.photos/600/400?random=5', clickUrl: 'https://classicflims.up.railway.app', priority: 7, active: false }
+            ]);
+            console.log('✅ Ads created (5)');
+        }
+        
+        // Content
+        const contentCount = await Content.countDocuments();
+        if (contentCount === 0) {
+            await Content.insertMany([
+                {
+                    title: 'Casablanca',
+                    description: 'A cynical expatriate American cafe owner struggles to decide whether or not to help his former lover and her fugitive husband escape the Nazis in French Morocco.',
+                    type: 'movie',
+                    category: 'Classic Hollywood',
+                    language: 'English',
+                    year: 1942,
+                    duration: '102 min',
+                    rating: 8.5,
+                    videoUrl: 'https://www.youtube.com/watch?v=BkL9l7qovsE',
+                    thumbnailUrl: 'https://picsum.photos/400/600?random=10',
+                    featured: true,
+                    trending: true,
+                    status: 'published',
+                    views: 1250,
+                    likes: 890
+                },
+                {
+                    title: 'Citizen Kane',
+                    description: 'Following the death of publishing tycoon Charles Foster Kane, reporters scramble to uncover the meaning of his final utterance: Rosebud.',
+                    type: 'movie',
+                    category: 'Classic Hollywood',
+                    language: 'English',
+                    year: 1941,
+                    duration: '119 min',
+                    rating: 8.3,
+                    videoUrl: 'https://www.youtube.com/watch?v=zyREh-jWIEE',
+                    thumbnailUrl: 'https://picsum.photos/400/600?random=11',
+                    featured: true,
+                    trending: false,
+                    status: 'published',
+                    views: 980,
+                    likes: 765
+                },
+                {
+                    title: 'The Maltese Falcon',
+                    description: 'San Francisco private detective Sam Spade takes on a case that involves him with three eccentric criminals and their quest for a priceless statuette.',
+                    type: 'movie',
+                    category: 'Film Noir',
+                    language: 'English',
+                    year: 1941,
+                    duration: '100 min',
+                    rating: 8.1,
+                    videoUrl: 'https://www.youtube.com/watch?v=Q4g3BfL6RaE',
+                    thumbnailUrl: 'https://picsum.photos/400/600?random=12',
+                    featured: false,
+                    trending: true,
+                    status: 'published',
+                    views: 670,
+                    likes: 543
+                },
+                {
+                    title: 'Double Indemnity',
+                    description: 'An insurance representative lets himself be talked into a murder/insurance fraud scheme that arouses suspicions.',
+                    type: 'movie',
+                    category: 'Film Noir',
+                    language: 'English',
+                    year: 1944,
+                    duration: '107 min',
+                    rating: 8.3,
+                    videoUrl: 'https://www.youtube.com/watch?v=S0z-F7BnqXA',
+                    thumbnailUrl: 'https://picsum.photos/400/600?random=13',
+                    featured: true,
+                    trending: false,
+                    status: 'published',
+                    views: 820,
+                    likes: 691
+                },
+                {
+                    title: 'The Wizard of Oz',
+                    description: 'Dorothy Gale is swept away from Kansas to a magical land of Oz and embarks on a quest with her new friends.',
+                    type: 'movie',
+                    category: 'Classic Hollywood',
+                    language: 'English',
+                    year: 1939,
+                    duration: '102 min',
+                    rating: 8.1,
+                    videoUrl: 'https://www.youtube.com/watch?v=PSZxmZmBfnU',
+                    thumbnailUrl: 'https://picsum.photos/400/600?random=14',
+                    featured: false,
+                    trending: true,
+                    status: 'published',
+                    views: 1540,
+                    likes: 1230
+                },
+                {
+                    title: 'Sunset Boulevard',
+                    description: 'A screenwriter develops a dangerous relationship with a faded film star determined to make a triumphant return.',
+                    type: 'movie',
+                    category: 'Film Noir',
+                    language: 'English',
+                    year: 1950,
+                    duration: '110 min',
+                    rating: 8.4,
+                    videoUrl: 'https://www.youtube.com/watch?v=wKRBj3-TszI',
+                    thumbnailUrl: 'https://picsum.photos/400/600?random=15',
+                    featured: true,
+                    trending: true,
+                    status: 'published',
+                    views: 750,
+                    likes: 612
+                }
+            ]);
+            console.log('✅ Content created (6)');
+        }
+        
+        res.json({ 
+            message: 'Database seeded successfully',
+            summary: {
+                admins: 1,
+                navigation: 6,
+                advertisements: 5,
+                settings: 9,
+                content: 6
+            }
+        });
     } catch (error) {
+        console.error('❌ Seed error:', error);
         res.status(500).json({ error: error.message });
     }
 });
 
 // ========================================
-// ROOT & ADMIN ROUTES
+// ERROR HANDLERS
 // ========================================
 
-// Root route
-app.get('/', (req, res) => {
-    res.json({
-        message: 'StreamIndia Backend API',
-        version: '1.0.0',
-        status: 'running',
-        endpoints: {
-            admin: '/admin',
-            api: '/api',
-            seed: '/api/seed',
-            health: '/health'
-        },
-        documentation: 'https://github.com/YOUR-USERNAME/streamindia-ott-platform'
-    });
-});
-
-// Admin panel route
-app.get('/admin', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
-});
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-    res.json({ 
-        status: 'ok', 
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime()
-    });
-});
-
-// 404 handler
 app.use((req, res) => {
-    res.status(404).json({
-        error: 'Not Found',
-        message: 'The requested endpoint does not exist',
-        availableEndpoints: {
-            root: '/',
-            admin: '/admin',
-            api: '/api',
-            content: '/api/content',
-            seed: '/api/seed'
-        }
+    res.status(404).json({ 
+        error: 'Route not found',
+        path: req.path,
+        message: 'The requested endpoint does not exist'
+    });
+});
+
+app.use((err, req, res, next) => {
+    console.error('Error:', err);
+    res.status(500).json({ 
+        error: 'Internal server error',
+        message: err.message 
     });
 });
 
@@ -722,10 +770,12 @@ app.use((req, res) => {
 // START SERVER
 // ========================================
 
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
-    console.log(`📊 Admin Panel: http://localhost:${PORT}/admin`);
-    console.log(`🎬 Frontend: http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log('✅ Server started successfully!');
+    console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
+    console.log(`📍 Admin Panel: http://0.0.0.0:${PORT}/admin`);
+    console.log(`📍 API: http://0.0.0.0:${PORT}/api`);
+    console.log('🎬 ClassicFlims Backend Ready!');
 });
 
 module.exports = app;
