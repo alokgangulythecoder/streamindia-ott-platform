@@ -5,6 +5,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 
@@ -39,6 +40,9 @@ app.use(cors({
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from 'public' directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Logging middleware
 app.use((req, res, next) => {
@@ -80,15 +84,15 @@ async function connectDB() {
             maxPoolSize: 10,
             serverSelectionTimeoutMS: 10000,
             socketTimeoutMS: 45000,
-            dbName: 'classicflims'  // ← COLLECTION NAME SET TO "classicflims"
+            dbName: 'classicalflims'  // ← DATABASE NAME
         };
 
         console.log('🔄 Creating new MongoDB connection...');
-        console.log('📊 Database: classicflims');
+        console.log('📊 Database: classicalflims');
         
         cached.promise = mongoose.connect(MONGODB_URI, opts)
             .then((mongoose) => {
-                console.log('✅ MongoDB Connected to database: classicflims');
+                console.log('✅ MongoDB Connected to database: classicalflims');
                 return mongoose;
             });
     }
@@ -118,7 +122,7 @@ const adminSchema = new mongoose.Schema({
     password: { type: String, required: true },
     role: { type: String, default: 'admin' },
     createdAt: { type: Date, default: Date.now }
-}, { collection: 'admins' });  // Explicit collection name
+}, { collection: 'admins' });
 
 const contentSchema = new mongoose.Schema({
     title: { type: String, required: true },
@@ -170,7 +174,7 @@ const settingsSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now }
 }, { collection: 'settings' });
 
-// Models - Use mongoose.models to prevent recompilation in serverless
+// Models - Use mongoose.models to prevent recompilation
 const Admin = mongoose.models.Admin || mongoose.model('Admin', adminSchema);
 const Content = mongoose.models.Content || mongoose.model('Content', contentSchema);
 const Navigation = mongoose.models.Navigation || mongoose.model('Navigation', navigationSchema);
@@ -197,27 +201,55 @@ const authMiddleware = (req, res, next) => {
 };
 
 // ========================================
-// BASIC ROUTES
+// FRONTEND ROUTES - Serve HTML Pages
 // ========================================
+
+// Serve admin.html from public folder
+app.get('/admin/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+// Alternative route for admin login page
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+// Serve index.html (if you have a frontend)
+app.get('/index', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// ========================================
+// API ROUTES
+// ========================================
+
+// Root endpoint
 app.get('/', (req, res) => {
     res.json({
         message: 'StreamIndia Backend API',
         version: '1.0.0',
         status: 'running',
-        database: 'classicflims',
+        database: 'classicalflims',
         timestamp: new Date().toISOString(),
         endpoints: {
-            health: '/health',
-            admin_login: '/api/admin/login',
-            content: '/api/content',
-            navigation: '/api/navigation',
-            advertisements: '/api/advertisements',
-            settings: '/api/settings',
-            seed: '/api/seed'
+            frontend: {
+                admin_page: '/admin/login',
+                admin_page_alt: '/admin'
+            },
+            api: {
+                health: '/health',
+                admin_login: 'POST /api/admin/login',
+                content: '/api/content',
+                navigation: '/api/navigation',
+                advertisements: '/api/advertisements',
+                settings: '/api/settings',
+                seed: 'POST /api/seed'
+            }
         }
     });
 });
 
+// Health check
 app.get('/health', (req, res) => {
     res.json({
         status: 'ok',
@@ -225,43 +257,50 @@ app.get('/health', (req, res) => {
         uptime: process.uptime(),
         database: {
             connected: mongoose.connection.readyState === 1,
-            name: 'classicflims'
+            name: 'classicalflims'
         },
         port: PORT
     });
 });
 
 // ========================================
-// ADMIN AUTH - FIXED ROUTE PATH
+// ADMIN AUTH API
 // ========================================
-app.get('/admin/login', (req, res) => {
-    res.sendFile(__dirname + '/public/admin.html');
-});
 
+// Admin login API endpoint (POST only)
 app.post('/api/admin/login', async (req, res) => {
     try {
-        await connectDB();  // Ensure connection
+        await connectDB();
         
         console.log('🔐 Login attempt:', req.body.username);
         
         const { username, password } = req.body;
         
         if (!username || !password) {
-            return res.status(400).json({ error: 'Username and password required' });
+            return res.status(400).json({ 
+                success: false,
+                error: 'Username and password required' 
+            });
         }
         
         const admin = await Admin.findOne({ username });
         
         if (!admin) {
             console.log('❌ Admin not found');
-            return res.status(401).json({ error: 'Invalid credentials' });
+            return res.status(401).json({ 
+                success: false,
+                error: 'Invalid credentials' 
+            });
         }
         
         const validPassword = await bcrypt.compare(password, admin.password);
         
         if (!validPassword) {
             console.log('❌ Invalid password');
-            return res.status(401).json({ error: 'Invalid credentials' });
+            return res.status(401).json({ 
+                success: false,
+                error: 'Invalid credentials' 
+            });
         }
         
         const token = jwt.sign(
@@ -274,6 +313,7 @@ app.post('/api/admin/login', async (req, res) => {
         
         res.json({
             success: true,
+            message: 'Login successful',
             token,
             admin: {
                 id: admin._id,
@@ -285,7 +325,10 @@ app.post('/api/admin/login', async (req, res) => {
         
     } catch (error) {
         console.error('❌ Login error:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ 
+            success: false,
+            error: error.message 
+        });
     }
 });
 
@@ -434,18 +477,6 @@ app.post('/api/navigation', authMiddleware, async (req, res) => {
     }
 });
 
-app.delete('/api/navigation/:id', authMiddleware, async (req, res) => {
-    try {
-        await connectDB();
-        
-        await Navigation.findByIdAndDelete(req.params.id);
-        res.json({ message: 'Navigation deleted successfully' });
-        
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
 // ========================================
 // ADVERTISEMENT ROUTES
 // ========================================
@@ -499,30 +530,6 @@ app.post('/api/advertisements/:id/click', async (req, res) => {
     }
 });
 
-app.post('/api/advertisements', authMiddleware, async (req, res) => {
-    try {
-        await connectDB();
-        
-        const ad = await Advertisement.create(req.body);
-        res.status(201).json(ad);
-        
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-});
-
-app.delete('/api/advertisements/:id', authMiddleware, async (req, res) => {
-    try {
-        await connectDB();
-        
-        await Advertisement.findByIdAndDelete(req.params.id);
-        res.json({ message: 'Advertisement deleted successfully' });
-        
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
 // ========================================
 // SETTINGS ROUTES
 // ========================================
@@ -532,7 +539,6 @@ app.get('/api/settings', async (req, res) => {
         
         const settings = await Settings.find();
         
-        // Convert to key-value object for easy frontend consumption
         const settingsObj = {};
         settings.forEach(setting => {
             settingsObj[setting.key] = setting.value;
@@ -563,40 +569,6 @@ app.post('/api/settings', authMiddleware, async (req, res) => {
 });
 
 // ========================================
-// DASHBOARD STATS
-// ========================================
-app.get('/api/dashboard/stats', authMiddleware, async (req, res) => {
-    try {
-        await connectDB();
-        
-        const totalContent = await Content.countDocuments();
-        const publishedContent = await Content.countDocuments({ status: 'published' });
-        const featuredContent = await Content.countDocuments({ featured: true });
-        const trendingContent = await Content.countDocuments({ trending: true });
-        
-        const totalViews = await Content.aggregate([
-            { $group: { _id: null, total: { $sum: '$views' } } }
-        ]);
-        
-        const totalLikes = await Content.aggregate([
-            { $group: { _id: null, total: { $sum: '$likes' } } }
-        ]);
-        
-        res.json({
-            totalContent,
-            publishedContent,
-            featuredContent,
-            trendingContent,
-            totalViews: totalViews[0]?.total || 0,
-            totalLikes: totalLikes[0]?.total || 0
-        });
-        
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// ========================================
 // SEED ROUTE - INITIALIZE DATABASE
 // ========================================
 app.post('/api/seed', async (req, res) => {
@@ -604,9 +576,8 @@ app.post('/api/seed', async (req, res) => {
         await connectDB();
         
         console.log('🌱 Starting database seed...');
-        console.log('📊 Database: classicflims');
+        console.log('📊 Database: classicalflims');
         
-        // 1. Seed Admin
         const adminCount = await Admin.countDocuments();
         let adminCreated = false;
         
@@ -620,11 +591,8 @@ app.post('/api/seed', async (req, res) => {
             });
             console.log('✅ Admin created:', admin._id);
             adminCreated = true;
-        } else {
-            console.log('ℹ️ Admin already exists');
         }
         
-        // 2. Seed Navigation
         const navCount = await Navigation.countDocuments();
         let navCreated = false;
         
@@ -633,94 +601,46 @@ app.post('/api/seed', async (req, res) => {
                 { label: 'Home', url: '/', icon: '🏠', order: 1, active: true },
                 { label: 'Movies', url: '/movies', icon: '🎬', order: 2, active: true },
                 { label: 'Series', url: '/series', icon: '📺', order: 3, active: true },
-                { label: 'Live', url: '/live', icon: '📡', order: 4, active: true },
-                { label: 'Documentaries', url: '/documentaries', icon: '📽️', order: 5, active: true }
+                { label: 'Live', url: '/live', icon: '📡', order: 4, active: true }
             ]);
-            console.log('✅ Navigation items created');
             navCreated = true;
         }
         
-        // 3. Seed Settings
         const settingsCount = await Settings.countDocuments();
         let settingsCreated = false;
         
         if (settingsCount === 0) {
             await Settings.insertMany([
-                { key: 'site_name', value: 'StreamIndia', category: 'general', description: 'Website name' },
-                { key: 'site_tagline', value: 'Premium Indian Content Streaming', category: 'general', description: 'Website tagline' },
-                { key: 'primary_color', value: '#ff3366', category: 'theme', description: 'Primary brand color' },
-                { key: 'secondary_color', value: '#7c3aed', category: 'theme', description: 'Secondary brand color' }
+                { key: 'site_name', value: 'StreamIndia', category: 'general' },
+                { key: 'site_tagline', value: 'Premium Content', category: 'general' },
+                { key: 'primary_color', value: '#ff3366', category: 'theme' },
+                { key: 'secondary_color', value: '#7c3aed', category: 'theme' }
             ]);
-            console.log('✅ Settings created');
             settingsCreated = true;
         }
         
-        // 4. Seed Sample Content (optional)
-        const contentCount = await Content.countDocuments();
-        let contentCreated = false;
-        
-        if (contentCount === 0) {
-            await Content.insertMany([
-                {
-                    title: 'Sample Movie 1',
-                    description: 'A great Indian movie',
-                    type: 'movie',
-                    category: 'Drama',
-                    language: 'Hindi',
-                    year: 2024,
-                    duration: '120 min',
-                    rating: 8.5,
-                    videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-                    thumbnailUrl: 'https://picsum.photos/400/600?random=1',
-                    featured: true,
-                    trending: true,
-                    status: 'published'
-                },
-                {
-                    title: 'Sample Series 1',
-                    description: 'An amazing series',
-                    type: 'series',
-                    category: 'Thriller',
-                    language: 'Tamil',
-                    year: 2024,
-                    duration: '8 episodes',
-                    rating: 8.0,
-                    videoUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-                    thumbnailUrl: 'https://picsum.photos/400/600?random=2',
-                    featured: true,
-                    trending: false,
-                    status: 'published'
-                }
-            ]);
-            console.log('✅ Sample content created');
-            contentCreated = true;
-        }
-        
-        // Verify data was saved
         await new Promise(resolve => setTimeout(resolve, 1000));
         
         const finalCounts = {
             admins: await Admin.countDocuments(),
             navigation: await Navigation.countDocuments(),
-            settings: await Settings.countDocuments(),
-            content: await Content.countDocuments()
+            settings: await Settings.countDocuments()
         };
         
         res.json({
             success: true,
             message: 'Database seeded successfully',
-            database: 'classicflims',
+            database: 'classicalflims',
             created: {
                 admin: adminCreated,
                 navigation: navCreated,
-                settings: settingsCreated,
-                content: contentCreated
+                settings: settingsCreated
             },
             counts: finalCounts,
             credentials: {
                 username: 'admin',
                 password: 'admin123',
-                note: 'Use these to login at /api/admin/login'
+                loginUrl: '/admin/login'
             }
         });
         
@@ -728,8 +648,7 @@ app.post('/api/seed', async (req, res) => {
         console.error('❌ Seed error:', error);
         res.status(500).json({ 
             success: false,
-            error: error.message,
-            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+            error: error.message
         });
     }
 });
@@ -743,14 +662,7 @@ app.use((req, res) => {
         error: 'Route not found',
         path: req.path,
         method: req.method,
-        message: 'This endpoint does not exist',
-        availableEndpoints: [
-            'GET /',
-            'GET /health',
-            'POST /api/admin/login',
-            'GET /api/content',
-            'POST /api/seed'
-        ]
+        message: 'This endpoint does not exist'
     });
 });
 
@@ -773,8 +685,9 @@ if (require.main === module) {
         console.log('='.repeat(50));
         console.log('✅ SERVER STARTED SUCCESSFULLY!');
         console.log(`🚀 Listening on http://0.0.0.0:${PORT}`);
+        console.log(`📍 Admin Page: http://0.0.0.0:${PORT}/admin/login`);
         console.log(`📍 API: http://0.0.0.0:${PORT}/api`);
-        console.log(`📊 Database: classicflims`);
+        console.log(`📊 Database: classicalflims`);
         console.log('='.repeat(50));
     });
 }
