@@ -11,21 +11,42 @@ const app = express();
 
 // Middleware
 // CORS Configuration
-// CRITICAL: CORS must be configured BEFORE routes
+const allowedOrigins = [
+    'https://classicflims.up.railway.app',
+    'http://localhost:3000',
+    'http://localhost:5173'
+];
+
 const corsOptions = {
-    origin: 'https://classicflims.up.railway.app',  // NO trailing slash
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: function(origin, callback) {
+        // Allow requests with no origin (Postman, mobile apps, etc.)
+        if (!origin) {
+            console.log('⚠️ Request with no origin');
+            return callback(null, true);
+        }
+        
+        console.log('🌐 Request from origin:', origin);
+        
+        if (allowedOrigins.includes(origin)) {
+            console.log('✅ Origin allowed');
+            callback(null, true);
+        } else {
+            console.log('❌ Origin blocked:', origin);
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     credentials: true,
-    optionsSuccessStatus: 200
+    optionsSuccessStatus: 200,
+    preflightContinue: false
 };
 
-// Apply CORS to ALL routes - MUST be before any route definitions
+// Apply CORS to ALL routes
 app.use(cors(corsOptions));
 
-// Explicitly handle preflight requests
+// Explicitly handle ALL OPTIONS requests
 app.options('*', cors(corsOptions));
-
 app.use(express.json());
 
 // Serve static files from public directory
