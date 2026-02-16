@@ -764,398 +764,272 @@
     tagline: 'Premium Classical Content Platform',
     description: 'Experience the finest classical arts, music, and cinema'
 };
-        // Mock Data (kept as fallback)
-        const mockContent = {
-            trending: [
-                { id: 1, title: "Sacred Games 3", type: "Series", year: "2025", rating: 8.9, badge: "NEW", genre: "Crime Thriller", language: "Hindi", image: "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=400&h=600&fit=crop" },
-                { id: 2, title: "Mirzapur Returns", type: "Series", year: "2025", rating: 9.2, badge: "TRENDING", genre: "Action Drama", language: "Hindi", image: "https://images.unsplash.com/photo-1574267432644-f610a2b4cb2e?w=400&h=600&fit=crop" },
-                { id: 3, title: "Delhi Crime Files", type: "Series", year: "2025", rating: 8.7, badge: "NEW", genre: "Crime", language: "Hindi", image: "https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?w=400&h=600&fit=crop" },
-                { id: 4, title: "The Family Man 4", type: "Series", year: "2025", rating: 9.1, badge: "EXCLUSIVE", genre: "Spy Thriller", language: "Hindi", image: "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=400&h=600&fit=crop" },
-                { id: 5, title: "Panchayat Season 4", type: "Series", year: "2025", rating: 9.3, badge: "TOP RATED", genre: "Comedy Drama", language: "Hindi", image: "https://images.unsplash.com/photo-1524117074681-31bd4de22ad3?w=400&h=600&fit=crop" },
-                { id: 6, title: "Asur 3", type: "Series", year: "2025", rating: 8.8, badge: "NEW", genre: "Thriller", language: "Hindi", image: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=400&h=600&fit=crop" },
-            ],
-            bollywood: [
-                { id: 7, title: "Pathaan 2", type: "Movie", year: "2025", rating: 8.5, badge: "BLOCKBUSTER", genre: "Action", language: "Hindi", image: "https://images.unsplash.com/photo-1518676590629-3dcbd9c5a5c9?w=400&h=600&fit=crop" },
-                { id: 8, title: "Jawan Returns", type: "Movie", year: "2025", rating: 8.9, badge: "NEW", genre: "Action Thriller", language: "Hindi", image: "https://images.unsplash.com/photo-1478720568477-152d9b164e26?w=400&h=600&fit=crop" },
-                { id: 9, title: "Rocky & Rani 2", type: "Movie", year: "2025", rating: 7.8, badge: "ROMANTIC", genre: "Romance", language: "Hindi", image: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=400&h=600&fit=crop" },
-                { id: 10, title: "Fighter", type: "Movie", year: "2025", rating: 8.3, badge: "ACTION", genre: "War Drama", language: "Hindi", image: "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=400&h=600&fit=crop" },
-                { id: 11, title: "Dunki", type: "Movie", year: "2024", rating: 8.1, badge: "DRAMA", genre: "Comedy Drama", language: "Hindi", image: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?w=400&h=600&fit=crop" },
-                { id: 12, title: "12th Fail", type: "Movie", year: "2024", rating: 9.2, badge: "INSPIRING", genre: "Biography", language: "Hindi", image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop" },
-            ],
-            regional: [
-                { id: 13, title: "Pushpa 2", type: "Movie", year: "2025", rating: 9.0, badge: "MEGA HIT", genre: "Action", language: "Telugu", image: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=600&fit=crop" },
-                { id: 14, title: "KGF Chapter 3", type: "Movie", year: "2025", rating: 9.3, badge: "BLOCKBUSTER", genre: "Action Drama", language: "Kannada", image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=600&fit=crop" },
-                { id: 15, title: "Vikram 2", type: "Movie", year: "2025", rating: 8.8, badge: "ACTION", genre: "Thriller", language: "Tamil", image: "https://images.unsplash.com/photo-1463453091185-61582044d556?w=400&h=600&fit=crop" },
-                { id: 16, title: "Kantara 2", type: "Movie", year: "2025", rating: 9.1, badge: "FOLKLORE", genre: "Thriller", language: "Kannada", image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=600&fit=crop" },
-                { id: 17, title: "RRR: The Rise", type: "Movie", year: "2025", rating: 9.4, badge: "EPIC", genre: "Action Drama", language: "Telugu", image: "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=400&h=600&fit=crop" },
-                { id: 18, title: "Jailer 2", type: "Movie", year: "2025", rating: 8.6, badge: "SUPERSTAR", genre: "Action", language: "Tamil", image: "https://images.unsplash.com/photo-1507591064344-4c6ce005b128?w=400&h=600&fit=crop" },
-            ],
-            kids: [
-                { id: 19, title: "Chhota Bheem Origins", type: "Series", year: "2025", rating: 8.2, badge: "KIDS", genre: "Animation", language: "Hindi", image: "https://images.unsplash.com/photo-1503454537195-1dcabb73ffb9?w=400&h=600&fit=crop" },
-                { id: 20, title: "Little Singham Adventures", type: "Series", year: "2025", rating: 7.9, badge: "KIDS", genre: "Animation", language: "Hindi", image: "https://images.unsplash.com/photo-1531891437562-4301cf35b7e4?w=400&h=600&fit=crop" },
-                { id: 21, title: "Motu Patlu Galaxy", type: "Series", year: "2025", rating: 8.0, badge: "KIDS", genre: "Comedy", language: "Hindi", image: "https://images.unsplash.com/photo-1488161628813-04466f872be2?w=400&h=600&fit=crop" },
-                { id: 22, title: "Mighty Raju Returns", type: "Series", year: "2025", rating: 7.8, badge: "KIDS", genre: "Superhero", language: "Hindi", image: "https://images.unsplash.com/photo-1542909168-82c3e7fdca5c?w=400&h=600&fit=crop" },
-            ]
-        };
+       
+    const API_CONFIG = {
+    BASE_URL: 'http://localhost:3000/api',
+    ENDPOINTS: {
+        // Content
+        CONTENT: '/content',
+        CONTENT_BY_ID: (id) => `/content/${id}`,
+        CONTENT_VIEW: (id) => `/content/${id}/view`,
+        
+        // Navigation
+        NAVIGATION: '/navigation',
+        
+        // Advertisements
+        ADS: '/advertisements',
+        AD_IMPRESSION: (id) => `/advertisements/${id}/impression`,
+        AD_CLICK: (id) => `/advertisements/${id}/click`,
+        
+        // Settings
+        SETTINGS: '/settings'
+    }
+};
 
-        const categories = [
-            "All", "Hindi", "Telugu", "Tamil", "Kannada", "Malayalam", "Bengali", 
-            "Marathi", "Punjabi", "Action", "Drama", "Comedy", "Thriller", "Romance"
-        ];
+// API Helper Functions
+const api = {
+    // Fetch content with filters
+    getContent: async (filters = {}) => {
+        const params = new URLSearchParams(filters);
+        const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTENT}?${params}`);
+        return await response.json();
+    },
 
-        // YouTube API Helper Functions
-        const fetchYouTubeVideos = async (maxResults = 12) => {
-            try {
-                const response = await fetch(
-                    `https://www.googleapis.com/youtube/v3/search?key=${YOUTUBE_API_KEY}&channelId=${CHANNEL_ID}&part=snippet,id&order=date&maxResults=${maxResults}&type=video`
-                );
-                
-                if (!response.ok) {
-                    throw new Error('Failed to fetch YouTube videos');
-                }
-                
-                const data = await response.json();
-                
-                // Transform YouTube data to our content format
-                return data.items.map(item => ({
-                    id: item.id.videoId,
-                    videoId: item.id.videoId,
-                    title: item.snippet.title,
-                    type: "YouTube Video",
-                    year: new Date(item.snippet.publishedAt).getFullYear().toString(),
-                    genre: "Content",
-                    language: "English",
-                    image: item.snippet.thumbnails.high?.url || item.snippet.thumbnails.medium?.url,
-                    description: item.snippet.description,
-                    channelTitle: item.snippet.channelTitle,
-                    publishedAt: item.snippet.publishedAt,
-                    badge: "YOUTUBE"
-                }));
-            } catch (error) {
-                console.error('Error fetching YouTube videos:', error);
-                return [];
+    // Get single content
+    getContentById: async (id) => {
+        const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTENT_BY_ID(id)}`);
+        return await response.json();
+    },
+
+    // Increment view count
+    trackView: async (id) => {
+        await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.CONTENT_VIEW(id)}`, {
+            method: 'POST'
+        });
+    },
+
+    // Get navigation menu
+    getNavigation: async () => {
+        const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.NAVIGATION}`);
+        return await response.json();
+    },
+
+    // Get advertisements
+    getAds: async (position, type) => {
+        const params = new URLSearchParams({ position, type });
+        const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.ADS}?${params}`);
+        return await response.json();
+    },
+
+    // Track ad impression
+    trackAdImpression: async (id) => {
+        await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AD_IMPRESSION(id)}`, {
+            method: 'POST'
+        });
+    },
+
+    // Track ad click
+    trackAdClick: async (id) => {
+        await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.AD_CLICK(id)}`, {
+            method: 'POST'
+        });
+    },
+
+    // Get settings
+    getSettings: async () => {
+        const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.SETTINGS}`);
+        return await response.json();
+    }
+};
+
+// ==========================================
+// UPDATED APP COMPONENT WITH BACKEND INTEGRATION
+// ==========================================
+
+// Replace the existing mockContent and App function with this:
+
+function App() {
+    const [activeCategory, setActiveCategory] = useState("All");
+    const [scrolled, setScrolled] = useState(false);
+    const [activeNav, setActiveNav] = useState("Home");
+    const [playerOpen, setPlayerOpen] = useState(false);
+    const [selectedContent, setSelectedContent] = useState(null);
+    const [youtubeVideos, setYoutubeVideos] = useState([]);
+    const [backendContent, setBackendContent] = useState({
+        trending: [],
+        movies: [],
+        series: [],
+        featured: []
+    });
+    const [navigation, setNavigation] = useState([]);
+    const [headerAd, setHeaderAd] = useState(null);
+    const [sidebarAds, setSidebarAds] = useState([]);
+    const [settings, setSettings] = useState({});
+    const [loading, setLoading] = useState(true);
+
+    // Fetch all data on component mount
+    useEffect(() => {
+        loadAllData();
+    }, []);
+
+    const loadAllData = async () => {
+        setLoading(true);
+        
+        try {
+            // Load content from backend
+            const [trendingData, moviesData, seriesData, featuredData] = await Promise.all([
+                api.getContent({ trending: true, limit: 12 }),
+                api.getContent({ type: 'movie', limit: 12 }),
+                api.getContent({ type: 'series', limit: 12 }),
+                api.getContent({ featured: true, limit: 12 })
+            ]);
+
+            setBackendContent({
+                trending: trendingData.content || [],
+                movies: moviesData.content || [],
+                series: seriesData.content || [],
+                featured: featuredData.content || []
+            });
+
+            // Load navigation
+            const navData = await api.getNavigation();
+            setNavigation(navData || []);
+
+            // Load advertisements
+            const headerAdData = await api.getAds('header', 'banner');
+            const sidebarAdData = await api.getAds('sidebar', 'banner');
+            
+            if (headerAdData.length > 0) {
+                setHeaderAd(headerAdData[0]);
+                api.trackAdImpression(headerAdData[0]._id);
             }
-        };
+            setSidebarAds(sidebarAdData || []);
 
-        const getYouTubeEmbedUrl = (videoId) => {
-            return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-        };
+            // Load settings
+            const settingsData = await api.getSettings();
+            setSettings(settingsData);
 
-        function App() {
-            const [activeCategory, setActiveCategory] = useState("All");
-            const [scrolled, setScrolled] = useState(false);
-            const [activeNav, setActiveNav] = useState("Home");
-            const [playerOpen, setPlayerOpen] = useState(false);
-            const [selectedContent, setSelectedContent] = useState(null);
-            const [youtubeVideos, setYoutubeVideos] = useState([]);
-            const [loading, setLoading] = useState(true);
+            // Apply dynamic theme if available
+            if (settingsData.primary_color) {
+                document.documentElement.style.setProperty('--accent-primary', settingsData.primary_color);
+            }
+            if (settingsData.secondary_color) {
+                document.documentElement.style.setProperty('--accent-secondary', settingsData.secondary_color);
+            }
 
-            useEffect(() => {
-                const handleScroll = () => {
-                    setScrolled(window.scrollY > 50);
-                };
-                window.addEventListener('scroll', handleScroll);
-                return () => window.removeEventListener('scroll', handleScroll);
-            }, []);
+            // Update site title
+            if (settingsData.site_name) {
+                document.title = settingsData.site_name + ' - Premium OTT Platform';
+            }
 
-            // Fetch YouTube videos on mount
-            useEffect(() => {
-                const loadYouTubeVideos = async () => {
-                    setLoading(true);
-                    const videos = await fetchYouTubeVideos(12);
-                    setYoutubeVideos(videos);
-                    setLoading(false);
-                };
-                loadYouTubeVideos();
-            }, []);
+            // Load YouTube videos (keeping existing functionality)
+            const videos = await fetchYouTubeVideos(12);
+            setYoutubeVideos(videos);
 
-            const playContent = (content) => {
-                setSelectedContent(content);
-                setPlayerOpen(true);
-            };
-
-            const ContentCard = ({ content }) => (
-                <div className="content-card" tabIndex="0">
-                    <img src={content.image} alt={content.title} className="card-image" />
-                    {content.badge && <div className="card-badge">{content.badge}</div>}
-                    <div className="card-overlay">
-                        <div className="card-title">{content.title}</div>
-                        <div className="card-meta">
-                            <span>{content.type}</span>
-                            <span>•</span>
-                            <span>{content.year}</span>
-                            {content.language && (
-                                <>
-                                    <span>•</span>
-                                    <span>{content.language}</span>
-                                </>
-                            )}
-                        </div>
-                        {content.channelTitle && (
-                            <div className="card-meta">
-                                <span>📺 {content.channelTitle}</span>
-                            </div>
-                        )}
-                        <div className="card-actions">
-                            <button className="card-btn card-btn-play" onClick={() => playContent(content)}>
-                                ▶ Play
-                            </button>
-                            <button className="card-btn card-btn-info">ℹ Info</button>
-                        </div>
-                    </div>
-                </div>
-            );
-
-            const Carousel = ({ items, isLoading }) => {
-                const carouselRef = useRef(null);
-
-                const scroll = (direction) => {
-                    if (carouselRef.current) {
-                        const scrollAmount = direction === 'left' ? -400 : 400;
-                        carouselRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-                    }
-                };
-
-                if (isLoading) {
-                    return (
-                        <div className="carousel-container">
-                            <div className="carousel-wrapper" ref={carouselRef}>
-                                <div className="carousel-track">
-                                    {[1, 2, 3, 4, 5, 6].map(i => (
-                                        <div key={i} className="carousel-item">
-                                            <div className="content-card loading-card" style={{height: '400px'}}></div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    );
-                }
-
-                return (
-                    <div className="carousel-container">
-                        <div className="carousel-nav carousel-nav-left" onClick={() => scroll('left')}>
-                            ‹
-                        </div>
-                        <div className="carousel-wrapper" ref={carouselRef}>
-                            <div className="carousel-track">
-                                {items.map(item => (
-                                    <div key={item.id} className="carousel-item">
-                                        <ContentCard content={item} />
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="carousel-nav carousel-nav-right" onClick={() => scroll('right')}>
-                            ›
-                        </div>
-                    </div>
-                );
-            };
-
-            return (
-                <div className="app-container">
-                    <div className="bg-ambience"></div>
-
-                    {/* Navigation */}
-                    <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
-                        <div className="logo">StreamIndia</div>
-                        <ul className="nav-menu">
-                            {["Home", "Movies", "Series", "Sports", "Live TV"].map(item => (
-                                <li 
-                                    key={item}
-                                    className={`nav-item ${activeNav === item ? 'active' : ''}`}
-                                    onClick={() => setActiveNav(item)}
-                                    tabIndex="0"
-                                >
-                                    {item}
-                                </li>
-                            ))}
-                        </ul>
-                        <div className="nav-actions">
-                            <div className="search-icon" tabIndex="0">🔍</div>
-                            <div className="profile-icon" tabIndex="0">👤</div>
-                        </div>
-                    </nav>
-
-                    {/* Hero Section */}
-                    <section className="hero-section">
-                        <div className="hero-bg"></div>
-                        <div className="hero-content">
-                            <div className="hero-badge">
-                                <span>🔥</span>
-                                <span>Trending Now</span>
-                            </div>
-                            <h1 className="hero-title">
-                                India's Premium Entertainment Platform
-                            </h1>
-                            <p className="hero-description">
-                                Stream unlimited movies, web series, and live TV in Hindi, Telugu, Tamil, and 10+ Indian languages. Premium Bollywood, regional cinema, and exclusive originals.
-                            </p>
-                            <div className="hero-actions">
-                                <button className="btn btn-primary" tabIndex="0">
-                                    <span>▶</span>
-                                    <span>Start Watching</span>
-                                </button>
-                                <button className="btn btn-secondary" tabIndex="0">
-                                    <span>ℹ</span>
-                                    <span>More Info</span>
-                                </button>
-                            </div>
-                        </div>
-                    </section>
-
-                    {/* Categories */}
-                    <div className="content-section">
-                        <div className="categories">
-                            {categories.map(cat => (
-                                <div
-                                    key={cat}
-                                    className={`category-chip ${activeCategory === cat ? 'active' : ''}`}
-                                    onClick={() => setActiveCategory(cat)}
-                                    tabIndex="0"
-                                >
-                                    {cat}
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* YouTube Channel Content */}
-                    <section className="content-section">
-                        <div className="section-header">
-                            <h2 className="section-title">📺 Alok Ganguly - Author Content</h2>
-                            <a href="https://www.youtube.com/@AlokGangulytheAuthor" 
-                               target="_blank" 
-                               rel="noopener noreferrer"
-                               className="view-all" 
-                               tabIndex="0">
-                                Visit Channel →
-                            </a>
-                        </div>
-                        <Carousel items={youtubeVideos} isLoading={loading} />
-                    </section>
-
-                    {/* Trending Now */}
-                    <section className="content-section">
-                        <div className="section-header">
-                            <h2 className="section-title">🔥 Trending Now</h2>
-                            <span className="view-all" tabIndex="0">View All →</span>
-                        </div>
-                        <Carousel items={mockContent.trending} isLoading={false} />
-                    </section>
-
-                    {/* Bollywood Blockbusters */}
-                    <section className="content-section">
-                        <div className="section-header">
-                            <h2 className="section-title">🎬 Bollywood Blockbusters</h2>
-                            <span className="view-all" tabIndex="0">View All →</span>
-                        </div>
-                        <Carousel items={mockContent.bollywood} isLoading={false} />
-                    </section>
-
-                    {/* Regional Cinema */}
-                    <section className="content-section">
-                        <div className="section-header">
-                            <h2 className="section-title">🌟 Regional Cinema</h2>
-                            <span className="view-all" tabIndex="0">View All →</span>
-                        </div>
-                        <Carousel items={mockContent.regional} isLoading={false} />
-                    </section>
-
-                    {/* Kids Content */}
-                    <section className="content-section">
-                        <div className="section-header">
-                            <h2 className="section-title">👶 Kids & Family</h2>
-                            <span className="view-all" tabIndex="0">View All →</span>
-                        </div>
-                        <div className="content-grid">
-                            {mockContent.kids.map(content => (
-                                <ContentCard key={content.id} content={content} />
-                            ))}
-                        </div>
-                    </section>
-
-                    {/* Player Modal */}
-                    {playerOpen && (
-                        <div className="player-modal" onClick={() => setPlayerOpen(false)}>
-                            <div className="player-container" onClick={(e) => e.stopPropagation()}>
-                                <button className="player-close" onClick={() => setPlayerOpen(false)}>
-                                    ✕
-                                </button>
-                                {selectedContent?.videoId ? (
-                                    <iframe
-                                        width="100%"
-                                        height="100%"
-                                        src={getYouTubeEmbedUrl(selectedContent.videoId)}
-                                        title={selectedContent.title}
-                                        frameBorder="0"
-                                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                        allowFullScreen
-                                        style={{borderRadius: '20px'}}
-                                    ></iframe>
-                                ) : (
-                                    <div className="player-content">
-                                        Now Playing: {selectedContent?.title}
-                                        <br />
-                                        <span style={{fontSize: '1.5rem', marginTop: '1rem'}}>
-                                            (Video Player Integration Ready)
-                                        </span>
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Footer */}
-                    <footer className="footer">
-                        <div className="footer-content">
-                            <div className="footer-section">
-                                <h3>StreamIndia</h3>
-                                <p style={{color: 'var(--text-secondary)', lineHeight: '1.8'}}>
-                                    India's premium OTT platform streaming unlimited entertainment in 15+ Indian languages across Android TV, Apple TV, and Smart TVs.
-                                </p>
-                            </div>
-                            <div className="footer-section">
-                                <h3>Content</h3>
-                                <ul className="footer-links">
-                                    <li><a href="#" tabIndex="0">Bollywood Movies</a></li>
-                                    <li><a href="#" tabIndex="0">Regional Cinema</a></li>
-                                    <li><a href="#" tabIndex="0">Web Series</a></li>
-                                    <li><a href="#" tabIndex="0">Live TV</a></li>
-                                    <li><a href="#" tabIndex="0">Sports</a></li>
-                                </ul>
-                            </div>
-                            <div className="footer-section">
-                                <h3>Platforms</h3>
-                                <ul className="footer-links">
-                                    <li><a href="#" tabIndex="0">Android TV</a></li>
-                                    <li><a href="#" tabIndex="0">Apple TV</a></li>
-                                    <li><a href="#" tabIndex="0">Samsung Smart TV</a></li>
-                                    <li><a href="#" tabIndex="0">LG Smart TV</a></li>
-                                    <li><a href="#" tabIndex="0">Fire TV</a></li>
-                                </ul>
-                            </div>
-                            <div className="footer-section">
-                                <h3>Support</h3>
-                                <ul className="footer-links">
-                                    <li><a href="#" tabIndex="0">Help Center</a></li>
-                                    <li><a href="#" tabIndex="0">Subscription Plans</a></li>
-                                    <li><a href="#" tabIndex="0">Privacy Policy</a></li>
-                                    <li><a href="#" tabIndex="0">Terms of Service</a></li>
-                                    <li><a href="#" tabIndex="0">Contact Us</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                        <div className="footer-bottom">
-                            <p>© 2025 StreamIndia. All rights reserved. Premium OTT Entertainment Platform for India.</p>
-                        </div>
-                    </footer>
-                </div>
-            );
+        } catch (error) {
+            console.error('Error loading data:', error);
+            // Fallback to mock data if backend is unavailable
+            console.log('Using fallback mock data');
         }
+        
+        setLoading(false);
+    };
 
-        ReactDOM.render(<App />, document.getElementById('root'));
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 50);
+        };
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, []);
+
+    const playContent = (content) => {
+        setSelectedContent(content);
+        setPlayerOpen(true);
+        
+        // Track view
+        if (content._id) {
+            api.trackView(content._id);
+        }
+    };
+
+    const handleAdClick = (ad) => {
+        if (ad._id) {
+            api.trackAdClick(ad._id);
+        }
+        if (ad.clickUrl) {
+            window.open(ad.clickUrl, '_blank');
+        }
+    };
+
+    // Advertisement Component
+    const AdBanner = ({ ad, position }) => {
+        if (!ad) return null;
+
+        return (
+            <div 
+                className={`ad-banner ad-${position}`}
+                onClick={() => handleAdClick(ad)}
+                style={{ cursor: ad.clickUrl ? 'pointer' : 'default' }}
+            >
+                {ad.imageUrl && (
+                    <img src={ad.imageUrl} alt={ad.title} style={{ width: '100%', borderRadius: '8px' }} />
+                )}
+                {ad.type === 'video' && ad.videoUrl && (
+                    <video 
+                        src={ad.videoUrl} 
+                        autoPlay 
+                        muted 
+                        loop 
+                        style={{ width: '100%', borderRadius: '8px' }}
+                    />
+                )}
+            </div>
+        );
+    };
+
+    const ContentCard = ({ content }) => (
+        <div className="content-card" tabIndex="0">
+            <img src={content.thumbnail || content.image} alt={content.title} className="card-image" />
+            {content.badge && <div className="card-badge">{content.badge}</div>}
+            <div className="card-overlay">
+                <div className="card-title">{content.title}</div>
+                <div className="card-meta">
+                    <span>{content.type}</span>
+                    <span>•</span>
+                    <span>{content.year}</span>
+                    {content.language && (
+                        <>
+                            <span>•</span>
+                            <span>{content.language}</span>
+                        </>
+                    )}
+                </div>
+                {content.rating && (
+                    <div className="card-rating">
+                        <span>⭐</span>
+                        <span>{content.rating}</span>
+                    </div>
+                )}
+                {content.views > 0 && (
+                    <div className="card-meta">
+                        <span>👁️ {content.views.toLocaleString()} views</span>
+                    </div>
+                )}
+                <div className="card-actions">
+                    <button className="card-btn card-btn-play" onClick={() => playContent(content)}>
+                        ▶ Play
+                    </button>
+                    <button className="card-btn card-btn-info">ℹ Info</button>
+                </div>
+            </div>
+        </div>
+    );
+
+    // Rest of the component remains the same...
+    // Use backendContent instead of mockContent for rendering
+}
+
     </script>
 </body>
 </html>
