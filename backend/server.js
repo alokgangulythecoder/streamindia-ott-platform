@@ -12,7 +12,14 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('public'));
+
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Admin panel route
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
 
 // Environment variables
 const PORT = process.env.PORT || 3000;
@@ -31,6 +38,41 @@ mongoose.connect(MONGODB_URI, {
 })
 .catch((error) => {
     console.error('❌ MongoDB connection error:', error.message);
+});
+
+// ========================================
+// ROUTES
+// ========================================
+
+// Root Route
+app.get('/', (req, res) => {
+    res.json({
+        message: 'ClassicFlims Backend API',
+        version: '1.0.0',
+        status: 'running',
+        tagline: 'Premium Classic Films & Timeless Cinema',
+        endpoints: {
+            admin: '/admin',
+            api: '/api',
+            health: '/health',
+            seed: '/api/seed'
+        }
+    });
+});
+
+// Admin Panel Route (IMPORTANT!)
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
+// Health Check
+app.get('/health', (req, res) => {
+    res.json({ 
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime(),
+        database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected'
+    });
 });
 
 // ========================================
