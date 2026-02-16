@@ -20,7 +20,7 @@ app.use(express.static('public'));
 // Configuration
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'streamindia-secret-key-change-in-production';
-const MONGO_URI = process.env.MONGO_URL;
+const MONGO_URI = process.env.MONGO_URI;
 
 // MongoDB Connection
 mongoose.connect(MONGODB_URI, {
