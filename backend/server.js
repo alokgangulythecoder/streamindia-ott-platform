@@ -234,11 +234,11 @@ app.get('/health', (req, res) => {
 // ========================================
 // ADMIN AUTH - FIXED ROUTE PATH
 // ========================================
-app.get('admin', (req, res) => {
+app.get('/admin/login', (req, res) => {
     res.sendFile(__dirname + '/public/admin.html');
 });
 
-app.post('/admin', async (req, res) => {
+app.post('/api/admin/login', async (req, res) => {
     try {
         await connectDB();  // Ensure connection
         
