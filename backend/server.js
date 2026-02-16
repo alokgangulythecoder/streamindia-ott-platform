@@ -19,8 +19,7 @@ console.log('📍 Port:', PORT);
 // MIDDLEWARE - MUST BE BEFORE ROUTES
 // ========================================
 const allowedOrigins = [
-    'https://classicflims.up.railway.app',
-    'https://classicflims.vercel.app',
+    'https://streamindia-ott-platform.vercel.app/',
     'http://localhost:3000',
     'http://localhost:5173'
 ];
