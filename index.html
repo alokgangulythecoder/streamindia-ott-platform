@@ -748,18 +748,6 @@
             animation: shimmer 2s infinite;
         }
 
-        // ==========================================
-// CSS ADDITIONS FOR ADVERTISEMENTS
-// ==========================================
-
-/* Add these styles to your existing CSS */
-
-const adStyles = `
-    .ad-banner {
-        margin: 2rem 0;
-        transition: all 0.3s ease;
-    }
-
     .ad-banner:hover {
         transform: scale(1.02);
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
@@ -815,17 +803,6 @@ const adStyles = `
 
     <script type="text/babel">
         const { useState, useEffect, useRef } = React;
-
-        // YouTube API Configuration
-        const YOUTUBE_API_KEY = 'AIzaSyDmRkbBNjoNIRd8YVSqUiM_nlkgmjBTL0U'; // You'll need to replace this with your own API key
-        const CHANNEL_HANDLE = '@AlokGangulytheAuthor';
-        const CHANNEL_ID = 'UCd8vVGuE3KdQr2aF-Qx0xVQ'; // Channel ID for Alok Ganguly
-        const SITE_CONFIG = {
-    name: 'ClassicFlims',
-    tagline: 'Premium Classical Content Platform',
-    description: 'Experience the finest classical arts, music, and cinema'
-};
-       
     const API_CONFIG = {
     BASE_URL: 'https://classicflims-ott-platform-production.up.railway.app/api',
     ENDPOINTS: {
@@ -1086,9 +1063,6 @@ function App() {
             </div>
         </div>
     );
-
-    // Rest of the component remains the same...
-    // Use backendContent instead of mockContent for rendering
 }
 
     </script>
