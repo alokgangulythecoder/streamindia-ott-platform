@@ -234,7 +234,7 @@ app.get('/health', (req, res) => {
 // ========================================
 // ADMIN AUTH - FIXED ROUTE PATH
 // ========================================
-app.get('/api/admin/login', (req, res) => {
+app.get('admin', (req, res) => {
     res.sendFile(__dirname + '/public/admin.html');
 });
 
