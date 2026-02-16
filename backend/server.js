@@ -238,7 +238,7 @@ app.get('admin', (req, res) => {
     res.sendFile(__dirname + '/public/admin.html');
 });
 
-app.post('/api/admin/login, async (req, res) => {
+app.post('/admin', async (req, res) => {
     try {
         await connectDB();  // Ensure connection
         
