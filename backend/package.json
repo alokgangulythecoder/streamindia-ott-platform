@@ -1,5 +1,5 @@
 {
-  "name": "classicflims-ott-platform-production",
+  "name": "streamindia-backend",
   "version": "1.0.0",
   "description": "ClassicFlims Backend API - Premium Classical Content Platform",
   "main": "server.js",
