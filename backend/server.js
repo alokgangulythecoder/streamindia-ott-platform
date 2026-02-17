@@ -636,8 +636,8 @@ app.get('/api/dashboard/stats', authMiddleware, async (req, res) => {
 app.post('/api/seed', async (req, res) => {
     try {
         console.log('🌱 Starting seed...');
-        
-        // Admin
+
+        // ── Admin ──────────────────────────────────────────────
         const adminCount = await Admin.countDocuments();
         if (adminCount === 0) {
             const hashedPassword = await bcrypt.hash('admin123', 10);
@@ -647,96 +647,424 @@ app.post('/api/seed', async (req, res) => {
                 password: hashedPassword,
                 role: 'admin'
             });
-            console.log('✅ Admin created');
+            console.log('✅ Admin created  (user: admin / pass: admin123)');
         }
-        
-        // Navigation
-        const navCount = await Navigation.countDocuments();
-        if (navCount === 0) {
-            await Navigation.insertMany([
-                { label: 'Home', url: '/', icon: '🏠', order: 0, active: true },
-                { label: 'Classic Films', url: '/classic-films', icon: '🎬', order: 1, active: true },
-                { label: 'Film Noir', url: '/film-noir', icon: '🎭', order: 2, active: true },
-                { label: 'Documentaries', url: '/documentaries', icon: '📽️', order: 3, active: true }
-            ]);
-            console.log('✅ Navigation created');
-        }
-        
-        // Settings
-        const settingsCount = await Settings.countDocuments();
-        if (settingsCount === 0) {
-            await Settings.insertMany([
-                { key: 'site_name', value: 'ClassicFlims', category: 'general' },
-                { key: 'site_tagline', value: 'Premium Classic Films', category: 'general' },
-                { key: 'primary_color', value: '#1a1a1a', category: 'theme' },
-                { key: 'secondary_color', value: '#d4af37', category: 'theme' }
-            ]);
-            console.log('✅ Settings created');
-        }
-        
-       // Content — insert full 40-item seed data
+
+        // ── Navigation ─────────────────────────────────────────
+        await Navigation.deleteMany({});
+        await Navigation.insertMany([
+            { label: 'Home',          url: '/',             icon: '🏠', order: 0, active: true },
+            { label: 'Movies',        url: '/movies',        icon: '🎬', order: 1, active: true },
+            { label: 'Series',        url: '/series',        icon: '📺', order: 2, active: true },
+            { label: 'Documentaries', url: '/documentaries', icon: '📽️', order: 3, active: true },
+            { label: 'Live',          url: '/live',          icon: '🔴', order: 4, active: true }
+        ]);
+        console.log('✅ Navigation created (5 items)');
+
+        // ── Settings ───────────────────────────────────────────
+        await Settings.deleteMany({});
+        await Settings.insertMany([
+            { key: 'site_name',       value: 'ClassicFlims',           category: 'general' },
+            { key: 'site_tagline',    value: 'PREMIUM CLASSIC CINEMA',  category: 'general' },
+            { key: 'primary_color',   value: '#ff3366',                 category: 'theme'   },
+            { key: 'secondary_color', value: '#7c3aed',                 category: 'theme'   }
+        ]);
+        console.log('✅ Settings created (4 items)');
+
+        // ── Content (40 items — only if DB is empty) ───────────
         const contentCount = await Content.countDocuments();
         if (contentCount === 0) {
-            const seedContent = [
-                // ===== MOVIES (10) =====
-                { title: 'Awaara (1951)', description: "Raj Kapoor's iconic masterpiece. A poor vagabond Raj falls in love with Rita while his father — a harsh judge — believes criminals are born not made. One of the most-watched Indian films globally, a cult classic across USSR, China and Turkey.", type: 'movie', category: 'Classic Hindi', language: 'Hindi', year: 1951, duration: '168 min', rating: 8.0, videoUrl: 'https://archive.org/embed/awara-1951-raj-kapoor-nargis-classic-hindi-film', thumbnailUrl: 'https://archive.org/services/img/awara-1951-raj-kapoor-nargis-classic-hindi-film', featured: true, trending: true, status: 'published', views: 52000, likes: 41000 },
-                { title: 'Shree 420 (1955)', description: "Raj Kapoor plays an innocent small-town man corrupted by Mumbai's greed. A sharp satire on capitalism with the legendary song 'Mera Joota Hai Japani'. Directed by Raj Kapoor.", type: 'movie', category: 'Classic Hindi', language: 'Hindi', year: 1955, duration: '168 min', rating: 7.8, videoUrl: 'https://archive.org/embed/shree-420-1955-raj-kapoor-nargis-classic-hindi-film', thumbnailUrl: 'https://archive.org/services/img/shree-420-1955-raj-kapoor-nargis-classic-hindi-film', featured: true, trending: false, status: 'published', views: 38000, likes: 29000 },
-                { title: 'Jagte Raho (1956)', description: 'A thirsty villager sneaks into a Kolkata apartment building searching for water, witnessing the hypocrisy of city elites. Won the Crystal Globe at Karlovy Vary Film Festival.', type: 'movie', category: 'Classic Hindi', language: 'Hindi', year: 1956, duration: '155 min', rating: 7.9, videoUrl: 'https://archive.org/embed/jagte-raho-1956', thumbnailUrl: 'https://archive.org/services/img/jagte-raho-1956', featured: false, trending: true, status: 'published', views: 22000, likes: 17000 },
-                { title: 'Do Bigha Zamin (1953)', description: "Bimal Roy's neo-realist landmark — a poor farmer travels to Calcutta to save his family land from a greedy zamindar. Won the International Critics Award at Cannes 1954.", type: 'movie', category: 'Classic Hindi', language: 'Hindi', year: 1953, duration: '142 min', rating: 8.2, videoUrl: 'https://archive.org/embed/DoBighaZamin1953', thumbnailUrl: 'https://archive.org/services/img/DoBighaZamin1953', featured: true, trending: false, status: 'published', views: 18500, likes: 15200 },
-                { title: 'Pather Panchali (1955)', description: "Satyajit Ray's debut — the first of the Apu Trilogy. Young Apu grows up in rural Bengal with his dreamer father and mischievous sister Durga. Winner of Best Human Document at Cannes 1956.", type: 'movie', category: 'Bengali Classic', language: 'Bengali', year: 1955, duration: '125 min', rating: 8.5, videoUrl: 'https://archive.org/embed/pather-panchali-1955', thumbnailUrl: 'https://archive.org/services/img/pather-panchali-1955', featured: true, trending: true, status: 'published', views: 29000, likes: 24500 },
-                { title: 'Aparajito (1956)', description: "Second of Satyajit Ray's Apu Trilogy. Apu moves to Varanasi and later Kolkata for education — a moving portrait of a son's independence and a mother's longing. Won the Golden Lion at Venice 1957.", type: 'movie', category: 'Bengali Classic', language: 'Bengali', year: 1956, duration: '110 min', rating: 8.3, videoUrl: 'https://archive.org/embed/aparajito-1956', thumbnailUrl: 'https://archive.org/services/img/aparajito-1956', featured: false, trending: false, status: 'published', views: 14000, likes: 11500 },
-                { title: 'Chandralekha (1948)', description: "One of the most expensive Indian films of its era — a Tamil historical epic featuring the iconic 100-drummer sequence. Produced by S.S. Vasan, it was a massive pan-India blockbuster released in Tamil and Hindi.", type: 'movie', category: 'Tamil Classic', language: 'Tamil', year: 1948, duration: '200 min', rating: 7.4, videoUrl: 'https://archive.org/embed/Chandralekha1948TamilMovie', thumbnailUrl: 'https://archive.org/services/img/Chandralekha1948TamilMovie', featured: false, trending: true, status: 'published', views: 16200, likes: 12800 },
-                { title: 'Parasakthi (1952)', description: "Sivaji Ganesan's debut — three brothers separated by Partition. Written by Karunanidhi, this politically charged Tamil drama transformed cinema and launched one of India's greatest acting careers.", type: 'movie', category: 'Tamil Classic', language: 'Tamil', year: 1952, duration: '170 min', rating: 8.0, videoUrl: 'https://archive.org/embed/Parasakthi1952', thumbnailUrl: 'https://archive.org/services/img/Parasakthi1952', featured: true, trending: false, status: 'published', views: 21000, likes: 17500 },
-                { title: 'Pathala Bhairavi (1951)', description: 'A beloved Telugu fantasy — young Todu Ramudu faces the wicked magician Nepala Mantriki. Starring NT Rama Rao in a career-defining role. One of the greatest Telugu classics with stunning effects for its time.', type: 'movie', category: 'Telugu Classic', language: 'Telugu', year: 1951, duration: '175 min', rating: 7.9, videoUrl: 'https://archive.org/embed/PathaalaBhairavi1951TeluguMovie', thumbnailUrl: 'https://archive.org/services/img/PathaalaBhairavi1951TeluguMovie', featured: false, trending: true, status: 'published', views: 19800, likes: 15600 },
-                { title: 'Neelakkuyil (1954)', description: 'A progressive Malayalam film addressing caste discrimination. Directed by P. Bhaskaran and Ramu Kariat — among the first realistic Malayalam films and a landmark in Kerala cinema history.', type: 'movie', category: 'Malayalam Classic', language: 'Malayalam', year: 1954, duration: '150 min', rating: 7.7, videoUrl: 'https://archive.org/embed/Neelakkuyil1954', thumbnailUrl: 'https://archive.org/services/img/Neelakkuyil1954', featured: true, trending: false, status: 'published', views: 13500, likes: 10800 },
+            await Content.insertMany([
 
-                // ===== SERIES (10) =====
-                { title: 'Ramayana (1987) — Episode 1', description: "Ramanand Sagar's iconic Doordarshan serial. Episode 1: The story begins in Ayodhya with King Dasharatha and the birth of Lord Rama. Holds the Guinness World Record for most-watched TV show.", type: 'series', category: 'Mythological', language: 'Hindi', year: 1987, duration: '45 min/ep', rating: 9.2, videoUrl: 'https://archive.org/embed/ramayana-1987-episode-1', thumbnailUrl: 'https://archive.org/services/img/ramayana-1987-episode-1', featured: true, trending: true, status: 'published', views: 89000, likes: 78000 },
-                { title: 'Mahabharat (1988) — Episode 1', description: "B.R. Chopra's magnum opus. Episode 1 introduces the Kuru dynasty. With Mukesh Khanna as Bhishma and Nitish Bharadwaj as Krishna — this serial redefined Indian television.", type: 'series', category: 'Mythological', language: 'Hindi', year: 1988, duration: '45 min/ep', rating: 9.1, videoUrl: 'https://archive.org/embed/mahabharat-1988-episode-1', thumbnailUrl: 'https://archive.org/services/img/mahabharat-1988-episode-1', featured: true, trending: true, status: 'published', views: 76000, likes: 67000 },
-                { title: 'Byomkesh Bakshi (1993)', description: "Doordarshan's beloved detective series. Rajit Kapur plays the 'truth-seeker' Byomkesh Bakshi in complex mysteries set in 1940s Kolkata. Acclaimed for its authentic period atmosphere.", type: 'series', category: 'Mystery Drama', language: 'Hindi', year: 1993, duration: '50 min/ep', rating: 8.7, videoUrl: 'https://archive.org/embed/ByomkeshBakshi1993Season1', thumbnailUrl: 'https://archive.org/services/img/ByomkeshBakshi1993Season1', featured: false, trending: true, status: 'published', views: 34000, likes: 28500 },
-                { title: 'Malgudi Days (1987)', description: "Shankar Nag's timeless adaptation of R.K. Narayan's stories of the fictional South Indian town of Malgudi. Young Swami's charming adventures. The nostalgic theme by L. Subramaniam is forever etched in memory.", type: 'series', category: 'Family Drama', language: 'Hindi', year: 1987, duration: '25 min/ep', rating: 9.0, videoUrl: 'https://archive.org/embed/MalgudiDays1987Season1', thumbnailUrl: 'https://archive.org/services/img/MalgudiDays1987Season1', featured: true, trending: false, status: 'published', views: 41000, likes: 36500 },
-                { title: 'Vikram aur Betaal (1985)', description: 'King Vikramaditya carries a corpse possessed by the spirit Betaal who tells a riddle story each episode. A beloved Doordarshan mythological-folk series that mesmerised a generation.', type: 'series', category: 'Mythology Folk', language: 'Hindi', year: 1985, duration: '25 min/ep', rating: 8.5, videoUrl: 'https://archive.org/embed/VikramaaurBetaal1985', thumbnailUrl: 'https://archive.org/services/img/VikramaaurBetaal1985', featured: false, trending: true, status: 'published', views: 27000, likes: 22000 },
-                { title: 'Buniyaad (1986)', description: "India's most celebrated family saga — the Haveli Ram family from Partition 1947 to the 1980s. Directed by Ramesh Sippy. The first major prime-time serial on Doordarshan.", type: 'series', category: 'Family Saga', language: 'Hindi', year: 1986, duration: '50 min/ep', rating: 8.8, videoUrl: 'https://archive.org/embed/Buniyaad1986', thumbnailUrl: 'https://archive.org/services/img/Buniyaad1986', featured: true, trending: false, status: 'published', views: 31000, likes: 26000 },
-                { title: 'Hum Log (1984)', description: "India's first soap opera — the Rastogi family's everyday struggles. 156 episodes, 50 million viewers per episode. Changed the landscape of Indian television forever.", type: 'series', category: 'Social Drama', language: 'Hindi', year: 1984, duration: '23 min/ep', rating: 8.3, videoUrl: 'https://archive.org/embed/HumLog1984', thumbnailUrl: 'https://archive.org/services/img/HumLog1984', featured: false, trending: false, status: 'published', views: 18000, likes: 14500 },
-                { title: 'Tenali Rama (1988)', description: "The witty tales of Tenali Rama, the court jester of Emperor Krishnadevaraya. Each episode showcases clever solutions to impossible problems. A beloved Tamil/Telugu DD series introducing millions to South Indian folklore.", type: 'series', category: 'Historical Comedy', language: 'Tamil', year: 1988, duration: '25 min/ep', rating: 8.1, videoUrl: 'https://archive.org/embed/TenaliRama1988TamilSeries', thumbnailUrl: 'https://archive.org/services/img/TenaliRama1988TamilSeries', featured: false, trending: true, status: 'published', views: 23000, likes: 19000 },
-                { title: 'Circus (1989)', description: "Shah Rukh Khan's television debut — a young trainee at a traveling circus discovers friendships and dreams. Directed by Aziz Mirza. The launch pad for the King of Bollywood.", type: 'series', category: 'Drama', language: 'Hindi', year: 1989, duration: '45 min/ep', rating: 8.4, videoUrl: 'https://archive.org/embed/Circus1989DoordarshantvsSerialShahrukhKhan', thumbnailUrl: 'https://archive.org/services/img/Circus1989DoordarshantvsSerialShahrukhKhan', featured: true, trending: true, status: 'published', views: 44000, likes: 38000 },
-                { title: 'Nukkad (1986)', description: 'Ensemble drama about everyday lives of people gathered at a Delhi street corner. Two seasons of raw honesty, humor and empathy about urban Indian life. One of Doordarshan's most beloved series.', type: 'series', category: 'Social Drama', language: 'Hindi', year: 1986, duration: '25 min/ep', rating: 8.6, videoUrl: 'https://archive.org/embed/Nukkad1986Season1', thumbnailUrl: 'https://archive.org/services/img/Nukkad1986Season1', featured: false, trending: false, status: 'published', views: 19500, likes: 16200 },
+                // ================================================
+                // MOVIES (10) — Indian public-domain on archive.org
+                // ================================================
+                {
+                    title: 'Awaara (1951)',
+                    description: "Raj Kapoor's iconic masterpiece. A poor vagabond Raj falls in love with Rita while his father — a harsh judge — believes criminals are born not made. A cult classic across USSR, China and Turkey.",
+                    type: 'movie', category: 'Classic Hindi', language: 'Hindi',
+                    year: 1951, duration: '168 min', rating: 8.0,
+                    videoUrl:     'https://archive.org/embed/awara-1951-raj-kapoor-nargis-classic-hindi-film',
+                    thumbnailUrl: 'https://archive.org/services/img/awara-1951-raj-kapoor-nargis-classic-hindi-film',
+                    featured: true, trending: true, status: 'published', views: 52000, likes: 41000
+                },
+                {
+                    title: 'Shree 420 (1955)',
+                    description: "Raj Kapoor plays an innocent small-town man corrupted by Mumbai's greed. Sharp satire on capitalism with the legendary song 'Mera Joota Hai Japani'.",
+                    type: 'movie', category: 'Classic Hindi', language: 'Hindi',
+                    year: 1955, duration: '168 min', rating: 7.8,
+                    videoUrl:     'https://archive.org/embed/shree-420-1955-raj-kapoor-nargis-classic-hindi-film',
+                    thumbnailUrl: 'https://archive.org/services/img/shree-420-1955-raj-kapoor-nargis-classic-hindi-film',
+                    featured: true, trending: false, status: 'published', views: 38000, likes: 29000
+                },
+                {
+                    title: 'Jagte Raho (1956)',
+                    description: 'A thirsty villager sneaks into a Kolkata building searching for water, witnessing the hypocrisy of city elites. Won the Crystal Globe at Karlovy Vary Film Festival.',
+                    type: 'movie', category: 'Classic Hindi', language: 'Hindi',
+                    year: 1956, duration: '155 min', rating: 7.9,
+                    videoUrl:     'https://archive.org/embed/jagte-raho-1956',
+                    thumbnailUrl: 'https://archive.org/services/img/jagte-raho-1956',
+                    featured: false, trending: true, status: 'published', views: 22000, likes: 17000
+                },
+                {
+                    title: 'Do Bigha Zamin (1953)',
+                    description: "Bimal Roy's neo-realist landmark — a poor farmer travels to Calcutta to save his family land. Won the International Critics Award at Cannes 1954. One of the greatest Indian films ever made.",
+                    type: 'movie', category: 'Classic Hindi', language: 'Hindi',
+                    year: 1953, duration: '142 min', rating: 8.2,
+                    videoUrl:     'https://archive.org/embed/DoBighaZamin1953',
+                    thumbnailUrl: 'https://archive.org/services/img/DoBighaZamin1953',
+                    featured: true, trending: false, status: 'published', views: 18500, likes: 15200
+                },
+                {
+                    title: 'Pather Panchali (1955)',
+                    description: "Satyajit Ray's debut — the first Apu Trilogy film. Young Apu grows up in rural Bengal in poverty. Winner of Best Human Document at Cannes 1956. A timeless masterpiece.",
+                    type: 'movie', category: 'Bengali Classic', language: 'Bengali',
+                    year: 1955, duration: '125 min', rating: 8.5,
+                    videoUrl:     'https://archive.org/embed/pather-panchali-1955',
+                    thumbnailUrl: 'https://archive.org/services/img/pather-panchali-1955',
+                    featured: true, trending: true, status: 'published', views: 29000, likes: 24500
+                },
+                {
+                    title: 'Aparajito (1956)',
+                    description: "Second of Satyajit Ray's Apu Trilogy. Apu moves to Varanasi then Kolkata for education. A moving portrait of growing independence and a mother's longing. Won the Golden Lion at Venice 1957.",
+                    type: 'movie', category: 'Bengali Classic', language: 'Bengali',
+                    year: 1956, duration: '110 min', rating: 8.3,
+                    videoUrl:     'https://archive.org/embed/aparajito-1956',
+                    thumbnailUrl: 'https://archive.org/services/img/aparajito-1956',
+                    featured: false, trending: false, status: 'published', views: 14000, likes: 11500
+                },
+                {
+                    title: 'Chandralekha (1948)',
+                    description: "One of the most expensive Indian films of its era — a Tamil historical epic with the iconic 100-drummer sequence. Produced by S.S. Vasan, a massive pan-India blockbuster in Tamil and Hindi.",
+                    type: 'movie', category: 'Tamil Classic', language: 'Tamil',
+                    year: 1948, duration: '200 min', rating: 7.4,
+                    videoUrl:     'https://archive.org/embed/Chandralekha1948TamilMovie',
+                    thumbnailUrl: 'https://archive.org/services/img/Chandralekha1948TamilMovie',
+                    featured: false, trending: true, status: 'published', views: 16200, likes: 12800
+                },
+                {
+                    title: 'Parasakthi (1952)',
+                    description: "Sivaji Ganesan's debut — three brothers separated by Partition. Written by Karunanidhi, this politically charged Tamil drama transformed cinema and launched one of India's greatest acting careers.",
+                    type: 'movie', category: 'Tamil Classic', language: 'Tamil',
+                    year: 1952, duration: '170 min', rating: 8.0,
+                    videoUrl:     'https://archive.org/embed/Parasakthi1952',
+                    thumbnailUrl: 'https://archive.org/services/img/Parasakthi1952',
+                    featured: true, trending: false, status: 'published', views: 21000, likes: 17500
+                },
+                {
+                    title: 'Pathala Bhairavi (1951)',
+                    description: 'A beloved Telugu fantasy — young Todu Ramudu faces the wicked magician Nepala Mantriki. Starring NT Rama Rao in a career-defining role. One of the greatest Telugu classics with stunning effects for its time.',
+                    type: 'movie', category: 'Telugu Classic', language: 'Telugu',
+                    year: 1951, duration: '175 min', rating: 7.9,
+                    videoUrl:     'https://archive.org/embed/PathaalaBhairavi1951TeluguMovie',
+                    thumbnailUrl: 'https://archive.org/services/img/PathaalaBhairavi1951TeluguMovie',
+                    featured: false, trending: true, status: 'published', views: 19800, likes: 15600
+                },
+                {
+                    title: 'Neelakkuyil (1954)',
+                    description: 'A progressive Malayalam film addressing caste discrimination. Directed by P. Bhaskaran and Ramu Kariat — among the first realistic Malayalam films and a landmark in Kerala cinema history.',
+                    type: 'movie', category: 'Malayalam Classic', language: 'Malayalam',
+                    year: 1954, duration: '150 min', rating: 7.7,
+                    videoUrl:     'https://archive.org/embed/Neelakkuyil1954',
+                    thumbnailUrl: 'https://archive.org/services/img/Neelakkuyil1954',
+                    featured: true, trending: false, status: 'published', views: 13500, likes: 10800
+                },
 
-                // ===== DOCUMENTARIES (10) =====
-                { title: 'Gandhi — Archival Documentary (1962)', description: 'Rare archival footage of Mahatma Gandhi — speeches, the Salt March, the Independence movement. Features actual newsreel footage from British Pathé and Films Division of India.', type: 'documentary', category: 'Historical', language: 'English', year: 1962, duration: '62 min', rating: 8.9, videoUrl: 'https://archive.org/embed/gov.archives.arc.43754', thumbnailUrl: 'https://archive.org/services/img/gov.archives.arc.43754', featured: true, trending: false, status: 'published', views: 31000, likes: 26500 },
-                { title: 'Night and Fog (1956)', description: "Alain Resnais' haunting documentary about Nazi concentration camps — alternating colour present-day footage with black-and-white archival film. One of the most powerful anti-war films ever made.", type: 'documentary', category: 'War History', language: 'French', year: 1956, duration: '32 min', rating: 8.6, videoUrl: 'https://archive.org/embed/NightAndFog1955', thumbnailUrl: 'https://archive.org/services/img/NightAndFog1955', featured: true, trending: false, status: 'published', views: 22000, likes: 18500 },
-                { title: 'Nanook of the North (1922)', description: "The world's first feature-length documentary. Robert Flaherty's portrait of Inuit life — Nanook and his family hunting and surviving the brutal Arctic. A foundational work of cinema in the US Library of Congress.", type: 'documentary', category: 'Anthropology', language: 'Silent', year: 1922, duration: '79 min', rating: 7.8, videoUrl: 'https://archive.org/embed/nanook-of-the-north', thumbnailUrl: 'https://archive.org/services/img/nanook-of-the-north', featured: true, trending: false, status: 'published', views: 17000, likes: 13500 },
-                { title: 'Man of Aran (1934)', description: "Robert Flaherty's masterpiece about the harsh life of Irish fisherfolk on the Aran Islands. Stunning cinematography of elemental struggle against the wild Atlantic. One of the greatest documentaries ever made.", type: 'documentary', category: 'Nature & People', language: 'English', year: 1934, duration: '76 min', rating: 7.9, videoUrl: 'https://archive.org/embed/ManOfAran', thumbnailUrl: 'https://archive.org/services/img/ManOfAran', featured: false, trending: true, status: 'published', views: 11500, likes: 9200 },
-                { title: 'The City (1939)', description: 'A landmark American documentary about urban planning and the contrast between industrial cities and planned communities. Score by Aaron Copland. Listed in the US National Film Registry.', type: 'documentary', category: 'Urban History', language: 'English', year: 1939, duration: '44 min', rating: 7.8, videoUrl: 'https://archive.org/embed/theCity', thumbnailUrl: 'https://archive.org/services/img/theCity', featured: false, trending: false, status: 'published', views: 7200, likes: 5400 },
-                { title: 'Housing Problems (1935)', description: 'A pioneering British social documentary where slum dwellers speak directly to camera — one of the first uses of the interview form in film. Arthur Elton and Edgar Anstey. A landmark of social realism.', type: 'documentary', category: 'Social History', language: 'English', year: 1935, duration: '15 min', rating: 7.3, videoUrl: 'https://archive.org/embed/HousingProblems', thumbnailUrl: 'https://archive.org/services/img/HousingProblems', featured: false, trending: false, status: 'published', views: 5100, likes: 3900 },
-                { title: 'The Plow That Broke the Plains (1936)', description: "US government documentary about the Dust Bowl catastrophe and how decades of over-farming destroyed the Great Plains. Score by Virgil Thomson. One of America's first great government-produced films.", type: 'documentary', category: 'Environmental', language: 'English', year: 1936, duration: '28 min', rating: 7.5, videoUrl: 'https://archive.org/embed/ThePlowThatBrokethePlains', thumbnailUrl: 'https://archive.org/services/img/ThePlowThatBrokethePlains', featured: false, trending: false, status: 'published', views: 6400, likes: 4900 },
-                { title: 'Listen to Britain (1942)', description: "Humphrey Jennings' impressionistic wartime documentary — Britain's soundscape during WWII. No narrator, just sounds and images of factories, music halls and streets. One of the finest British documentaries ever.", type: 'documentary', category: 'WWII History', language: 'English', year: 1942, duration: '19 min', rating: 8.0, videoUrl: 'https://archive.org/embed/ListentoBritain1942', thumbnailUrl: 'https://archive.org/services/img/ListentoBritain1942', featured: false, trending: false, status: 'published', views: 9000, likes: 7200 },
-                { title: 'India: A Nation Under Siege (1944)', description: 'Rare WWII-era documentary about India's role in the Allied war effort — Indian Army, industrial mobilization and the social fabric of colonial India. An extraordinary time capsule from the US National Archives.', type: 'documentary', category: 'WWII History', language: 'English', year: 1944, duration: '18 min', rating: 7.6, videoUrl: 'https://archive.org/embed/india-a-nation-under-siege-1944', thumbnailUrl: 'https://archive.org/services/img/india-a-nation-under-siege-1944', featured: false, trending: false, status: 'published', views: 8500, likes: 6800 },
-                { title: 'Triumph of the Will (1935)', description: "Leni Riefenstahl's groundbreaking and controversial documentary of the 1934 Nuremberg rally. Widely studied as the supreme example of propaganda cinema and a landmark of film technique.", type: 'documentary', category: 'Historical Study', language: 'German', year: 1935, duration: '114 min', rating: 7.4, videoUrl: 'https://archive.org/embed/TriumphOfTheWill', thumbnailUrl: 'https://archive.org/services/img/TriumphOfTheWill', featured: false, trending: false, status: 'published', views: 14000, likes: 8500 },
+                // ================================================
+                // SERIES (10) — Classic Indian TV serials
+                // ================================================
+                {
+                    title: 'Ramayana (1987) — Episode 1',
+                    description: "Ramanand Sagar's iconic Doordarshan serial. Episode 1: The story begins in Ayodhya with King Dasharatha and the birth of Lord Rama. Holds the Guinness World Record for most-watched TV show.",
+                    type: 'series', category: 'Mythological', language: 'Hindi',
+                    year: 1987, duration: '45 min/ep', rating: 9.2,
+                    videoUrl:     'https://archive.org/embed/ramayana-1987-episode-1',
+                    thumbnailUrl: 'https://archive.org/services/img/ramayana-1987-episode-1',
+                    featured: true, trending: true, status: 'published', views: 89000, likes: 78000
+                },
+                {
+                    title: 'Mahabharat (1988) — Episode 1',
+                    description: "B.R. Chopra's magnum opus. Episode 1 introduces the Kuru dynasty. With Mukesh Khanna as Bhishma and Nitish Bharadwaj as Krishna — this serial redefined Indian television.",
+                    type: 'series', category: 'Mythological', language: 'Hindi',
+                    year: 1988, duration: '45 min/ep', rating: 9.1,
+                    videoUrl:     'https://archive.org/embed/mahabharat-1988-episode-1',
+                    thumbnailUrl: 'https://archive.org/services/img/mahabharat-1988-episode-1',
+                    featured: true, trending: true, status: 'published', views: 76000, likes: 67000
+                },
+                {
+                    title: 'Byomkesh Bakshi (1993)',
+                    description: "Doordarshan's beloved detective series. Rajit Kapur plays the 'truth-seeker' Byomkesh Bakshi in complex mysteries set in 1940s Kolkata. Acclaimed for its authentic period atmosphere.",
+                    type: 'series', category: 'Mystery Drama', language: 'Hindi',
+                    year: 1993, duration: '50 min/ep', rating: 8.7,
+                    videoUrl:     'https://archive.org/embed/ByomkeshBakshi1993Season1',
+                    thumbnailUrl: 'https://archive.org/services/img/ByomkeshBakshi1993Season1',
+                    featured: false, trending: true, status: 'published', views: 34000, likes: 28500
+                },
+                {
+                    title: 'Malgudi Days (1987)',
+                    description: "Shankar Nag's timeless adaptation of R.K. Narayan's stories of the fictional South Indian town of Malgudi. Young Swami's charming adventures. The nostalgic theme by L. Subramaniam is forever etched in memory.",
+                    type: 'series', category: 'Family Drama', language: 'Hindi',
+                    year: 1987, duration: '25 min/ep', rating: 9.0,
+                    videoUrl:     'https://archive.org/embed/MalgudiDays1987Season1',
+                    thumbnailUrl: 'https://archive.org/services/img/MalgudiDays1987Season1',
+                    featured: true, trending: false, status: 'published', views: 41000, likes: 36500
+                },
+                {
+                    title: 'Vikram aur Betaal (1985)',
+                    description: 'King Vikramaditya carries a corpse possessed by the spirit Betaal, who poses a riddle each episode. A beloved Doordarshan mythological-folk series that mesmerised a generation.',
+                    type: 'series', category: 'Mythology Folk', language: 'Hindi',
+                    year: 1985, duration: '25 min/ep', rating: 8.5,
+                    videoUrl:     'https://archive.org/embed/VikramaaurBetaal1985',
+                    thumbnailUrl: 'https://archive.org/services/img/VikramaaurBetaal1985',
+                    featured: false, trending: true, status: 'published', views: 27000, likes: 22000
+                },
+                {
+                    title: 'Buniyaad (1986)',
+                    description: "India's most celebrated family saga — the Haveli Ram family from Partition 1947 to the 1980s. Directed by Ramesh Sippy, written by Manohar Shyam Joshi. The first major prime-time serial on Doordarshan.",
+                    type: 'series', category: 'Family Saga', language: 'Hindi',
+                    year: 1986, duration: '50 min/ep', rating: 8.8,
+                    videoUrl:     'https://archive.org/embed/Buniyaad1986',
+                    thumbnailUrl: 'https://archive.org/services/img/Buniyaad1986',
+                    featured: true, trending: false, status: 'published', views: 31000, likes: 26000
+                },
+                {
+                    title: 'Hum Log (1984)',
+                    description: "India's first soap opera — the Rastogi family's everyday struggles. 156 episodes, 50 million viewers per episode. Changed the landscape of Indian television forever.",
+                    type: 'series', category: 'Social Drama', language: 'Hindi',
+                    year: 1984, duration: '23 min/ep', rating: 8.3,
+                    videoUrl:     'https://archive.org/embed/HumLog1984',
+                    thumbnailUrl: 'https://archive.org/services/img/HumLog1984',
+                    featured: false, trending: false, status: 'published', views: 18000, likes: 14500
+                },
+                {
+                    title: 'Tenali Rama (1988)',
+                    description: 'The witty tales of Tenali Rama, court jester of Emperor Krishnadevaraya. Each episode showcases clever solutions to impossible problems. A beloved Tamil/Telugu DD series.',
+                    type: 'series', category: 'Historical Comedy', language: 'Tamil',
+                    year: 1988, duration: '25 min/ep', rating: 8.1,
+                    videoUrl:     'https://archive.org/embed/TenaliRama1988TamilSeries',
+                    thumbnailUrl: 'https://archive.org/services/img/TenaliRama1988TamilSeries',
+                    featured: false, trending: true, status: 'published', views: 23000, likes: 19000
+                },
+                {
+                    title: 'Circus (1989)',
+                    description: "Shah Rukh Khan's television debut — a young trainee at a traveling circus discovers friendships and dreams. Directed by Aziz Mirza. The launch pad for the King of Bollywood.",
+                    type: 'series', category: 'Drama', language: 'Hindi',
+                    year: 1989, duration: '45 min/ep', rating: 8.4,
+                    videoUrl:     'https://archive.org/embed/Circus1989DoordarshantvsSerialShahrukhKhan',
+                    thumbnailUrl: 'https://archive.org/services/img/Circus1989DoordarshantvsSerialShahrukhKhan',
+                    featured: true, trending: true, status: 'published', views: 44000, likes: 38000
+                },
+                {
+                    title: 'Nukkad (1986)',
+                    description: "Ensemble drama about everyday lives of people at a Delhi street corner. Two seasons of raw honesty, humor and empathy. One of Doordarshan's most beloved and enduring series.",
+                    type: 'series', category: 'Social Drama', language: 'Hindi',
+                    year: 1986, duration: '25 min/ep', rating: 8.6,
+                    videoUrl:     'https://archive.org/embed/Nukkad1986Season1',
+                    thumbnailUrl: 'https://archive.org/services/img/Nukkad1986Season1',
+                    featured: false, trending: false, status: 'published', views: 19500, likes: 16200
+                },
 
-                // ===== LIVE (10) =====
-                { title: 'Ravi Shankar — Monterey Pop Festival (1967)', description: "Pandit Ravi Shankar's historic sitar performance at Monterey that introduced Indian classical music to Western rock audiences. A transcendent raga that moved the crowd to meditation.", type: 'live', category: 'Classical Music', language: 'Instrumental', year: 1967, duration: '15 min', rating: 9.3, videoUrl: 'https://archive.org/embed/RaviShankarMonterey1967', thumbnailUrl: 'https://archive.org/services/img/RaviShankarMonterey1967', featured: true, trending: true, status: 'published', views: 48000, likes: 43000 },
-                { title: 'M.S. Subbulakshmi — Carnegie Hall (1977)', description: 'M.S. Subbulakshmi's landmark Carnegie Hall performance — the first Carnatic vocalist to perform there. Legendary renditions of Bhaja Govindam and Venkateswara Suprabhatham.', type: 'live', category: 'Carnatic Vocal', language: 'Tamil/Sanskrit', year: 1977, duration: '96 min', rating: 9.4, videoUrl: 'https://archive.org/embed/MSSubbulakshmiCarnegieHall1977', thumbnailUrl: 'https://archive.org/services/img/MSSubbulakshmiCarnegieHall1977', featured: true, trending: true, status: 'published', views: 37000, likes: 33500 },
-                { title: 'Kishore Kumar — Live Concert Ahmedabad (1985)', description: 'One of the last great recordings of Kishore Kumar — performing iconic Bollywood songs in a packed Ahmedabad stadium, two years before his passing. Includes Mohammed Rafi tributes.', type: 'live', category: 'Bollywood Music', language: 'Hindi', year: 1985, duration: '120 min', rating: 9.0, videoUrl: 'https://archive.org/embed/KishoreKumarLiveAhmedabad1985', thumbnailUrl: 'https://archive.org/services/img/KishoreKumarLiveAhmedabad1985', featured: true, trending: true, status: 'published', views: 54000, likes: 49000 },
-                { title: 'Lata Mangeshkar — Royal Albert Hall (1974)', description: "The Nightingale of India performing live in London — Lag Ja Gale, Aye Mere Watan Ke Logon, and Tere Bina Zindagi Se. The first major Bollywood concert at the Royal Albert Hall.", type: 'live', category: 'Bollywood Music', language: 'Hindi', year: 1974, duration: '90 min', rating: 9.0, videoUrl: 'https://archive.org/embed/LataMangeshkarLiveLondon1974', thumbnailUrl: 'https://archive.org/services/img/LataMangeshkarLiveLondon1974', featured: false, trending: true, status: 'published', views: 41000, likes: 36500 },
-                { title: 'Bismillah Khan — Shehnai at Varanasi Ghat', description: "Bharat Ratna Ustad Bismillah Khan performing shehnai at the sacred ghats of Varanasi — the city he never left. An irreplaceable document of North Indian classical tradition.", type: 'live', category: 'Classical Music', language: 'Instrumental', year: 1980, duration: '48 min', rating: 9.1, videoUrl: 'https://archive.org/embed/BismillahKhanShehnaiVaranasi', thumbnailUrl: 'https://archive.org/services/img/BismillahKhanShehnaiVaranasi', featured: true, trending: false, status: 'published', views: 28000, likes: 24000 },
-                { title: 'Zakir Hussain — Tabla at WOMAD (1982)', description: "Ustad Zakir Hussain's breathtaking tabla solo and jugalbandi at the inaugural WOMAD festival. The performance that made Zakir Hussain an international superstar.", type: 'live', category: 'Classical Music', language: 'Instrumental', year: 1982, duration: '55 min', rating: 9.2, videoUrl: 'https://archive.org/embed/ZakirHussainTablaWOMAD1982', thumbnailUrl: 'https://archive.org/services/img/ZakirHussainTablaWOMAD1982', featured: false, trending: false, status: 'published', views: 23000, likes: 20000 },
-                { title: 'Bhimsen Joshi — Sawai Gandharva Festival (1976)', description: "Pandit Bhimsen Joshi performing Raag Bhairav and Raag Miyan Ki Malhar at his own Sawai Gandharva Festival, Pune. The definitive live recording of Kirana Gharana Hindustani vocals.", type: 'live', category: 'Hindustani Vocal', language: 'Hindi/Sanskrit', year: 1976, duration: '80 min', rating: 9.3, videoUrl: 'https://archive.org/embed/BhimsenJoshiSawaiGandharva1976', thumbnailUrl: 'https://archive.org/services/img/BhimsenJoshiSawaiGandharva1976', featured: true, trending: false, status: 'published', views: 17500, likes: 15000 },
-                { title: 'Girija Devi — Thumri at Benares (1983)', description: "Padma Vibhushan Girija Devi, Queen of Thumri, performing in Varanasi. A rare live recording of thumri, dadra and kajri — devotion, romance and playfulness in her fullest splendour.", type: 'live', category: 'Hindustani Semi-classical', language: 'Bhojpuri/Hindi', year: 1983, duration: '65 min', rating: 8.8, videoUrl: 'https://archive.org/embed/GirijaDeviThumriBenares1983', thumbnailUrl: 'https://archive.org/services/img/GirijaDeviThumriBenares1983', featured: false, trending: false, status: 'published', views: 12000, likes: 10200 },
-                { title: 'Ali Akbar Khan — Sarod Recital (1955)', description: 'Ustad Ali Akbar Khan's celebrated early sarod recital — one of the first Indian classical LPs released in America. Disciple of Baba Allauddin Khan and brother-in-law of Ravi Shankar.', type: 'live', category: 'Hindustani Instrumental', language: 'Instrumental', year: 1955, duration: '52 min', rating: 9.0, videoUrl: 'https://archive.org/embed/AliAkbarKhanSarodRecital1955', thumbnailUrl: 'https://archive.org/services/img/AliAkbarKhanSarodRecital1955', featured: false, trending: false, status: 'published', views: 14200, likes: 12500 },
-                { title: 'Nadaswaram Classical Concert (1970)', description: 'T.N. Rajarathnam Pillai performing the nadaswaram — the iconic South Indian temple wind instrument. One of the finest recordings of this rare instrument from the Films Division of India archives.', type: 'live', category: 'Carnatic Instrumental', language: 'Instrumental', year: 1970, duration: '42 min', rating: 8.5, videoUrl: 'https://archive.org/embed/NadaswaramClassical1970', thumbnailUrl: 'https://archive.org/services/img/NadaswaramClassical1970', featured: false, trending: false, status: 'published', views: 9500, likes: 8000 }
-            ];
-            await Content.insertMany(seedContent);
-            console.log(`✅ Content created: ${seedContent.length} items`);
+                // ================================================
+                // DOCUMENTARIES (10) — All public domain
+                // ================================================
+                {
+                    title: 'Gandhi — Archival Documentary (1962)',
+                    description: 'Rare archival footage of Mahatma Gandhi — his speeches, the Salt March, the Independence movement. Features actual newsreel footage from British Pathé and Films Division of India.',
+                    type: 'documentary', category: 'Historical', language: 'English',
+                    year: 1962, duration: '62 min', rating: 8.9,
+                    videoUrl:     'https://archive.org/embed/gov.archives.arc.43754',
+                    thumbnailUrl: 'https://archive.org/services/img/gov.archives.arc.43754',
+                    featured: true, trending: false, status: 'published', views: 31000, likes: 26500
+                },
+                {
+                    title: 'Night and Fog (1956)',
+                    description: "Alain Resnais' haunting documentary about Nazi concentration camps — alternating colour present-day footage with black-and-white archival film. One of the most powerful anti-war films ever made.",
+                    type: 'documentary', category: 'War History', language: 'French',
+                    year: 1956, duration: '32 min', rating: 8.6,
+                    videoUrl:     'https://archive.org/embed/NightAndFog1955',
+                    thumbnailUrl: 'https://archive.org/services/img/NightAndFog1955',
+                    featured: true, trending: false, status: 'published', views: 22000, likes: 18500
+                },
+                {
+                    title: 'Nanook of the North (1922)',
+                    description: "The world's first feature-length documentary. Robert Flaherty's portrait of Inuit life — Nanook and his family hunting and surviving the brutal Arctic. A foundational work of world cinema.",
+                    type: 'documentary', category: 'Anthropology', language: 'Silent',
+                    year: 1922, duration: '79 min', rating: 7.8,
+                    videoUrl:     'https://archive.org/embed/nanook-of-the-north',
+                    thumbnailUrl: 'https://archive.org/services/img/nanook-of-the-north',
+                    featured: true, trending: false, status: 'published', views: 17000, likes: 13500
+                },
+                {
+                    title: 'Man of Aran (1934)',
+                    description: "Robert Flaherty's masterpiece about the harsh life of Irish fisherfolk on the Aran Islands. Stunning cinematography of elemental struggle. One of the greatest documentaries ever made.",
+                    type: 'documentary', category: 'Nature & People', language: 'English',
+                    year: 1934, duration: '76 min', rating: 7.9,
+                    videoUrl:     'https://archive.org/embed/ManOfAran',
+                    thumbnailUrl: 'https://archive.org/services/img/ManOfAran',
+                    featured: false, trending: true, status: 'published', views: 11500, likes: 9200
+                },
+                {
+                    title: 'The City (1939)',
+                    description: 'A landmark American documentary about urban planning — industrial cities vs planned communities. Score by Aaron Copland. Listed in the US National Film Registry.',
+                    type: 'documentary', category: 'Urban History', language: 'English',
+                    year: 1939, duration: '44 min', rating: 7.8,
+                    videoUrl:     'https://archive.org/embed/theCity',
+                    thumbnailUrl: 'https://archive.org/services/img/theCity',
+                    featured: false, trending: false, status: 'published', views: 7200, likes: 5400
+                },
+                {
+                    title: 'Housing Problems (1935)',
+                    description: 'Pioneering British social documentary where slum dwellers speak directly to camera — one of the first uses of the interview form in film. A landmark of social realist documentary.',
+                    type: 'documentary', category: 'Social History', language: 'English',
+                    year: 1935, duration: '15 min', rating: 7.3,
+                    videoUrl:     'https://archive.org/embed/HousingProblems',
+                    thumbnailUrl: 'https://archive.org/services/img/HousingProblems',
+                    featured: false, trending: false, status: 'published', views: 5100, likes: 3900
+                },
+                {
+                    title: 'The Plow That Broke the Plains (1936)',
+                    description: "US government documentary about the Dust Bowl catastrophe and decades of over-farming. Score by Virgil Thomson. One of America's first great government-produced documentary films.",
+                    type: 'documentary', category: 'Environmental', language: 'English',
+                    year: 1936, duration: '28 min', rating: 7.5,
+                    videoUrl:     'https://archive.org/embed/ThePlowThatBrokethePlains',
+                    thumbnailUrl: 'https://archive.org/services/img/ThePlowThatBrokethePlains',
+                    featured: false, trending: false, status: 'published', views: 6400, likes: 4900
+                },
+                {
+                    title: 'Listen to Britain (1942)',
+                    description: "Humphrey Jennings' impressionistic wartime documentary — Britain's soundscape during WWII. No narrator, just sounds and images of factories, music halls and streets. A masterpiece of the form.",
+                    type: 'documentary', category: 'WWII History', language: 'English',
+                    year: 1942, duration: '19 min', rating: 8.0,
+                    videoUrl:     'https://archive.org/embed/ListentoBritain1942',
+                    thumbnailUrl: 'https://archive.org/services/img/ListentoBritain1942',
+                    featured: false, trending: false, status: 'published', views: 9000, likes: 7200
+                },
+                {
+                    title: 'India: A Nation Under Siege (1944)',
+                    description: "Rare WWII-era documentary about India's role in the Allied war effort — Indian Army, industrial mobilization and colonial social fabric. A time capsule from the US National Archives.",
+                    type: 'documentary', category: 'WWII History', language: 'English',
+                    year: 1944, duration: '18 min', rating: 7.6,
+                    videoUrl:     'https://archive.org/embed/india-a-nation-under-siege-1944',
+                    thumbnailUrl: 'https://archive.org/services/img/india-a-nation-under-siege-1944',
+                    featured: false, trending: false, status: 'published', views: 8500, likes: 6800
+                },
+                {
+                    title: 'Triumph of the Will (1935)',
+                    description: "Leni Riefenstahl's groundbreaking and controversial documentary of the 1934 Nuremberg rally. Widely studied as the supreme example of propaganda cinema and a technical landmark of filmmaking.",
+                    type: 'documentary', category: 'Historical Study', language: 'German',
+                    year: 1935, duration: '114 min', rating: 7.4,
+                    videoUrl:     'https://archive.org/embed/TriumphOfTheWill',
+                    thumbnailUrl: 'https://archive.org/services/img/TriumphOfTheWill',
+                    featured: false, trending: false, status: 'published', views: 14000, likes: 8500
+                },
+
+                // ================================================
+                // LIVE (10) — Indian classical music legends
+                // ================================================
+                {
+                    title: 'Ravi Shankar — Monterey Pop Festival (1967)',
+                    description: "Pandit Ravi Shankar's historic sitar performance at Monterey that introduced Indian classical music to Western rock audiences. A transcendent raga that moved the crowd to meditation.",
+                    type: 'live', category: 'Classical Music', language: 'Instrumental',
+                    year: 1967, duration: '15 min', rating: 9.3,
+                    videoUrl:     'https://archive.org/embed/RaviShankarMonterey1967',
+                    thumbnailUrl: 'https://archive.org/services/img/RaviShankarMonterey1967',
+                    featured: true, trending: true, status: 'published', views: 48000, likes: 43000
+                },
+                {
+                    title: 'M.S. Subbulakshmi — Carnegie Hall (1977)',
+                    description: "M.S. Subbulakshmi's landmark Carnegie Hall performance — the first Carnatic vocalist to perform there. Legendary renditions of Bhaja Govindam and Venkateswara Suprabhatham.",
+                    type: 'live', category: 'Carnatic Vocal', language: 'Tamil/Sanskrit',
+                    year: 1977, duration: '96 min', rating: 9.4,
+                    videoUrl:     'https://archive.org/embed/MSSubbulakshmiCarnegieHall1977',
+                    thumbnailUrl: 'https://archive.org/services/img/MSSubbulakshmiCarnegieHall1977',
+                    featured: true, trending: true, status: 'published', views: 37000, likes: 33500
+                },
+                {
+                    title: 'Kishore Kumar — Live Concert Ahmedabad (1985)',
+                    description: 'One of the last great recordings of Kishore Kumar — performing iconic Bollywood songs in a packed Ahmedabad stadium, two years before his passing. Includes Mohammed Rafi tributes.',
+                    type: 'live', category: 'Bollywood Music', language: 'Hindi',
+                    year: 1985, duration: '120 min', rating: 9.0,
+                    videoUrl:     'https://archive.org/embed/KishoreKumarLiveAhmedabad1985',
+                    thumbnailUrl: 'https://archive.org/services/img/KishoreKumarLiveAhmedabad1985',
+                    featured: true, trending: true, status: 'published', views: 54000, likes: 49000
+                },
+                {
+                    title: 'Lata Mangeshkar — Royal Albert Hall (1974)',
+                    description: "The Nightingale of India performing live in London — Lag Ja Gale, Aye Mere Watan Ke Logon, and Tere Bina Zindagi Se. The first major Bollywood concert at the Royal Albert Hall.",
+                    type: 'live', category: 'Bollywood Music', language: 'Hindi',
+                    year: 1974, duration: '90 min', rating: 9.0,
+                    videoUrl:     'https://archive.org/embed/LataMangeshkarLiveLondon1974',
+                    thumbnailUrl: 'https://archive.org/services/img/LataMangeshkarLiveLondon1974',
+                    featured: false, trending: true, status: 'published', views: 41000, likes: 36500
+                },
+                {
+                    title: 'Bismillah Khan — Shehnai at Varanasi Ghat',
+                    description: "Bharat Ratna Ustad Bismillah Khan performing shehnai at the sacred ghats of Varanasi — the city he never left. An irreplaceable document of North Indian classical tradition.",
+                    type: 'live', category: 'Classical Music', language: 'Instrumental',
+                    year: 1980, duration: '48 min', rating: 9.1,
+                    videoUrl:     'https://archive.org/embed/BismillahKhanShehnaiVaranasi',
+                    thumbnailUrl: 'https://archive.org/services/img/BismillahKhanShehnaiVaranasi',
+                    featured: true, trending: false, status: 'published', views: 28000, likes: 24000
+                },
+                {
+                    title: 'Zakir Hussain — Tabla at WOMAD (1982)',
+                    description: "Ustad Zakir Hussain's breathtaking tabla solo and jugalbandi at the inaugural WOMAD festival. The performance that made Zakir Hussain an international superstar.",
+                    type: 'live', category: 'Classical Music', language: 'Instrumental',
+                    year: 1982, duration: '55 min', rating: 9.2,
+                    videoUrl:     'https://archive.org/embed/ZakirHussainTablaWOMAD1982',
+                    thumbnailUrl: 'https://archive.org/services/img/ZakirHussainTablaWOMAD1982',
+                    featured: false, trending: false, status: 'published', views: 23000, likes: 20000
+                },
+                {
+                    title: 'Bhimsen Joshi — Sawai Gandharva Festival (1976)',
+                    description: "Pandit Bhimsen Joshi performing Raag Bhairav and Miyan Ki Malhar at the Sawai Gandharva Festival, Pune. The definitive live recording of the Kirana Gharana Hindustani vocal tradition.",
+                    type: 'live', category: 'Hindustani Vocal', language: 'Hindi/Sanskrit',
+                    year: 1976, duration: '80 min', rating: 9.3,
+                    videoUrl:     'https://archive.org/embed/BhimsenJoshiSawaiGandharva1976',
+                    thumbnailUrl: 'https://archive.org/services/img/BhimsenJoshiSawaiGandharva1976',
+                    featured: true, trending: false, status: 'published', views: 17500, likes: 15000
+                },
+                {
+                    title: 'Girija Devi — Thumri at Benares (1983)',
+                    description: "Padma Vibhushan Girija Devi, Queen of Thumri, performing in Varanasi. A rare live recording of thumri, dadra and kajri — devotion, romance and playfulness at their finest.",
+                    type: 'live', category: 'Hindustani Semi-classical', language: 'Bhojpuri/Hindi',
+                    year: 1983, duration: '65 min', rating: 8.8,
+                    videoUrl:     'https://archive.org/embed/GirijaDeviThumriBenares1983',
+                    thumbnailUrl: 'https://archive.org/services/img/GirijaDeviThumriBenares1983',
+                    featured: false, trending: false, status: 'published', views: 12000, likes: 10200
+                },
+                {
+                    title: 'Ali Akbar Khan — Sarod Recital (1955)',
+                    description: "Ustad Ali Akbar Khan's celebrated sarod recital — one of the first Indian classical LPs released in America. Disciple of Baba Allauddin Khan and brother-in-law of Ravi Shankar.",
+                    type: 'live', category: 'Hindustani Instrumental', language: 'Instrumental',
+                    year: 1955, duration: '52 min', rating: 9.0,
+                    videoUrl:     'https://archive.org/embed/AliAkbarKhanSarodRecital1955',
+                    thumbnailUrl: 'https://archive.org/services/img/AliAkbarKhanSarodRecital1955',
+                    featured: false, trending: false, status: 'published', views: 14200, likes: 12500
+                },
+                {
+                    title: 'Nadaswaram Classical Concert (1970)',
+                    description: 'T.N. Rajarathnam Pillai performing the nadaswaram — the iconic South Indian temple wind instrument. One of the finest recordings of this rare instrument from the Films Division of India archives.',
+                    type: 'live', category: 'Carnatic Instrumental', language: 'Instrumental',
+                    year: 1970, duration: '42 min', rating: 8.5,
+                    videoUrl:     'https://archive.org/embed/NadaswaramClassical1970',
+                    thumbnailUrl: 'https://archive.org/services/img/NadaswaramClassical1970',
+                    featured: false, trending: false, status: 'published', views: 9500, likes: 8000
+                }
+
+            ]);
+            console.log('✅ Content created: 40 items (10 movies + 10 series + 10 documentaries + 10 live)');
+        } else {
+            console.log(`ℹ️  Content already exists (${contentCount} items) — skipping content seed`);
         }
-        
-        res.json({ 
-            message: 'Database seeded successfully',
+
+        res.json({
+            message: '✅ Database seeded successfully!',
             summary: {
-                admins: 1,
-                navigation: 4,
-                settings: 4,
-                content: 3
+                admins:     'admin / admin123',
+                navigation: 5,
+                settings:   4,
+                content:    '40 items — 10 movies, 10 series, 10 documentaries, 10 live'
             }
         });
     } catch (error) {
