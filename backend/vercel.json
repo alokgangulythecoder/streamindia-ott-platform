@@ -8,11 +8,11 @@
   ],
   "routes": [
     {
-      "src": "/(.*)",
+      "src": "/users/(.*)",
       "dest": "server.js"
     },
     {
-      "src": "/users/(.*)",
+      "src": "/(.*)",
       "dest": "server.js"
     }
   ]
