@@ -48,7 +48,7 @@ app.use((req, res, next) => {
 // ========================================
 
 const MONGODB_URI = process.env.MONGO_URI;
- console.log(MONGODB_URI);
+ 
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-me';
 
 console.log('🔧 MongoDB URI:', MONGODB_URI ? '✓ Set' : '✗ Missing');
@@ -637,6 +637,7 @@ app.get('/api/dashboard/stats', authMiddleware, async (req, res) => {
 app.post('/api/seed', async (req, res) => {
     try {
         console.log('🌱 Starting seed...');
+        console.log('🔧 MongoDB URI:', MONGODB_URI ? '✓ Set' : '✗ Missing');
 
         // ── Admin ──────────────────────────────────────────────
         const adminCount = await Admin.countDocuments();
