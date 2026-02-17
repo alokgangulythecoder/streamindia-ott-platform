@@ -196,7 +196,7 @@ app.get('/health', (req, res) => {
 // ========================================
 
 // User Registration (Sign Up)
-app.post('/users/register', async (req, res) => {
+app.post('/api/users/register', async (req, res) => {
     try {
         console.log('📝 Registration attempt:', req.body.email);
         
@@ -267,7 +267,7 @@ app.post('/users/register', async (req, res) => {
 });
 
 // User Login (Sign In)
-app.post('/users/login', async (req, res) => {
+app.post('/api/users/login', async (req, res) => {
     try {
         console.log('🔐 User login attempt:', req.body.email);
         
@@ -332,7 +332,7 @@ app.post('/users/login', async (req, res) => {
 });
 
 // Get current user info (optional - for profile)
-app.get('/users/me', authMiddleware, async (req, res) => {
+app.get('/api/users/me', authMiddleware, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
         res.json({ success: true, user });
