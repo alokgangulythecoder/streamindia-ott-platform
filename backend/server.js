@@ -84,6 +84,20 @@ const adminSchema = new mongoose.Schema({
     createdAt: { type: Date, default: Date.now }
 });
 
+// ========================================
+// USER SCHEMA - ADD THIS WITH OTHER SCHEMAS
+// ========================================
+const userSchema = new mongoose.Schema({
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: { type: String, default: 'user' },
+    subscription: { type: String, default: 'free', enum: ['free', 'premium'] },
+    subscriptionExpiry: { type: Date },
+    createdAt: { type: Date, default: Date.now },
+    lastLogin: { type: Date }
+});
+
 const contentSchema = new mongoose.Schema({
     title: { type: String, required: true },
     description: String,
@@ -135,6 +149,8 @@ const settingsSchema = new mongoose.Schema({
 });
 
 const Admin = mongoose.model('Admin', adminSchema);
+// ADD USER MODEL WITH OTHER MODELS
+const User = mongoose.model('User', userSchema);
 const Content = mongoose.model('Content', contentSchema);
 const Navigation = mongoose.model('Navigation', navigationSchema);
 const Advertisement = mongoose.model('Advertisement', advertisementSchema);
