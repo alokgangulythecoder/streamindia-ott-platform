@@ -674,10 +674,10 @@ app.post('/api/seed', async (req, res) => {
             console.log('✅ Settings created');
         }
         
-        // Content
+       // Content — insert full 40-item seed data
         const contentCount = await Content.countDocuments();
         if (contentCount === 0) {
-            await Content.insertMany([
+            const seedContent = [
                 // ===== MOVIES (10) =====
                 { title: 'Awaara (1951)', description: "Raj Kapoor's iconic masterpiece. A poor vagabond Raj falls in love with Rita while his father — a harsh judge — believes criminals are born not made. One of the most-watched Indian films globally, a cult classic across USSR, China and Turkey.", type: 'movie', category: 'Classic Hindi', language: 'Hindi', year: 1951, duration: '168 min', rating: 8.0, videoUrl: 'https://archive.org/embed/awara-1951-raj-kapoor-nargis-classic-hindi-film', thumbnailUrl: 'https://archive.org/services/img/awara-1951-raj-kapoor-nargis-classic-hindi-film', featured: true, trending: true, status: 'published', views: 52000, likes: 41000 },
                 { title: 'Shree 420 (1955)', description: "Raj Kapoor plays an innocent small-town man corrupted by Mumbai's greed. A sharp satire on capitalism with the legendary song 'Mera Joota Hai Japani'. Directed by Raj Kapoor.", type: 'movie', category: 'Classic Hindi', language: 'Hindi', year: 1955, duration: '168 min', rating: 7.8, videoUrl: 'https://archive.org/embed/shree-420-1955-raj-kapoor-nargis-classic-hindi-film', thumbnailUrl: 'https://archive.org/services/img/shree-420-1955-raj-kapoor-nargis-classic-hindi-film', featured: true, trending: false, status: 'published', views: 38000, likes: 29000 },
@@ -725,8 +725,9 @@ app.post('/api/seed', async (req, res) => {
                 { title: 'Girija Devi — Thumri at Benares (1983)', description: "Padma Vibhushan Girija Devi, Queen of Thumri, performing in Varanasi. A rare live recording of thumri, dadra and kajri — devotion, romance and playfulness in her fullest splendour.", type: 'live', category: 'Hindustani Semi-classical', language: 'Bhojpuri/Hindi', year: 1983, duration: '65 min', rating: 8.8, videoUrl: 'https://archive.org/embed/GirijaDeviThumriBenares1983', thumbnailUrl: 'https://archive.org/services/img/GirijaDeviThumriBenares1983', featured: false, trending: false, status: 'published', views: 12000, likes: 10200 },
                 { title: 'Ali Akbar Khan — Sarod Recital (1955)', description: 'Ustad Ali Akbar Khan's celebrated early sarod recital — one of the first Indian classical LPs released in America. Disciple of Baba Allauddin Khan and brother-in-law of Ravi Shankar.', type: 'live', category: 'Hindustani Instrumental', language: 'Instrumental', year: 1955, duration: '52 min', rating: 9.0, videoUrl: 'https://archive.org/embed/AliAkbarKhanSarodRecital1955', thumbnailUrl: 'https://archive.org/services/img/AliAkbarKhanSarodRecital1955', featured: false, trending: false, status: 'published', views: 14200, likes: 12500 },
                 { title: 'Nadaswaram Classical Concert (1970)', description: 'T.N. Rajarathnam Pillai performing the nadaswaram — the iconic South Indian temple wind instrument. One of the finest recordings of this rare instrument from the Films Division of India archives.', type: 'live', category: 'Carnatic Instrumental', language: 'Instrumental', year: 1970, duration: '42 min', rating: 8.5, videoUrl: 'https://archive.org/embed/NadaswaramClassical1970', thumbnailUrl: 'https://archive.org/services/img/NadaswaramClassical1970', featured: false, trending: false, status: 'published', views: 9500, likes: 8000 }
-            ]);
-            console.log('✅ Content created');
+            ];
+            await Content.insertMany(seedContent);
+            console.log(`✅ Content created: ${seedContent.length} items`);
         }
         
         res.json({ 
