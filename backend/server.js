@@ -47,7 +47,7 @@ app.use((req, res, next) => {
 // ENVIRONMENT VARIABLES
 // ========================================
 
-const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_URI = process.env.MONGO_URI;
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-me';
 
 console.log('🔧 MongoDB URI:', MONGODB_URI ? '✓ Set' : '✗ Missing');
