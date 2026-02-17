@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="description" content="Watch classical movies, concerts, operas, and documentaries on ClassicFlims - Premium classical content streaming platform">
     <meta name="keywords" content="classical music, opera, ballet, classical movies, concerts, documentaries">
     <title>ClassicFlims- Premium Classical Content Streaming</title>
@@ -567,38 +567,267 @@
             margin-bottom: 2rem;
         }
 
-        @media (max-width: 1200px) {
-            .hero-title {
-                font-size: 4rem;
+        /* Page subheader (Movies / Series / Live heading) */
+        .page-subheader {
+            padding: 8rem 4rem 0;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Prevent iOS input zoom (inputs stay 16px font) */
+        input, select, textarea {
+            font-size: 16px !important;
+        }
+
+        /* Smooth scrolling */
+        html { scroll-behavior: smooth; }
+
+        /* =============================================
+           MOBILE HAMBURGER MENU
+        ============================================= */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.6rem;
+            cursor: pointer;
+            padding: 0.4rem;
+            line-height: 1;
+        }
+
+        .mobile-menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--primary-bg);
+            z-index: 2000;
+            flex-direction: column;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        .mobile-menu-overlay.open { display: flex; }
+
+        .mobile-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+        .mobile-menu-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
+        .mobile-nav-item {
+            font-size: 1.4rem;
+            font-weight: 600;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .mobile-nav-item:active { color: var(--accent-primary); }
+        .mobile-auth-row {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .mobile-auth-row button {
+            flex: 1;
+            padding: 0.9rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* =============================================
+           TABLET  (max 1024px)
+        ============================================= */
+        @media (max-width: 1024px) {
+            .navbar { padding: 1.2rem 2rem; }
+            .navbar.scrolled { padding: 1rem 2rem; }
+            .logo { font-size: 2rem; }
+            .hero-title { font-size: 3.8rem; }
+            .content-section { padding: 3rem 2rem; }
+            .content-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; }
+            .section-title { font-size: 1.8rem; }
+        }
+
+        /* =============================================
+           MOBILE  (max 768px) — phones & small tablets
+        ============================================= */
+        @media (max-width: 768px) {
+            /* NAV */
+            .navbar {
+                padding: 0.9rem 1.2rem;
+                -webkit-backdrop-filter: blur(20px);
             }
+            .navbar.scrolled { padding: 0.75rem 1.2rem; }
+            .logo { font-size: 1.5rem; letter-spacing: -0.03em; }
+            .nav-menu { display: none; }
+            .nav-actions { gap: 0.6rem; }
+            .nav-actions > button { display: none; } /* hide login/signup — in mobile menu */
+            .search-icon, .profile-icon {
+                width: 40px; height: 40px;
+                border-radius: 10px;
+                font-size: 1.1rem;
+            }
+            .mobile-menu-btn { display: block; }
+
+            /* HERO */
+            .hero-section {
+                height: auto;
+                min-height: 85vh;
+                padding-top: 5rem;
+                padding-bottom: 3rem;
+                display: flex;
+                align-items: center;
+            }
+            .hero-content {
+                padding: 0 1.2rem;
+                height: auto;
+            }
+            .hero-badge {
+                font-size: 0.7rem;
+                padding: 0.5rem 1rem;
+                margin-bottom: 1rem;
+                letter-spacing: 0.06em;
+            }
+            .hero-title {
+                font-size: 2rem;
+                line-height: 1.15;
+                margin-bottom: 1rem;
+                max-width: 100%;
+            }
+            .hero-description {
+                font-size: 0.95rem;
+                margin-bottom: 1.8rem;
+                max-width: 100%;
+                line-height: 1.7;
+            }
+            .hero-actions {
+                flex-direction: column;
+                gap: 0.8rem;
+                align-items: stretch;
+            }
+            .btn {
+                padding: 0.95rem 1.5rem;
+                font-size: 1rem;
+                justify-content: center;
+                border-radius: 10px;
+            }
+
+            /* CONTENT */
+            .content-section { padding: 1.5rem 1rem; }
+            .section-header { margin-bottom: 1.2rem; }
+            .section-title { font-size: 1.25rem; }
+            .view-all { font-size: 0.85rem; padding: 0.5rem 0.8rem; }
             .content-grid {
-                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+                margin-bottom: 2rem;
+            }
+
+            /* CARDS — always show overlay on mobile (no hover) */
+            .content-card { border-radius: 10px; }
+            .content-card:hover {
+                transform: none;
+                box-shadow: none;
+            }
+            .card-overlay {
+                transform: translateY(0);
+                opacity: 1;
+                background: linear-gradient(0deg, rgba(10,10,15,0.98) 0%, rgba(10,10,15,0.4) 60%, transparent 100%);
+                padding: 0.8rem;
+            }
+            .card-title { font-size: 0.85rem; margin-bottom: 0.2rem; }
+            .card-meta { font-size: 0.7rem; gap: 0.4rem; margin-bottom: 0.3rem; }
+            .card-rating { font-size: 0.7rem; }
+            .card-badge { font-size: 0.6rem; padding: 0.25rem 0.5rem; top: 0.5rem; right: 0.5rem; }
+            .card-actions { gap: 0.4rem; margin-top: 0.5rem; }
+            .card-btn { padding: 0.55rem 0.3rem; font-size: 0.75rem; border-radius: 6px; }
+
+            /* PLAYER */
+            .player-modal { padding: 0; }
+            .player-container {
+                border-radius: 0;
+                max-width: 100%;
+                width: 100%;
+            }
+            .player-close {
+                top: 0.75rem; right: 0.75rem;
+                width: 38px; height: 38px;
+                font-size: 1.1rem;
+            }
+
+            /* PAGE SUBHEADER */
+            .page-subheader { padding: 5.5rem 1.2rem 1rem; }
+            .page-subheader h1 { font-size: 1.6rem; }
+
+            /* FOOTER */
+            .footer {
+                padding: 2.5rem 1.2rem 1.5rem;
+                margin-top: 3rem;
+            }
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 2rem;
+            }
+            .footer-section h3 { font-size: 1rem; margin-bottom: 0.8rem; }
+            .footer-links li { margin-bottom: 0.5rem; }
+            .footer-links a { font-size: 0.85rem; }
+            .footer-bottom { margin-top: 1.5rem; font-size: 0.8rem; }
+
+            /* LOADING / EMPTY */
+            .loading-message { padding: 3rem 1rem; font-size: 1.1rem; }
+            .no-content-message { padding: 3rem 1rem; }
+            .no-content-message h2 { font-size: 1.4rem; }
+        }
+
+        /* =============================================
+           SMALL PHONES  (max 390px)  iPhone SE, older Androids
+        ============================================= */
+        @media (max-width: 390px) {
+            .logo { font-size: 1.25rem; }
+            .hero-title { font-size: 1.7rem; }
+            .hero-description { font-size: 0.9rem; }
+            .content-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.6rem;
+            }
+            .card-title { font-size: 0.78rem; }
+            .footer-content { grid-template-columns: 1fr; gap: 1.5rem; }
+        }
+
+        /* =============================================
+           SAFE AREAS — iPhone notch / home indicator
+        ============================================= */
+        @supports (padding: max(0px)) {
+            .navbar {
+                padding-left: max(1.2rem, env(safe-area-inset-left));
+                padding-right: max(1.2rem, env(safe-area-inset-right));
+            }
+            .footer {
+                padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
             }
         }
 
-        @media (max-width: 768px) {
-            .navbar {
-                padding: 1.5rem 2rem;
-            }
-            .nav-menu {
-                display: none;
-            }
-            .hero-content {
-                padding: 0 2rem;
-            }
-            .hero-title {
-                font-size: 2.5rem;
-            }
-            .hero-description {
-                font-size: 1.1rem;
-            }
-            .content-section {
-                padding: 3rem 2rem;
-            }
-            .content-grid {
-                grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-                gap: 1.5rem;
-            }
+        /* =============================================
+           TOUCH — remove hover effects on touch devices
+        ============================================= */
+        @media (hover: none) {
+            .content-card:hover { transform: none; box-shadow: none; }
+            .btn:hover { transform: none; }
+            .nav-item:hover::after { transform: translateX(-50%) scaleX(0); }
         }
     </style>
 </head>
@@ -728,8 +957,8 @@
             const [searchQuery, setSearchQuery]         = useState('');
             const [searchResults, setSearchResults]     = useState([]);
             const [authModal, setAuthModal]             = useState(null);   // 'login' | 'signup' | null
-            const [loggedIn, setLoggedIn]               = useState(false);
-            const [userName, setUserName]               = useState('');
+            const [loggedIn, setLoggedIn]               = useState(() => !!localStorage.getItem('userToken'));
+            const [userName, setUserName]               = useState(() => localStorage.getItem('userName') || '');
             const [mobileMenuOpen, setMobileMenuOpen]   = useState(false);
 
             const [allContent, setAllContent]           = useState([]);
@@ -1022,7 +1251,7 @@
                             {/* Login / Profile */}
                             {loggedIn ? (
                                 <div className="profile-icon" title={userName}
-                                    onClick={() => { if (confirm('Logout?')) { setLoggedIn(false); setUserName(''); } }}
+                                    onClick={() => { if (confirm('Logout?')) { localStorage.removeItem('userToken'); localStorage.removeItem('userName'); setLoggedIn(false); setUserName(''); } }}
                                     style={{fontWeight:700, fontSize:'1rem'}}>
                                     {userName.charAt(0).toUpperCase()}
                                 </div>
@@ -1038,8 +1267,45 @@
                                     </button>
                                 </>
                             )}
+                            {/* Hamburger — mobile only */}
+                            <button className="mobile-menu-btn" onClick={() => setMobileMenuOpen(true)} aria-label="Open menu">☰</button>
                         </div>
                     </nav>
+
+                    {/* ===== MOBILE MENU OVERLAY ===== */}
+                    <div className={`mobile-menu-overlay ${mobileMenuOpen ? 'open' : ''}`}>
+                        <div className="mobile-menu-header">
+                            <div className="logo">{settings.site_name || 'ClassicFlims'}</div>
+                            <button className="mobile-menu-close" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu">✕</button>
+                        </div>
+                        {(navigation.length > 0 ? navigation : defaultNavItems.map(l => ({ label: l, icon: '' }))).map((item, i) => {
+                            const label = item.label || item;
+                            return (
+                                <div key={i} className="mobile-nav-item" onClick={() => { handleNavClick(label); setMobileMenuOpen(false); }}>
+                                    {item.icon && <span>{item.icon}</span>}{label}
+                                </div>
+                            );
+                        })}
+                        <div className="mobile-auth-row">
+                            {loggedIn ? (
+                                <button onClick={() => { localStorage.removeItem('userToken'); localStorage.removeItem('userName'); setLoggedIn(false); setUserName(''); setMobileMenuOpen(false); }}
+                                    style={{background:'rgba(255,51,102,0.15)',border:'2px solid var(--accent-primary)',color:'var(--accent-primary)',borderRadius:'10px'}}>
+                                    Logout ({userName})
+                                </button>
+                            ) : (
+                                <>
+                                    <button onClick={() => { setAuthModal('login'); setMobileMenuOpen(false); }}
+                                        style={{background:'transparent',border:'2px solid rgba(255,255,255,0.25)',color:'white'}}>
+                                        Login
+                                    </button>
+                                    <button onClick={() => { setAuthModal('signup'); setMobileMenuOpen(false); }}
+                                        style={{background:'linear-gradient(135deg,#ff3366,#7c3aed)',border:'none',color:'white'}}>
+                                        Sign Up
+                                    </button>
+                                </>
+                            )}
+                        </div>
+                    </div>
 
                     {/* ===== SEARCH OVERLAY ===== */}
                     {searchOpen && (
@@ -1096,7 +1362,33 @@
                                     <>
                                         <h2 style={{fontFamily:'Unbounded,sans-serif',fontSize:'1.6rem',marginBottom:'0.4rem'}}>Welcome Back</h2>
                                         <p style={{color:'var(--text-secondary)',marginBottom:'2rem',fontSize:'0.95rem'}}>Sign in to your account</p>
-                                        <form onSubmit={e => { e.preventDefault(); setLoggedIn(true); setUserName(e.target.email.value.split('@')[0]); setAuthModal(null); }}>
+                                        <form onSubmit={async e => {
+                                                e.preventDefault();
+                                                const btn = e.target.querySelector('[type=submit]');
+                                                const origText = btn.textContent;
+                                                btn.textContent = 'Signing in...'; btn.disabled = true;
+                                                try {
+                                                    const res = await fetch(`${API_CONFIG.BASE_URL}/users/login`, {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ email: e.target.email.value, password: e.target.password.value })
+                                                    });
+                                                    const data = await res.json();
+                                                    if (res.ok) {
+                                                        localStorage.setItem('userToken', data.token);
+                                                        localStorage.setItem('userName', data.user.name);
+                                                        setLoggedIn(true);
+                                                        setUserName(data.user.name);
+                                                        setAuthModal(null);
+                                                    } else {
+                                                        alert(data.error || 'Login failed. Please check your credentials.');
+                                                        btn.textContent = origText; btn.disabled = false;
+                                                    }
+                                                } catch(err) {
+                                                    alert('Connection error — is the server running?');
+                                                    btn.textContent = origText; btn.disabled = false;
+                                                }
+                                            }}>
                                             {[['email','Email','email','you@example.com'],['password','Password','password','••••••••']].map(([n,l,t,p]) => (
                                                 <div key={n} style={{marginBottom:'1.2rem'}}>
                                                     <label style={{display:'block',fontSize:'0.875rem',fontWeight:600,marginBottom:'0.5rem',color:'var(--text-secondary)'}}>{l}</label>
@@ -1117,7 +1409,37 @@
                                     <>
                                         <h2 style={{fontFamily:'Unbounded,sans-serif',fontSize:'1.6rem',marginBottom:'0.4rem'}}>Create Account</h2>
                                         <p style={{color:'var(--text-secondary)',marginBottom:'2rem',fontSize:'0.95rem'}}>Join and start streaming</p>
-                                        <form onSubmit={e => { e.preventDefault(); setLoggedIn(true); setUserName(e.target.name.value); setAuthModal(null); }}>
+                                        <form onSubmit={async e => {
+                                                e.preventDefault();
+                                                const btn = e.target.querySelector('[type=submit]');
+                                                const origText = btn.textContent;
+                                                btn.textContent = 'Creating account...'; btn.disabled = true;
+                                                try {
+                                                    const res = await fetch(`${API_CONFIG.BASE_URL}/users/register`, {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({
+                                                            name: e.target.name.value,
+                                                            email: e.target.email.value,
+                                                            password: e.target.password.value
+                                                        })
+                                                    });
+                                                    const data = await res.json();
+                                                    if (res.ok) {
+                                                        localStorage.setItem('userToken', data.token);
+                                                        localStorage.setItem('userName', data.user.name);
+                                                        setLoggedIn(true);
+                                                        setUserName(data.user.name);
+                                                        setAuthModal(null);
+                                                    } else {
+                                                        alert(data.error || 'Registration failed. Please try again.');
+                                                        btn.textContent = origText; btn.disabled = false;
+                                                    }
+                                                } catch(err) {
+                                                    alert('Connection error — is the server running?');
+                                                    btn.textContent = origText; btn.disabled = false;
+                                                }
+                                            }}>
                                             {[['name','Full Name','text','Your Name'],['email','Email','email','you@example.com'],['password','Password','password','Min. 6 characters']].map(([n,l,t,p]) => (
                                                 <div key={n} style={{marginBottom:'1.2rem'}}>
                                                     <label style={{display:'block',fontSize:'0.875rem',fontWeight:600,marginBottom:'0.5rem',color:'var(--text-secondary)'}}>{l}</label>
@@ -1227,7 +1549,7 @@
 
                     {/* Page heading for sub-pages */}
                     {page !== 'home' && (
-                        <div style={{paddingTop:'8rem', maxWidth:'1600px', margin:'0 auto', padding:'8rem 4rem 0'}}>
+                        <div className="page-subheader">
                             <h1 style={{fontFamily:'Unbounded,sans-serif',fontSize:'2.5rem',marginBottom:'0.5rem'}}>
                                 {page === 'movies' ? '🎬 Movies' : page === 'series' ? '📺 Series' : '📡 Live'}
                             </h1>
@@ -1271,7 +1593,7 @@
                                             <li><a onClick={() => setAuthModal('signup')} style={{cursor:'pointer'}}>Sign Up</a></li>
                                         </>
                                     ) : (
-                                        <li><a onClick={() => { setLoggedIn(false); setUserName(''); }} style={{cursor:'pointer',color:'var(--accent-primary)'}}>Logout ({userName})</a></li>
+                                        <li><a style={{cursor:'pointer',color:'var(--accent-primary)'}} onClick={() => { localStorage.removeItem('userToken'); localStorage.removeItem('userName'); setLoggedIn(false); setUserName(''); }}>Logout ({userName})</a></li>
                                     )}
                                 </ul>
                             </div>
