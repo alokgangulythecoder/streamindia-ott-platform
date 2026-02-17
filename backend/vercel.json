@@ -8,10 +8,6 @@
   ],
  "routes": [
     {
-      "src": "/admin/login",
-      "dest": "/public/admin.html"
-    },
-    {
       "src": "/admin",
       "dest": "/public/admin.html"
     },
