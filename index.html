@@ -611,10 +611,10 @@
         // API Configuration — UPDATE THIS URL
         // ========================================
         const API_CONFIG = {
-            //BASE_URL: window.location.hostname === 'localhost'
-             //   ? 'http://localhost:3000/api'
-              //  : `${window.location.protocol}//${window.location.host}/api`,
-            BASE_URL: process.env.BASE_URL_API,
+            BASE_URL: window.location.hostname === 'localhost'
+               ? 'http://localhost:3000/api'
+                : process.env.BASE_URL_API,
+            //BASE_URL: process.env.BASE_URL_API,
             ENDPOINTS: {
                 CONTENT: '/content',
                 CONTENT_BY_ID: (id) => `/content/${id}`,
