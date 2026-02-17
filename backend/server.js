@@ -26,6 +26,17 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// ========================================
+// SERVE STATIC FILES (public/admin.html)
+// ========================================
+const path = require('path');
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Admin panel routes — all serve admin.html
+app.get('/admin',        (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
+app.get('/admin/login',  (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
+app.get('/admin/*',      (req, res) => res.sendFile(path.join(__dirname, 'public', 'admin.html')));
+
 // Logging middleware
 app.use((req, res, next) => {
     console.log(`${req.method} ${req.path}`);
@@ -36,7 +47,7 @@ app.use((req, res, next) => {
 // ENVIRONMENT VARIABLES
 // ========================================
 
-const MONGODB_URI = process.env.MONGO_URI;
+const MONGODB_URI = process.env.MONGODB_URI;
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-me';
 
 console.log('🔧 MongoDB URI:', MONGODB_URI ? '✓ Set' : '✗ Missing');
@@ -596,37 +607,36 @@ app.use((err, req, res, next) => {
 });
 
 // ========================================
-// START SERVER - CRITICAL FOR RAILWAY
+// START SERVER
+// Works on both Railway (traditional) and Vercel (serverless)
 // ========================================
 
-const server = app.listen(PORT, '0.0.0.0', () => {
-    console.log('='.repeat(50));
-    console.log('✅ SERVER STARTED SUCCESSFULLY!');
-    console.log(`🚀 Listening on http://0.0.0.0:${PORT}`);
-    console.log(`📍 API: http://0.0.0.0:${PORT}/api`);
-    console.log(`🏥 Health: http://0.0.0.0:${PORT}/health`);
-    console.log('='.repeat(50));
-});
+// module.exports MUST come before app.listen for Vercel
+module.exports = app;
 
-// Handle server errors
-server.on('error', (error) => {
-    console.error('❌ Server error:', error);
-    if (error.code === 'EADDRINUSE') {
-        console.error(`Port ${PORT} is already in use`);
-        process.exit(1);
-    }
-});
+// Only start listening when NOT on Vercel
+if (process.env.VERCEL !== '1') {
+    const server = app.listen(PORT, '0.0.0.0', () => {
+        console.log('='.repeat(50));
+        console.log('✅ SERVER STARTED SUCCESSFULLY!');
+        console.log(`🚀 Listening on http://0.0.0.0:${PORT}`);
+        console.log(`📍 Admin Login: http://0.0.0.0:${PORT}/api/admin/login`);
+        console.log(`📍 Content:     http://0.0.0.0:${PORT}/api/content`);
+        console.log(`📍 Seed:        http://0.0.0.0:${PORT}/api/seed`);
+        console.log('='.repeat(50));
+    });
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-    console.log('SIGTERM received, shutting down gracefully');
-    server.close(() => {
-        console.log('Server closed');
-        mongoose.connection.close(false, () => {
-            console.log('MongoDB connection closed');
-            process.exit(0);
+    server.on('error', (error) => {
+        console.error('❌ Server error:', error);
+        if (error.code === 'EADDRINUSE') {
+            console.error(`Port ${PORT} is already in use`);
+            process.exit(1);
+        }
+    });
+
+    process.on('SIGTERM', () => {
+        server.close(() => {
+            mongoose.connection.close(false, () => process.exit(0));
         });
     });
-});
-
-module.exports = app;
+}
