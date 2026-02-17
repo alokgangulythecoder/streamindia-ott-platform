@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Watch classical movies, concerts, operas, and documentaries on ClassicFlims - Premium classical content streaming platform">
     <meta name="keywords" content="classical music, opera, ballet, classical movies, concerts, documentaries">
-    <title>StreamIndia - Premium Classical Content Streaming</title>
+    <title>ClassicFlims- Premium Classical Content Streaming</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -605,13 +605,15 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
 
         // ========================================
-        // API Configuration
+        // API Configuration — UPDATE THIS URL
         // ========================================
         const API_CONFIG = {
-            BASE_URL: 'https://streamindia-ott-platform-dgj8.vercel.app/api',
+            BASE_URL: window.location.hostname === 'localhost'
+                ? 'http://localhost:3000/api'
+                : `${window.location.protocol}//${window.location.host}/api`,
             ENDPOINTS: {
                 CONTENT: '/content',
                 CONTENT_BY_ID: (id) => `/content/${id}`,
@@ -715,173 +717,179 @@
         // Main App Component
         // ========================================
         function App() {
-            const [activeCategory, setActiveCategory] = useState("All");
-            const [scrolled, setScrolled] = useState(false);
-            const [activeNav, setActiveNav] = useState("Home");
-            const [playerOpen, setPlayerOpen] = useState(false);
+            // ---- State ----
+            const [page, setPage]                       = useState('home');  // 'home' | 'movies' | 'series' | 'live'
+            const [scrolled, setScrolled]               = useState(false);
+            const [playerOpen, setPlayerOpen]           = useState(false);
             const [selectedContent, setSelectedContent] = useState(null);
-            const [backendContent, setBackendContent] = useState({
-                trending: [],
-                movies: [],
-                series: [],
-                featured: []
-            });
-            const [navigation, setNavigation] = useState([]);
-            const [headerAd, setHeaderAd] = useState(null);
-            const [settings, setSettings] = useState({});
-            const [loading, setLoading] = useState(true);
+            const [infoContent, setInfoContent]         = useState(null);   // for Info modal
+            const [searchOpen, setSearchOpen]           = useState(false);
+            const [searchQuery, setSearchQuery]         = useState('');
+            const [searchResults, setSearchResults]     = useState([]);
+            const [authModal, setAuthModal]             = useState(null);   // 'login' | 'signup' | null
+            const [loggedIn, setLoggedIn]               = useState(false);
+            const [userName, setUserName]               = useState('');
+            const [mobileMenuOpen, setMobileMenuOpen]   = useState(false);
 
-            // Load all data on mount
-            useEffect(() => {
-                loadAllData();
-            }, []);
+            const [allContent, setAllContent]           = useState([]);
+            const [backendContent, setBackendContent]   = useState({ trending: [], movies: [], series: [], featured: [] });
+            const [navigation, setNavigation]           = useState([]);
+            const [headerAd, setHeaderAd]               = useState(null);
+            const [settings, setSettings]               = useState({});
+            const [loading, setLoading]                 = useState(true);
+
+            const searchInputRef = useRef(null);
+
+            // ---- Load data ----
+            useEffect(() => { loadAllData(); }, []);
 
             const loadAllData = async () => {
                 setLoading(true);
-
                 try {
-                    console.log('Loading data from backend...');
-
-                    // Load content from backend
-                    const [trendingData, moviesData, seriesData, featuredData] = await Promise.all([
-                        api.getContent({ trending: true, limit: 12 }),
-                        api.getContent({ type: 'movie', limit: 12 }),
-                        api.getContent({ type: 'series', limit: 12 }),
-                        api.getContent({ featured: true, limit: 12 })
+                    const [allData, navData, adsData, settingsData] = await Promise.all([
+                        api.getContent({ limit: 100 }),
+                        api.getNavigation(),
+                        api.getAds('header', 'banner'),
+                        api.getSettings()
                     ]);
 
+                    const all = allData.content || [];
+                    setAllContent(all);
                     setBackendContent({
-                        trending: trendingData.content || [],
-                        movies: moviesData.content || [],
-                        series: seriesData.content || [],
-                        featured: featuredData.content || []
+                        trending: all.filter(c => c.trending),
+                        movies:   all.filter(c => c.type === 'movie'),
+                        series:   all.filter(c => c.type === 'series'),
+                        featured: all.filter(c => c.featured)
                     });
 
-                    console.log('Content loaded:', {
-                        trending: trendingData.content?.length || 0,
-                        movies: moviesData.content?.length || 0,
-                        series: seriesData.content?.length || 0,
-                        featured: featuredData.content?.length || 0
-                    });
-
-                    // Load navigation
-                    const navData = await api.getNavigation();
                     setNavigation(navData || []);
 
-                    // Load advertisements
-                    const headerAdData = await api.getAds('header', 'banner');
-                    if (headerAdData.length > 0) {
-                        setHeaderAd(headerAdData[0]);
-                        api.trackAdImpression(headerAdData[0]._id);
+                    const activeAds = Array.isArray(adsData) ? adsData.filter(a => a.active) : [];
+                    const hAd = activeAds.find(a => a.position === 'header');
+                    if (hAd) { setHeaderAd(hAd); api.trackAdImpression(hAd._id); }
+
+                    // Settings comes back as array [{key,value},...] — convert to map
+                    const sMap = {};
+                    if (Array.isArray(settingsData)) {
+                        settingsData.forEach(s => { sMap[s.key] = s.value; });
+                    } else if (settingsData && typeof settingsData === 'object') {
+                        Object.assign(sMap, settingsData);
                     }
+                    setSettings(sMap);
+                    if (sMap.primary_color)   document.documentElement.style.setProperty('--accent-primary', sMap.primary_color);
+                    if (sMap.secondary_color) document.documentElement.style.setProperty('--accent-secondary', sMap.secondary_color);
+                    if (sMap.site_name)       document.title = sMap.site_name + ' - Premium OTT Platform';
 
-                    // Load settings
-                    const settingsData = await api.getSettings();
-                    setSettings(settingsData);
-
-                    // Apply dynamic theme if available
-                    if (settingsData.primary_color) {
-                        document.documentElement.style.setProperty('--accent-primary', settingsData.primary_color);
-                    }
-                    if (settingsData.secondary_color) {
-                        document.documentElement.style.setProperty('--accent-secondary', settingsData.secondary_color);
-                    }
-
-                    // Update site title
-                    if (settingsData.site_name) {
-                        document.title = settingsData.site_name + ' - Premium OTT Platform';
-                    }
-
-                } catch (error) {
-                    console.error('Error loading data:', error);
-                }
-
+                } catch (err) { console.error('Error loading data:', err); }
                 setLoading(false);
             };
 
-            // Scroll handler
+            // ---- Scroll ----
             useEffect(() => {
-                const handleScroll = () => {
-                    setScrolled(window.scrollY > 50);
-                };
-                window.addEventListener('scroll', handleScroll);
-                return () => window.removeEventListener('scroll', handleScroll);
+                const h = () => setScrolled(window.scrollY > 50);
+                window.addEventListener('scroll', h);
+                return () => window.removeEventListener('scroll', h);
             }, []);
 
+            // ---- Search focus when opened ----
+            useEffect(() => {
+                if (searchOpen) setTimeout(() => searchInputRef.current?.focus(), 50);
+            }, [searchOpen]);
+
+            // ---- Live search filter ----
+            useEffect(() => {
+                if (!searchQuery.trim()) { setSearchResults([]); return; }
+                const q = searchQuery.toLowerCase();
+                setSearchResults(
+                    allContent.filter(c =>
+                        c.title?.toLowerCase().includes(q) ||
+                        c.category?.toLowerCase().includes(q) ||
+                        c.description?.toLowerCase().includes(q)
+                    ).slice(0, 8)
+                );
+            }, [searchQuery, allContent]);
+
+            // ---- Actions ----
             const playContent = (content) => {
                 setSelectedContent(content);
                 setPlayerOpen(true);
-
-                // Track view
-                if (content._id) {
-                    api.trackView(content._id);
-                }
+                if (content._id) api.trackView(content._id);
             };
 
             const handleAdClick = (ad) => {
-                if (ad._id) {
-                    api.trackAdClick(ad._id);
-                }
-                if (ad.clickUrl) {
-                    window.open(ad.clickUrl, '_blank');
-                }
+                if (ad._id) api.trackAdClick(ad._id);
+                if (ad.clickUrl) window.open(ad.clickUrl, '_blank');
             };
 
             const seedDatabase = async () => {
                 try {
-                    const response = await fetch('/api/seed', { method: 'POST' });
-                    const data = await response.json();
-                    alert(data.message || 'Database seeded successfully!');
+                    const res = await fetch(`${API_CONFIG.BASE_URL}/seed`, { method: 'POST' });
+                    const data = await res.json();
+                    alert(data.message || 'Database seeded!');
                     window.location.reload();
-                } catch (error) {
-                    alert('Failed to seed database: ' + error.message);
-                }
+                } catch (e) { alert('Seed failed: ' + e.message); }
             };
 
-            // Advertisement Component
+            // Nav page routing
+            const handleNavClick = (label) => {
+                setMobileMenuOpen(false);
+                const l = label.toLowerCase();
+                if (l === 'home')               setPage('home');
+                else if (l.includes('movie'))   setPage('movies');
+                else if (l.includes('serie'))   setPage('series');
+                else if (l.includes('live'))    setPage('live');
+                else                            setPage('home');
+            };
+
+            // YouTube / Vimeo embed converter
+            const getEmbedUrl = (url) => {
+                if (!url) return null;
+                const yt = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+                if (yt) return `https://www.youtube.com/embed/${yt[1]}?autoplay=1&rel=0`;
+                const vm = url.match(/vimeo\.com\/(\d+)/);
+                if (vm) return `https://player.vimeo.com/video/${vm[1]}?autoplay=1`;
+                if (url.startsWith('http')) return url;
+                return null;
+            };
+
+            const hasContent = allContent.length > 0;
+
+            const defaultNavItems = ['Home', 'Movies', 'Series', 'Live'];
+
+            // ---- Sub-components ----
+
             const AdBanner = ({ ad, position }) => {
                 if (!ad) return null;
-
                 return (
-                    <div 
-                        className={`ad-banner ad-${position}`}
+                    <div className={`ad-banner ad-${position}`}
                         onClick={() => handleAdClick(ad)}
-                        style={{ cursor: ad.clickUrl ? 'pointer' : 'default' }}
-                    >
-                        {ad.imageUrl && (
-                            <img src={ad.imageUrl} alt={ad.title} />
-                        )}
+                        style={{ cursor: ad.clickUrl ? 'pointer' : 'default' }}>
+                        {ad.imageUrl && <img src={ad.imageUrl} alt={ad.title} />}
                     </div>
                 );
             };
 
-            // Content Card Component
             const ContentCard = ({ content }) => (
                 <div className="content-card" tabIndex="0">
-                    <img 
-                        src={content.thumbnailUrl || 'https://via.placeholder.com/300x450?text=' + encodeURIComponent(content.title)} 
-                        alt={content.title} 
-                        className="card-image" 
+                    <img
+                        src={content.thumbnailUrl || `https://picsum.photos/seed/${content._id}/300/450`}
+                        alt={content.title}
+                        className="card-image"
+                        onError={e => { e.target.src = 'https://picsum.photos/300/450'; }}
                     />
                     {content.featured && <div className="card-badge">Featured</div>}
-                    {content.trending && !content.featured && <div className="card-badge">Trending</div>}
+                    {content.trending && !content.featured && <div className="card-badge" style={{background:'#f59e0b'}}>Trending</div>}
                     <div className="card-overlay">
                         <div className="card-title">{content.title}</div>
                         <div className="card-meta">
                             <span>{content.type}</span>
                             <span>•</span>
                             <span>{content.year || 'N/A'}</span>
-                            {content.language && (
-                                <>
-                                    <span>•</span>
-                                    <span>{content.language}</span>
-                                </>
-                            )}
+                            {content.language && (<><span>•</span><span>{content.language}</span></>)}
                         </div>
                         {content.rating && (
                             <div className="card-rating">
-                                <span>⭐</span>
-                                <span>{content.rating}</span>
+                                <span>⭐</span><span>{content.rating}/10</span>
                             </div>
                         )}
                         {content.views > 0 && (
@@ -890,186 +898,380 @@
                             </div>
                         )}
                         <div className="card-actions">
-                            <button className="card-btn card-btn-play" onClick={() => playContent(content)}>
-                                ▶ Play
-                            </button>
-                            <button className="card-btn card-btn-info">ℹ Info</button>
+                            <button className="card-btn card-btn-play" onClick={() => playContent(content)}>▶ Play</button>
+                            <button className="card-btn card-btn-info" onClick={() => setInfoContent(content)}>ℹ Info</button>
                         </div>
                     </div>
                 </div>
             );
 
-            // Check if there's any content
-            const hasContent = backendContent.trending.length > 0 || 
-                             backendContent.movies.length > 0 || 
-                             backendContent.series.length > 0 || 
-                             backendContent.featured.length > 0;
+            const ContentSection = ({ title, items, onViewAll }) => {
+                if (!items || items.length === 0) return null;
+                return (
+                    <>
+                        <div className="section-header">
+                            <h2 className="section-title">{title}</h2>
+                            <span className="view-all" onClick={onViewAll}>View All →</span>
+                        </div>
+                        <div className="content-grid">
+                            {items.map(c => <ContentCard key={c._id} content={c} />)}
+                        </div>
+                    </>
+                );
+            };
 
+            // ---- Page rendering ----
+            const renderPageContent = () => {
+                if (loading) return (
+                    <div className="loading-message">
+                        <h2>⏳ Loading content...</h2>
+                        <p>Fetching from backend, please wait...</p>
+                    </div>
+                );
+
+                if (!hasContent) return (
+                    <div className="no-content-message">
+                        <h2>No content available</h2>
+                        <p>The database needs to be initialized with content.</p>
+                        <button className="btn btn-primary" onClick={seedDatabase}>🌱 Initialize Database</button>
+                    </div>
+                );
+
+                if (page === 'movies') return (
+                    <>
+                        <div style={{paddingTop:'2rem',marginBottom:'1.5rem'}}>
+                            <h2 className="section-title">🎬 All Movies</h2>
+                        </div>
+                        {backendContent.movies.length === 0
+                            ? <p style={{color:'var(--text-secondary)'}}>No movies found.</p>
+                            : <div className="content-grid">
+                                {backendContent.movies.map(c => <ContentCard key={c._id} content={c} />)}
+                              </div>
+                        }
+                    </>
+                );
+
+                if (page === 'series') return (
+                    <>
+                        <div style={{paddingTop:'2rem',marginBottom:'1.5rem'}}>
+                            <h2 className="section-title">📺 All Series</h2>
+                        </div>
+                        {backendContent.series.length === 0
+                            ? <p style={{color:'var(--text-secondary)'}}>No series found.</p>
+                            : <div className="content-grid">
+                                {backendContent.series.map(c => <ContentCard key={c._id} content={c} />)}
+                              </div>
+                        }
+                    </>
+                );
+
+                if (page === 'live') return (
+                    <>
+                        <div style={{paddingTop:'2rem',marginBottom:'1.5rem'}}>
+                            <h2 className="section-title">📡 Live</h2>
+                        </div>
+                        <p style={{color:'var(--text-secondary)'}}>No live streams available right now. Check back soon!</p>
+                    </>
+                );
+
+                // Home page
+                return (
+                    <>
+                        <ContentSection title="🔥 Trending Now" items={backendContent.trending} onViewAll={() => setPage('home')} />
+                        <ContentSection title="🎬 Movies"       items={backendContent.movies}   onViewAll={() => setPage('movies')} />
+                        <ContentSection title="📺 Series"       items={backendContent.series}   onViewAll={() => setPage('series')} />
+                        <ContentSection title="⭐ Featured"     items={backendContent.featured} onViewAll={() => setPage('home')} />
+                    </>
+                );
+            };
+
+            // ---- JSX ----
             return (
                 <div className="app-container">
                     <div className="bg-ambience"></div>
 
-                    {/* Navigation */}
+                    {/* ===== NAVBAR ===== */}
                     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
-                        <div className="logo">{settings.site_name || 'StreamIndia'}</div>
+                        <div className="logo" onClick={() => setPage('home')} style={{cursor:'pointer'}}>
+                            {settings.site_name || 'ClassicFlims'}
+                        </div>
+
                         <ul className="nav-menu">
-                            {navigation.length > 0 ? (
-                                navigation.map(item => (
-                                    <li 
-                                        key={item._id}
-                                        className={`nav-item ${activeNav === item.label ? 'active' : ''}`}
-                                        onClick={() => setActiveNav(item.label)}
-                                    >
-                                        {item.icon && <span>{item.icon}</span>} {item.label}
+                            {(navigation.length > 0 ? navigation : defaultNavItems.map(l => ({ label: l, icon: '' }))).map((item, i) => {
+                                const label = item.label || item;
+                                const isActive =
+                                    (label === 'Home' && page === 'home') ||
+                                    (label.toLowerCase().includes('movie') && page === 'movies') ||
+                                    (label.toLowerCase().includes('serie') && page === 'series') ||
+                                    (label.toLowerCase().includes('live') && page === 'live');
+                                return (
+                                    <li key={item._id || i}
+                                        className={`nav-item ${isActive ? 'active' : ''}`}
+                                        onClick={() => handleNavClick(label)}>
+                                        {item.icon && <span>{item.icon}</span>} {label}
                                     </li>
-                                ))
-                            ) : (
-                                ['Home', 'Movies', 'Series', 'Live'].map(item => (
-                                    <li 
-                                        key={item}
-                                        className={`nav-item ${activeNav === item ? 'active' : ''}`}
-                                        onClick={() => setActiveNav(item)}
-                                    >
-                                        {item}
-                                    </li>
-                                ))
-                            )}
+                                );
+                            })}
                         </ul>
+
                         <div className="nav-actions">
-                            <div className="search-icon">🔍</div>
-                            <div className="profile-icon">👤</div>
+                            {/* Search */}
+                            <div className="search-icon" onClick={() => setSearchOpen(true)} title="Search">🔍</div>
+
+                            {/* Login / Profile */}
+                            {loggedIn ? (
+                                <div className="profile-icon" title={userName}
+                                    onClick={() => { if (confirm('Logout?')) { setLoggedIn(false); setUserName(''); } }}
+                                    style={{fontWeight:700, fontSize:'1rem'}}>
+                                    {userName.charAt(0).toUpperCase()}
+                                </div>
+                            ) : (
+                                <>
+                                    <button onClick={() => setAuthModal('login')}
+                                        style={{background:'transparent',border:'2px solid rgba(255,255,255,0.25)',color:'white',padding:'0.5rem 1.2rem',borderRadius:'8px',cursor:'pointer',fontWeight:600,fontSize:'0.95rem',fontFamily:'inherit',transition:'all 0.3s'}}>
+                                        Login
+                                    </button>
+                                    <button onClick={() => setAuthModal('signup')}
+                                        style={{background:'linear-gradient(135deg,#ff3366,#7c3aed)',border:'none',color:'white',padding:'0.5rem 1.2rem',borderRadius:'8px',cursor:'pointer',fontWeight:700,fontSize:'0.95rem',fontFamily:'inherit',transition:'all 0.3s'}}>
+                                        Sign Up
+                                    </button>
+                                </>
+                            )}
                         </div>
                     </nav>
 
-                    {/* Hero Section */}
-                    <section className="hero-section">
-                        <div className="hero-content">
-                            <div className="hero-badge">
-                                <span>✨</span> {settings.site_tagline || 'NEW RELEASES'}
-                            </div>
-                            <h1 className="hero-title">Experience Premium Content</h1>
-                            <p className="hero-description">
-                                Stream the finest collection of movies, series, and live content. 
-                                Immerse yourself in entertainment excellence.
-                            </p>
-                            <div className="hero-actions">
-                                <button className="btn btn-primary">
-                                    ▶ Start Watching
-                                </button>
-                                <button className="btn btn-secondary">
-                                    📚 Browse Catalog
-                                </button>
+                    {/* ===== SEARCH OVERLAY ===== */}
+                    {searchOpen && (
+                        <div onClick={e => { if (e.target === e.currentTarget) { setSearchOpen(false); setSearchQuery(''); } }}
+                            style={{position:'fixed',top:0,left:0,width:'100%',height:'100%',background:'rgba(0,0,0,0.85)',backdropFilter:'blur(10px)',zIndex:3000,display:'flex',alignItems:'flex-start',justifyContent:'center',paddingTop:'6rem'}}>
+                            <div style={{width:'90%',maxWidth:'680px',background:'var(--secondary-bg)',borderRadius:'16px',border:'1px solid var(--border-color)',overflow:'hidden'}}>
+                                <div style={{display:'flex',alignItems:'center',gap:'1rem',padding:'1.2rem 1.5rem',borderBottom:'1px solid var(--border-color)'}}>
+                                    <span style={{fontSize:'1.3rem'}}>🔍</span>
+                                    <input ref={searchInputRef} value={searchQuery}
+                                        onChange={e => setSearchQuery(e.target.value)}
+                                        onKeyDown={e => { if (e.key === 'Escape') { setSearchOpen(false); setSearchQuery(''); } }}
+                                        placeholder="Search movies, series, categories..."
+                                        style={{flex:1,background:'transparent',border:'none',outline:'none',color:'white',fontSize:'1.15rem',fontFamily:'inherit'}} />
+                                    <button onClick={() => { setSearchOpen(false); setSearchQuery(''); }}
+                                        style={{background:'none',border:'none',color:'var(--text-secondary)',fontSize:'1.4rem',cursor:'pointer'}}>✕</button>
+                                </div>
+                                {searchQuery && (
+                                    <div style={{padding:'0.5rem 1rem 1rem'}}>
+                                        {searchResults.length === 0 ? (
+                                            <p style={{color:'var(--text-secondary)',padding:'1.5rem',textAlign:'center'}}>No results for "{searchQuery}"</p>
+                                        ) : (
+                                            <>
+                                                <p style={{color:'var(--text-secondary)',fontSize:'0.85rem',padding:'0.75rem 0.5rem 0.5rem'}}>{searchResults.length} result{searchResults.length > 1 ? 's' : ''}</p>
+                                                {searchResults.map(c => (
+                                                    <div key={c._id} onClick={() => { setSearchOpen(false); setSearchQuery(''); setInfoContent(c); }}
+                                                        style={{display:'flex',gap:'1rem',alignItems:'center',padding:'0.75rem',borderRadius:'10px',cursor:'pointer',transition:'background 0.2s'}}
+                                                        onMouseOver={e => e.currentTarget.style.background='var(--card-bg)'}
+                                                        onMouseOut={e => e.currentTarget.style.background='transparent'}>
+                                                        <img src={c.thumbnailUrl || `https://picsum.photos/seed/${c._id}/50/70`} alt={c.title}
+                                                            style={{width:'46px',height:'64px',objectFit:'cover',borderRadius:'6px',flexShrink:0}} />
+                                                        <div>
+                                                            <div style={{fontWeight:600,marginBottom:'0.2rem'}}>{c.title}</div>
+                                                            <div style={{fontSize:'0.85rem',color:'var(--text-secondary)'}}>{c.type} • {c.year || 'N/A'} {c.category ? `• ${c.category}` : ''}</div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
-                    </section>
+                    )}
 
-                    {/* Header Ad */}
-                    {headerAd && <AdBanner ad={headerAd} position="header" />}
+                    {/* ===== AUTH MODAL ===== */}
+                    {authModal && (
+                        <div onClick={e => { if (e.target === e.currentTarget) setAuthModal(null); }}
+                            style={{position:'fixed',top:0,left:0,width:'100%',height:'100%',background:'rgba(0,0,0,0.85)',backdropFilter:'blur(10px)',zIndex:4000,display:'flex',alignItems:'center',justifyContent:'center',padding:'1rem'}}>
+                            <div style={{background:'var(--secondary-bg)',borderRadius:'20px',padding:'2.5rem',width:'100%',maxWidth:'420px',border:'1px solid var(--border-color)',position:'relative'}}>
+                                <button onClick={() => setAuthModal(null)}
+                                    style={{position:'absolute',top:'1rem',right:'1rem',background:'none',border:'none',color:'var(--text-secondary)',fontSize:'1.5rem',cursor:'pointer',lineHeight:1}}>✕</button>
 
-                    {/* Content Sections */}
-                    <div className="content-section">
-                        {loading ? (
-                            <div className="loading-message">
-                                <h2>Loading content...</h2>
-                                <p>Please wait while we fetch the latest content for you.</p>
+                                {authModal === 'login' ? (
+                                    <>
+                                        <h2 style={{fontFamily:'Unbounded,sans-serif',fontSize:'1.6rem',marginBottom:'0.4rem'}}>Welcome Back</h2>
+                                        <p style={{color:'var(--text-secondary)',marginBottom:'2rem',fontSize:'0.95rem'}}>Sign in to your account</p>
+                                        <form onSubmit={e => { e.preventDefault(); setLoggedIn(true); setUserName(e.target.email.value.split('@')[0]); setAuthModal(null); }}>
+                                            {[['email','Email','email','you@example.com'],['password','Password','password','••••••••']].map(([n,l,t,p]) => (
+                                                <div key={n} style={{marginBottom:'1.2rem'}}>
+                                                    <label style={{display:'block',fontSize:'0.875rem',fontWeight:600,marginBottom:'0.5rem',color:'var(--text-secondary)'}}>{l}</label>
+                                                    <input name={n} type={t} placeholder={p} required
+                                                        style={{width:'100%',padding:'0.85rem 1rem',background:'var(--card-bg)',border:'1.5px solid var(--border-color)',borderRadius:'10px',color:'white',fontSize:'1rem',fontFamily:'inherit',outline:'none'}} />
+                                                </div>
+                                            ))}
+                                            <button type="submit"
+                                                style={{width:'100%',padding:'1rem',borderRadius:'10px',background:'linear-gradient(135deg,#ff3366,#7c3aed)',border:'none',color:'white',fontWeight:700,fontSize:'1rem',cursor:'pointer',fontFamily:'inherit',marginTop:'0.5rem'}}>
+                                                Sign In
+                                            </button>
+                                        </form>
+                                        <p style={{textAlign:'center',marginTop:'1.5rem',color:'var(--text-secondary)',fontSize:'0.9rem'}}>
+                                            Don't have an account? <span onClick={() => setAuthModal('signup')} style={{color:'var(--accent-primary)',cursor:'pointer',fontWeight:600}}>Sign Up</span>
+                                        </p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <h2 style={{fontFamily:'Unbounded,sans-serif',fontSize:'1.6rem',marginBottom:'0.4rem'}}>Create Account</h2>
+                                        <p style={{color:'var(--text-secondary)',marginBottom:'2rem',fontSize:'0.95rem'}}>Join and start streaming</p>
+                                        <form onSubmit={e => { e.preventDefault(); setLoggedIn(true); setUserName(e.target.name.value); setAuthModal(null); }}>
+                                            {[['name','Full Name','text','Your Name'],['email','Email','email','you@example.com'],['password','Password','password','Min. 6 characters']].map(([n,l,t,p]) => (
+                                                <div key={n} style={{marginBottom:'1.2rem'}}>
+                                                    <label style={{display:'block',fontSize:'0.875rem',fontWeight:600,marginBottom:'0.5rem',color:'var(--text-secondary)'}}>{l}</label>
+                                                    <input name={n} type={t} placeholder={p} required minLength={n==='password'?6:undefined}
+                                                        style={{width:'100%',padding:'0.85rem 1rem',background:'var(--card-bg)',border:'1.5px solid var(--border-color)',borderRadius:'10px',color:'white',fontSize:'1rem',fontFamily:'inherit',outline:'none'}} />
+                                                </div>
+                                            ))}
+                                            <button type="submit"
+                                                style={{width:'100%',padding:'1rem',borderRadius:'10px',background:'linear-gradient(135deg,#ff3366,#7c3aed)',border:'none',color:'white',fontWeight:700,fontSize:'1rem',cursor:'pointer',fontFamily:'inherit',marginTop:'0.5rem'}}>
+                                                Create Account
+                                            </button>
+                                        </form>
+                                        <p style={{textAlign:'center',marginTop:'1.5rem',color:'var(--text-secondary)',fontSize:'0.9rem'}}>
+                                            Already have an account? <span onClick={() => setAuthModal('login')} style={{color:'var(--accent-primary)',cursor:'pointer',fontWeight:600}}>Sign In</span>
+                                        </p>
+                                    </>
+                                )}
                             </div>
-                        ) : !hasContent ? (
-                            <div className="no-content-message">
-                                <h2>No content available</h2>
-                                <p>The database needs to be initialized with content.</p>
-                                <button className="btn btn-primary" onClick={seedDatabase}>
-                                    🌱 Initialize Database
-                                </button>
-                            </div>
-                        ) : (
-                            <>
-                                {/* Trending */}
-                                {backendContent.trending.length > 0 && (
-                                    <>
-                                        <div className="section-header">
-                                            <h2 className="section-title">🔥 Trending Now</h2>
-                                            <span className="view-all">View All →</span>
-                                        </div>
-                                        <div className="content-grid">
-                                            {backendContent.trending.map(content => (
-                                                <ContentCard key={content._id} content={content} />
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
+                        </div>
+                    )}
 
-                                {/* Movies */}
-                                {backendContent.movies.length > 0 && (
-                                    <>
-                                        <div className="section-header">
-                                            <h2 className="section-title">🎬 Movies</h2>
-                                            <span className="view-all">View All →</span>
-                                        </div>
-                                        <div className="content-grid">
-                                            {backendContent.movies.map(content => (
-                                                <ContentCard key={content._id} content={content} />
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
-
-                                {/* Series */}
-                                {backendContent.series.length > 0 && (
-                                    <>
-                                        <div className="section-header">
-                                            <h2 className="section-title">📺 Series</h2>
-                                            <span className="view-all">View All →</span>
-                                        </div>
-                                        <div className="content-grid">
-                                            {backendContent.series.map(content => (
-                                                <ContentCard key={content._id} content={content} />
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
-
-                                {/* Featured */}
-                                {backendContent.featured.length > 0 && (
-                                    <>
-                                        <div className="section-header">
-                                            <h2 className="section-title">⭐ Featured</h2>
-                                            <span className="view-all">View All →</span>
-                                        </div>
-                                        <div className="content-grid">
-                                            {backendContent.featured.map(content => (
-                                                <ContentCard key={content._id} content={content} />
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
-                            </>
-                        )}
-                    </div>
-
-                    {/* Player Modal */}
-                    {playerOpen && (
-                        <div className="player-modal">
-                            <div className="player-container">
-                                <button className="player-close" onClick={() => setPlayerOpen(false)}>
-                                    ✕
-                                </button>
-                                <div className="player-content">
-                                    {selectedContent ? selectedContent.title : 'Loading...'}
+                    {/* ===== INFO MODAL ===== */}
+                    {infoContent && (
+                        <div onClick={e => { if (e.target === e.currentTarget) setInfoContent(null); }}
+                            style={{position:'fixed',top:0,left:0,width:'100%',height:'100%',background:'rgba(0,0,0,0.9)',zIndex:3500,display:'flex',alignItems:'center',justifyContent:'center',padding:'1rem'}}>
+                            <div style={{background:'var(--secondary-bg)',borderRadius:'20px',width:'100%',maxWidth:'780px',maxHeight:'90vh',overflowY:'auto',border:'1px solid var(--border-color)',position:'relative'}}>
+                                <div style={{position:'relative',height:'280px',overflow:'hidden',borderRadius:'20px 20px 0 0'}}>
+                                    <img src={infoContent.thumbnailUrl || `https://picsum.photos/seed/${infoContent._id}/800/400`} alt={infoContent.title}
+                                        style={{width:'100%',height:'100%',objectFit:'cover'}} />
+                                    <div style={{position:'absolute',inset:0,background:'linear-gradient(0deg,var(--secondary-bg) 0%,transparent 60%)'}} />
+                                    <button onClick={() => setInfoContent(null)}
+                                        style={{position:'absolute',top:'1rem',right:'1rem',width:'38px',height:'38px',borderRadius:'50%',background:'rgba(0,0,0,0.6)',border:'none',color:'white',fontSize:'1.1rem',cursor:'pointer',zIndex:10}}>✕</button>
+                                </div>
+                                <div style={{padding:'1.5rem 2rem 2rem'}}>
+                                    <h2 style={{fontFamily:'Unbounded,sans-serif',fontSize:'1.7rem',marginBottom:'0.8rem'}}>{infoContent.title}</h2>
+                                    <div style={{display:'flex',flexWrap:'wrap',gap:'0.75rem',marginBottom:'1rem',fontSize:'0.9rem',color:'var(--text-secondary)',alignItems:'center'}}>
+                                        {infoContent.year && <span>{infoContent.year}</span>}
+                                        {infoContent.duration && <span>⏱ {infoContent.duration}</span>}
+                                        {infoContent.language && <span>🌐 {infoContent.language}</span>}
+                                        {infoContent.rating && <span>⭐ {infoContent.rating}/10</span>}
+                                        {infoContent.views > 0 && <span>👁 {infoContent.views.toLocaleString()} views</span>}
+                                        <span style={{background:'var(--accent-primary)',color:'white',padding:'0.2rem 0.7rem',borderRadius:'20px',fontSize:'0.75rem',fontWeight:700}}>{infoContent.type}</span>
+                                        {infoContent.category && <span style={{background:'var(--accent-secondary)',color:'white',padding:'0.2rem 0.7rem',borderRadius:'20px',fontSize:'0.75rem',fontWeight:700}}>{infoContent.category}</span>}
+                                    </div>
+                                    {infoContent.description && <p style={{color:'var(--text-secondary)',lineHeight:1.8,marginBottom:'1.5rem'}}>{infoContent.description}</p>}
+                                    <div style={{display:'flex',gap:'1rem',flexWrap:'wrap'}}>
+                                        <button className="btn btn-primary" onClick={() => { setInfoContent(null); playContent(infoContent); }}>▶ Play Now</button>
+                                        <button className="btn btn-secondary" onClick={() => setInfoContent(null)}>Close</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     )}
 
+                    {/* ===== VIDEO PLAYER ===== */}
+                    {playerOpen && selectedContent && (
+                        <div style={{position:'fixed',top:0,left:0,width:'100%',height:'100%',background:'rgba(0,0,0,0.97)',zIndex:5000,display:'flex',alignItems:'center',justifyContent:'center',flexDirection:'column',gap:'1rem',padding:'2rem'}}>
+                            <div style={{width:'100%',maxWidth:'1200px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                                <span style={{fontFamily:'Unbounded,sans-serif',fontSize:'1.1rem',fontWeight:600}}>{selectedContent.title}</span>
+                                <button className="player-close" onClick={() => setPlayerOpen(false)}>✕</button>
+                            </div>
+                            <div className="player-container">
+                                {getEmbedUrl(selectedContent.videoUrl) ? (
+                                    <iframe src={getEmbedUrl(selectedContent.videoUrl)}
+                                        style={{width:'100%',height:'100%',border:'none'}}
+                                        allowFullScreen allow="autoplay; fullscreen"
+                                        title={selectedContent.title} />
+                                ) : (
+                                    <div className="player-content" style={{flexDirection:'column',gap:'1rem'}}>
+                                        <div style={{fontSize:'4rem'}}>🎬</div>
+                                        <div>{selectedContent.title}</div>
+                                        {selectedContent.videoUrl && (
+                                            <a href={selectedContent.videoUrl} target="_blank" rel="noreferrer"
+                                                style={{color:'var(--accent-primary)',fontSize:'1rem',fontWeight:600}}>
+                                                Open Video ↗
+                                            </a>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    )}
+
+                    {/* ===== HERO (home only) ===== */}
+                    {page === 'home' && (
+                        <section className="hero-section">
+                            <div className="hero-content">
+                                <div className="hero-badge">
+                                    <span>✨</span> {settings.site_tagline || 'PREMIUM CLASSIC CINEMA'}
+                                </div>
+                                <h1 className="hero-title">
+                                    {settings.site_name || 'ClassicFlims'}
+                                </h1>
+                                <p className="hero-description">
+                                    Stream the finest collection of classic films, golden age Hollywood, and timeless cinema masterpieces.
+                                </p>
+                                <div className="hero-actions">
+                                    <button className="btn btn-primary" onClick={() => {
+                                        const first = backendContent.featured[0] || backendContent.trending[0] || allContent[0];
+                                        if (first) playContent(first);
+                                    }}>▶ Start Watching</button>
+                                    <button className="btn btn-secondary" onClick={() => setPage('movies')}>📚 Browse Catalog</button>
+                                </div>
+                            </div>
+                        </section>
+                    )}
+
+                    {/* Page heading for sub-pages */}
+                    {page !== 'home' && (
+                        <div style={{paddingTop:'8rem', maxWidth:'1600px', margin:'0 auto', padding:'8rem 4rem 0'}}>
+                            <h1 style={{fontFamily:'Unbounded,sans-serif',fontSize:'2.5rem',marginBottom:'0.5rem'}}>
+                                {page === 'movies' ? '🎬 Movies' : page === 'series' ? '📺 Series' : '📡 Live'}
+                            </h1>
+                        </div>
+                    )}
+
+                    {/* Header Ad */}
+                    {headerAd && page === 'home' && <AdBanner ad={headerAd} position="header" />}
+
+                    {/* Content */}
+                    <div className="content-section">
+                        {renderPageContent()}
+                    </div>
+
                     {/* Footer */}
                     <footer className="footer">
                         <div className="footer-content">
                             <div className="footer-section">
-                                <h3>About {settings.site_name || 'StreamIndia'}</h3>
+                                <h3>About {settings.site_name || 'ClassicFlims'}</h3>
                                 <ul className="footer-links">
                                     <li><a href="#">About Us</a></li>
                                     <li><a href="#">Contact</a></li>
                                     <li><a href="#">Terms of Service</a></li>
                                     <li><a href="#">Privacy Policy</a></li>
+                                </ul>
+                            </div>
+                            <div className="footer-section">
+                                <h3>Browse</h3>
+                                <ul className="footer-links">
+                                    <li><a onClick={() => setPage('home')} style={{cursor:'pointer'}}>Home</a></li>
+                                    <li><a onClick={() => setPage('movies')} style={{cursor:'pointer'}}>Movies</a></li>
+                                    <li><a onClick={() => setPage('series')} style={{cursor:'pointer'}}>Series</a></li>
+                                </ul>
+                            </div>
+                            <div className="footer-section">
+                                <h3>Account</h3>
+                                <ul className="footer-links">
+                                    {!loggedIn ? (
+                                        <>
+                                            <li><a onClick={() => setAuthModal('login')} style={{cursor:'pointer'}}>Login</a></li>
+                                            <li><a onClick={() => setAuthModal('signup')} style={{cursor:'pointer'}}>Sign Up</a></li>
+                                        </>
+                                    ) : (
+                                        <li><a onClick={() => { setLoggedIn(false); setUserName(''); }} style={{cursor:'pointer',color:'var(--accent-primary)'}}>Logout ({userName})</a></li>
+                                    )}
                                 </ul>
                             </div>
                             <div className="footer-section">
@@ -1081,14 +1283,13 @@
                             </div>
                         </div>
                         <div className="footer-bottom">
-                            <p>© 2026 {settings.site_name || 'StreamIndia'}. All rights reserved.</p>
+                            <p>© 2026 {settings.site_name || 'ClassicFlims'}. All rights reserved.</p>
                         </div>
                     </footer>
                 </div>
             );
         }
 
-        // Render the app
         ReactDOM.render(<App />, document.getElementById('root'));
     </script>
 </body>
