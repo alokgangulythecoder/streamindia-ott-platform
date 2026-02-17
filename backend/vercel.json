@@ -6,21 +6,9 @@
       "use": "@vercel/node"
     }
   ],
- "routes": [
+  "routes": [
     {
-      "src": "/admin",
-      "dest": "/public/admin.html"
-    },
-    {
-      "src": "/api/(.*)",
-      "dest": "server.js"
-    },
-    {
-      "src": "/health",
-      "dest": "server.js"
-    },
-    {
-      "src": "/",
+      "src": "/(.*)",
       "dest": "server.js"
     }
   ]
