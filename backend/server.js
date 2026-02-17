@@ -675,7 +675,9 @@ app.post('/api/seed', async (req, res) => {
 
         // ── Content (40 items — only if DB is empty) ───────────
         const contentCount = await Content.countDocuments();
-        if (contentCount === 0) {
+        if (contentCount < 5) {
+            console.log('🔧 MongoDB URI:', MONGODB_URI ? '✓ Set' : '✗ Missing');
+            console.log('🔧 JWT Secret:', JWT_SECRET ? '✓ Set' : '✗ Missing');
             await Content.insertMany([
 
                 // ================================================
