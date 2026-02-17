@@ -192,6 +192,156 @@ app.get('/health', (req, res) => {
 });
 
 // ========================================
+// USER AUTH ROUTES
+// ========================================
+
+// User Registration (Sign Up)
+app.post('/users/register', async (req, res) => {
+    try {
+        console.log('📝 Registration attempt:', req.body.email);
+        
+        const { name, email, password } = req.body;
+        
+        // Validation
+        if (!name || !email || !password) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Name, email and password are required' 
+            });
+        }
+        
+        if (password.length < 6) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Password must be at least 6 characters' 
+            });
+        }
+        
+        // Check if user already exists
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Email already registered' 
+            });
+        }
+        
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+        
+        // Create user
+        const user = await User.create({
+            name,
+            email,
+            password: hashedPassword,
+            role: 'user'
+        });
+        
+        // Generate token
+        const token = jwt.sign(
+            { id: user._id, email: user.email, role: user.role },
+            JWT_SECRET,
+            { expiresIn: '30d' }
+        );
+        
+        console.log('✅ User registered:', user.email);
+        
+        res.status(201).json({
+            success: true,
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
+        
+    } catch (error) {
+        console.error('❌ Registration error:', error);
+        res.status(500).json({ 
+            success: false,
+            error: error.message 
+        });
+    }
+});
+
+// User Login (Sign In)
+app.post('/users/login', async (req, res) => {
+    try {
+        console.log('🔐 User login attempt:', req.body.email);
+        
+        const { email, password } = req.body;
+        
+        if (!email || !password) {
+            return res.status(400).json({ 
+                success: false,
+                error: 'Email and password required' 
+            });
+        }
+        
+        // Find user
+        const user = await User.findOne({ email });
+        
+        if (!user) {
+            console.log('❌ User not found');
+            return res.status(401).json({ 
+                success: false,
+                error: 'Invalid credentials' 
+            });
+        }
+        
+        // Verify password
+        const validPassword = await bcrypt.compare(password, user.password);
+        
+        if (!validPassword) {
+            console.log('❌ Invalid password');
+            return res.status(401).json({ 
+                success: false,
+                error: 'Invalid credentials' 
+            });
+        }
+        
+        // Generate token
+        const token = jwt.sign(
+            { id: user._id, email: user.email, role: user.role },
+            JWT_SECRET,
+            { expiresIn: '30d' }
+        );
+        
+        console.log('✅ User login successful');
+        
+        res.json({
+            success: true,
+            token,
+            user: {
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                role: user.role
+            }
+        });
+        
+    } catch (error) {
+        console.error('❌ Login error:', error);
+        res.status(500).json({ 
+            success: false,
+            error: error.message 
+        });
+    }
+});
+
+// Get current user info (optional - for profile)
+app.get('/users/me', authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('-password');
+        res.json({ success: true, user });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ========================================
 // ADMIN AUTH
 // ========================================
 
