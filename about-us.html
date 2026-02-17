@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - ClassicFlims</title>
+    <meta name="description" content="Learn about ClassicFlims and our mission to preserve and share classic cinema">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Unbounded:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
+        :root {{
+            --primary-bg: #0a0a0f;
+            --secondary-bg: #141419;
+            --card-bg: #1a1a24;
+            --accent-primary: #ff3366;
+            --accent-secondary: #7c3aed;
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0b8;
+            --border-color: #2a2a3a;
+        }}
+        body {{ font-family: 'Plus Jakarta Sans', sans-serif; background: var(--primary-bg); color: var(--text-primary); line-height: 1.8; min-height: 100vh; }}
+        .navbar {{ background: rgba(10, 10, 15, 0.98); padding: 1.5rem 4rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }}
+        .logo {{ font-family: 'Unbounded', sans-serif; font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #ff3366 0%, #7c3aed 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-decoration: none; }}
+        .back-btn {{ padding: 0.75rem 1.5rem; background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); text-decoration: none; font-weight: 600; transition: all 0.3s ease; }}
+        .back-btn:hover {{ background: rgba(255, 255, 255, 0.15); transform: translateX(-3px); }}
+        .container {{ max-width: 900px; margin: 0 auto; padding: 4rem 2rem; }}
+        h1 {{ font-family: 'Unbounded', sans-serif; font-size: 3rem; margin-bottom: 1.5rem; background: linear-gradient(135deg, #ff3366 0%, #7c3aed 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }}
+        h2 {{ font-family: 'Unbounded', sans-serif; font-size: 1.8rem; margin-top: 2.5rem; margin-bottom: 1rem; color: var(--text-primary); }}
+        h3 {{ font-size: 1.3rem; margin-top: 2rem; margin-bottom: 0.75rem; color: var(--accent-primary); }}
+        p {{ margin-bottom: 1.25rem; color: var(--text-secondary); font-size: 1.05rem; }}
+        ul, ol {{ margin-left: 2rem; margin-bottom: 1.5rem; color: var(--text-secondary); }}
+        li {{ margin-bottom: 0.75rem; }}
+        strong {{ color: var(--text-primary); font-weight: 600; }}
+        a {{ color: var(--accent-primary); text-decoration: none; }}
+        a:hover {{ text-decoration: underline; }}
+        .info-box {{ background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin: 2rem 0; }}
+        .contact-info {{ background: var(--card-bg); border-left: 4px solid var(--accent-primary); padding: 1.5rem; margin: 1.5rem 0; border-radius: 4px; }}
+        .form-group {{ margin-bottom: 1.5rem; }}
+        label {{ display: block; margin-bottom: 0.5rem; color: var(--text-primary); font-weight: 600; }}
+        input, textarea {{ width: 100%; padding: 0.85rem; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: inherit; font-size: 1rem; }}
+        input:focus, textarea:focus {{ outline: none; border-color: var(--accent-primary); }}
+        textarea {{ min-height: 150px; resize: vertical; }}
+        button {{ background: linear-gradient(135deg, #ff3366 0%, #7c3aed 100%); color: white; padding: 1rem 2rem; border: none; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; }}
+        button:hover {{ transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255, 51, 102, 0.3); }}
+        .footer {{ background: var(--secondary-bg); padding: 3rem 2rem; margin-top: 4rem; text-align: center; border-top: 1px solid var(--border-color); color: var(--text-secondary); }}
+        @media (max-width: 768px) {{
+            .navbar {{ padding: 1rem 1.5rem; }}
+            .logo {{ font-size: 1.5rem; }}
+            .container {{ padding: 2rem 1.5rem; }}
+            h1 {{ font-size: 2rem; }}
+            h2 {{ font-size: 1.5rem; }}
+        }}
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html" class="logo">ClassicFlims</a>
+        <a href="index.html" class="back-btn">← Back to Home</a>
+    </nav>
+    <div class="container">
+
+<h1>About Us</h1>
+
+<p>Welcome to ClassicFlims, your home for classic movies and timeless cinema. We are dedicated to preserving and sharing the golden age of film with movie lovers around the world.</p>
+
+<h2>Our Mission</h2>
+
+<p>We believe classic movies are more than entertainment. They are a window into history, culture, and the art of storytelling. Our mission is to make these films accessible to everyone, ensuring that future generations can enjoy the masterpieces of cinema's past.</p>
+
+<h2>What We Offer</h2>
+
+<ul>
+    <li><strong>Curated Collection:</strong> We hand-pick classic films from different eras and genres to bring you the best of vintage cinema.</li>
+    <li><strong>High Quality:</strong> All our movies are restored and presented in the best available quality for your viewing pleasure.</li>
+    <li><strong>Free Access:</strong> We focus on public domain films, making classic cinema available to everyone at no cost.</li>
+    <li><strong>Easy Discovery:</strong> Our platform helps you find movies by genre, year, director, and more.</li>
+</ul>
+
+<h2>Our Story</h2>
+
+<p>ClassicFlims was created by film enthusiasts who wanted to share their love of classic cinema with the world. We started with a simple idea: great movies should be available to everyone, not locked away in archives.</p>
+
+<p>Today, we are proud to offer a growing library of classic films that spans decades of cinema history. From silent films to golden age Hollywood, from noir to musicals, we celebrate the diversity and artistry of classic movies.</p>
+
+<h2>Our Team</h2>
+
+<p>Our team includes film historians, developers, and cinema lovers who work together to bring you the best streaming experience. We carefully select each film, restore old footage when possible, and provide context to help you appreciate these timeless works.</p>
+
+<h2>Join Our Community</h2>
+
+<p>We invite you to explore our collection, discover new favorites, and rediscover old classics. Whether you are a lifelong fan of classic cinema or just starting your journey, ClassicFlims is here for you.</p>
+
+<p>Thank you for being part of our community and helping us preserve the magic of classic film.</p>
+
+    </div>
+    <footer class="footer">
+        <p>© 2026 ClassicFlims. All rights reserved.</p>
+    </footer>
+</body>
+</html>
