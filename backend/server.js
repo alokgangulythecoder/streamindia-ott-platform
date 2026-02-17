@@ -1061,7 +1061,7 @@ app.post('/api/seed', async (req, res) => {
         }
 
         res.json({
-            message: '✅ Database seeded successfully!' + ${MONGODB_URI}',
+            message: '✅ Database seeded successfully!',
             summary: {
                 admins:     'admin / admin123',
                 navigation: 5,
