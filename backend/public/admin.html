@@ -64,6 +64,15 @@
         th { font-weight:600; background:#f9fafb; }
         tr:hover td { background:#f9fafb; }
 
+        /* PAGINATION */
+        .pagination { display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; padding:1rem; background:#f9fafb; border-radius:8px; }
+        .pagination-info { color:var(--gray); font-size:0.9rem; }
+        .pagination-buttons { display:flex; gap:0.5rem; }
+        .page-btn { padding:0.5rem 1rem; border:1px solid var(--gray-light); background:white; border-radius:6px; cursor:pointer; font-weight:500; transition:all 0.2s; }
+        .page-btn:hover:not(:disabled) { background:var(--primary); color:white; border-color:var(--primary); }
+        .page-btn:disabled { opacity:0.5; cursor:not-allowed; }
+        .page-btn.active { background:var(--primary); color:white; border-color:var(--primary); }
+
         /* BADGES */
         .badge { display:inline-block; padding:0.25rem 0.75rem; border-radius:20px; font-size:0.75rem; font-weight:600; text-transform:uppercase; }
         .badge-success { background:rgba(16,185,129,0.1); color:var(--success); }
@@ -226,6 +235,18 @@
                         <thead><tr><th>Title</th><th>Type</th><th>Category</th><th>Status</th><th>Views</th><th>Actions</th></tr></thead>
                         <tbody id="contentTable"><tr><td colspan="6"><div class="loading"><div class="spinner"></div></div></td></tr></tbody>
                     </table>
+                </div>
+                <div id="contentPagination" class="pagination" style="display:none;">
+                    <div class="pagination-info">
+                        Showing <strong id="contentShowingStart">0</strong>-<strong id="contentShowingEnd">0</strong> of <strong id="contentTotal">0</strong> items
+                    </div>
+                    <div class="pagination-buttons">
+                        <button class="page-btn" id="contentFirstPage" onclick="goToContentPage(1)">First</button>
+                        <button class="page-btn" id="contentPrevPage" onclick="prevContentPage()">Previous</button>
+                        <span style="padding:0.5rem 1rem;color:var(--gray);font-weight:500;">Page <strong id="contentCurrentPage">1</strong> of <strong id="contentTotalPages">1</strong></span>
+                        <button class="page-btn" id="contentNextPage" onclick="nextContentPage()">Next</button>
+                        <button class="page-btn" id="contentLastPage" onclick="goToContentPage('last')">Last</button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -617,18 +638,34 @@ async function loadDashboard() {
 }
 
 // ============================================================
-// CONTENT CRUD
+// CONTENT CRUD WITH PAGINATION
 // ============================================================
-async function loadContent() {
+let currentContentPage = 1;
+const contentPageSize = 50;
+let totalContentPages = 1;
+let totalContentItems = 0;
+
+async function loadContent(page = 1) {
+    currentContentPage = page;
     document.getElementById('contentTable').innerHTML = '<tr><td colspan="6"><div class="loading"><div class="spinner"></div></div></td></tr>';
+    document.getElementById('contentPagination').style.display = 'none';
+    
     try {
-        const res = await fetch(`${API_URL}/content?status=all`, { headers: { 'Authorization': `Bearer ${authToken}` } });
+        const res = await fetch(`${API_URL}/content?status=all&page=${page}&limit=${contentPageSize}`, { 
+            headers: { 'Authorization': `Bearer ${authToken}` } 
+        });
         const data = await res.json();
         const rows = data.content;
+        const pagination = data.pagination;
+        
+        totalContentPages = pagination.pages || 1;
+        totalContentItems = pagination.total || 0;
+        
         if (!rows || rows.length === 0) {
             document.getElementById('contentTable').innerHTML = '<tr><td colspan="6"><div class="empty-state"><p>No content found. Click + Add Content.</p></div></td></tr>';
             return;
         }
+        
         document.getElementById('contentTable').innerHTML = rows.map(c => `
             <tr>
                 <td>${c.title}</td>
@@ -641,8 +678,53 @@ async function loadContent() {
                     <button class="btn btn-danger btn-sm" onclick="deleteContent('${c._id}')">Delete</button>
                 </td>
             </tr>`).join('');
+        
+        // Update pagination UI
+        updateContentPagination(pagination);
+        
     } catch (err) {
         document.getElementById('contentTable').innerHTML = '<tr><td colspan="6" style="color:red;padding:1rem;">Error loading content</td></tr>';
+    }
+}
+
+function updateContentPagination(pagination) {
+    const { page, total, pages } = pagination;
+    const start = ((page - 1) * contentPageSize) + 1;
+    const end = Math.min(page * contentPageSize, total);
+    
+    document.getElementById('contentShowingStart').textContent = total > 0 ? start : 0;
+    document.getElementById('contentShowingEnd').textContent = end;
+    document.getElementById('contentTotal').textContent = total;
+    document.getElementById('contentCurrentPage').textContent = page;
+    document.getElementById('contentTotalPages').textContent = pages;
+    
+    // Enable/disable buttons
+    document.getElementById('contentFirstPage').disabled = page === 1;
+    document.getElementById('contentPrevPage').disabled = page === 1;
+    document.getElementById('contentNextPage').disabled = page === pages;
+    document.getElementById('contentLastPage').disabled = page === pages;
+    
+    // Show pagination only if there are multiple pages
+    document.getElementById('contentPagination').style.display = pages > 1 ? 'flex' : 'none';
+}
+
+function goToContentPage(pageNum) {
+    if (pageNum === 'last') {
+        loadContent(totalContentPages);
+    } else {
+        loadContent(pageNum);
+    }
+}
+
+function nextContentPage() {
+    if (currentContentPage < totalContentPages) {
+        loadContent(currentContentPage + 1);
+    }
+}
+
+function prevContentPage() {
+    if (currentContentPage > 1) {
+        loadContent(currentContentPage - 1);
     }
 }
 
