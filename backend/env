@@ -5,7 +5,7 @@ PORT=3000
 NODE_ENV=production
 
 # Database Configuration
-
+DBNAME=test
 
 # JWT Secret (CHANGE THIS IN PRODUCTION!)
 # Generate with: node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
