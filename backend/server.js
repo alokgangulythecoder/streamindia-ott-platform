@@ -47,20 +47,20 @@ app.use((req, res, next) => {
 // ENVIRONMENT VARIABLES
 // ========================================
 
-const MONGODB_URI = process.env.MONGO_URI;
+const MONGOTESTDB_URI = process.env.MONGO_URI;
  
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-me';
 
-console.log('🔧 MongoDB URI:', MONGODB_URI ? '✓ Set' : '✗ Missing');
+console.log('🔧 MongoDB URI:', MONGOTESTDB_URI ? '✓ Set' : '✗ Missing');
 console.log('🔧 JWT Secret:', JWT_SECRET ? '✓ Set' : '✗ Missing');
 
 // ========================================
 // MONGODB CONNECTION
 // ========================================
 
-if (MONGODB_URI) {
+if (MONGOTESTDB_URI) {
     console.log('🔄 Connecting to MongoDB...');
-    mongoose.connect(MONGODB_URI)
+    mongoose.connect(MONGOTESTDB_URI)
         .then(() => {
             console.log('✅ MongoDB Connected');
             console.log('📊 Database:', mongoose.connection.name);
@@ -637,7 +637,7 @@ app.get('/api/dashboard/stats', authMiddleware, async (req, res) => {
 app.post('/api/seed', async (req, res) => {
     try {
         console.log('🌱 Starting seed...');
-        console.log('🔧 MongoDB URI:', MONGODB_URI ? '✓ Set' : '✗ Missing');
+        console.log('🔧 MongoDB URI:', MONGOTESTDB_URI ? '✓ Set' : '✗ Missing');
 
         // ── Admin ──────────────────────────────────────────────
         const adminCount = await Admin.countDocuments();
@@ -682,7 +682,7 @@ app.post('/api/seed', async (req, res) => {
         console.log('⚠️ Force mode: Deleting existing content...');
         await Content.deleteMany({});
       }
-            console.log('🔧 MongoDB URI:', MONGODB_URI ? '✓ Set' : '✗ Missing');
+            console.log('🔧 MongoDB URI:', MONGOTESTDB_URI ? '✓ Set' : '✗ Missing');
             console.log('🔧 JWT Secret:', JWT_SECRET ? '✓ Set' : '✗ Missing');
             console.log('\n📌 Seeding Content (70 items)...');
       await Content.insertMany([
