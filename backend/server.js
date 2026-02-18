@@ -675,10 +675,17 @@ app.post('/api/seed', async (req, res) => {
 
         // ── Content (40 items — only if DB is empty) ───────────
         const contentCount = await Content.countDocuments();
-        if (contentCount < 50) {
+        const force = req.query.force === 'true';
+
+    if (contentCount === 0 || force) {
+      if (force && contentCount > 0) {
+        console.log('⚠️ Force mode: Deleting existing content...');
+        await Content.deleteMany({});
+      }
             console.log('🔧 MongoDB URI:', MONGODB_URI ? '✓ Set' : '✗ Missing');
             console.log('🔧 JWT Secret:', JWT_SECRET ? '✓ Set' : '✗ Missing');
-            await Content.insertMany([
+            console.log('\n📌 Seeding Content (70 items)...');
+      await Content.insertMany([
 
                 // ================================================
                 // MOVIES — Indian public-domain on archive.org
@@ -1348,7 +1355,181 @@ app.post('/api/seed', async (req, res) => {
   },
 
                 // ================================================
-                // DOCUMENTARIES (10) — All public domain
+          
+      // ===========================
+      // SERIES (10 Classic Indian TV)
+      // ===========================
+      {
+        title: "Ramayana (1987) - Episode 1",
+        description: "Ramanand Sagar's iconic Doordarshan serial. Episode 1: The story begins in Ayodhya with King Dasharatha and the birth of Lord Rama. Holds the Guinness World Record for most-watched TV show. Arun Govil as Rama and Deepika Chikhalia as Sita became household names.",
+        type: "series",
+        category: "Mythological",
+        language: "Hindi",
+        year: 1987,
+        duration: "45 min/ep",
+        rating: 9.2,
+        videoUrl: "https://archive.org/embed/ramayana-1987-episode-1",
+        thumbnailUrl: "https://archive.org/services/img/ramayana-1987-episode-1",
+        featured: true,
+        trending: true,
+        status: "published",
+        views: 89000,
+        likes: 78000
+      },
+      {
+        title: "Mahabharat (1988) - Episode 1",
+        description: "B.R. Chopra's magnum opus. Episode 1 introduces the Kuru dynasty. With Mukesh Khanna as Bhishma and Nitish Bharadwaj as Krishna, this serial redefined Indian television. 94 episodes that captivated a billion viewers every Sunday morning.",
+        type: "series",
+        category: "Mythological",
+        language: "Hindi",
+        year: 1988,
+        duration: "45 min/ep",
+        rating: 9.1,
+        videoUrl: "https://archive.org/embed/mahabharat-1988-episode-1",
+        thumbnailUrl: "https://archive.org/services/img/mahabharat-1988-episode-1",
+        featured: true,
+        trending: true,
+        status: "published",
+        views: 76000,
+        likes: 67000
+      },
+      {
+        title: "Byomkesh Bakshi (1993) - Season 1",
+        description: "Doordarshan's beloved detective series. Rajit Kapur plays the truth-seeker Byomkesh Bakshi in complex mysteries set in 1940s Kolkata. Acclaimed for its authentic period atmosphere, intelligent writing, and stellar performances. India's Sherlock Holmes.",
+        type: "series",
+        category: "Mystery Drama",
+        language: "Hindi",
+        year: 1993,
+        duration: "50 min/ep",
+        rating: 8.7,
+        videoUrl: "https://archive.org/embed/ByomkeshBakshi1993Season1",
+        thumbnailUrl: "https://archive.org/services/img/ByomkeshBakshi1993Season1",
+        featured: false,
+        trending: true,
+        status: "published",
+        views: 34000,
+        likes: 28500
+      },
+      {
+        title: "Malgudi Days (1987) - Season 1",
+        description: "Shankar Nag's timeless adaptation of R.K. Narayan's stories of the fictional South Indian town of Malgudi. Young Swami's charming adventures, the wise Raju, and colorful characters. The nostalgic theme by L. Subramaniam is forever etched in memory.",
+        type: "series",
+        category: "Family Drama",
+        language: "Hindi",
+        year: 1987,
+        duration: "25 min/ep",
+        rating: 9.0,
+        videoUrl: "https://archive.org/embed/MalgudiDays1987Season1",
+        thumbnailUrl: "https://archive.org/services/img/MalgudiDays1987Season1",
+        featured: true,
+        trending: false,
+        status: "published",
+        views: 41000,
+        likes: 36500
+      },
+      {
+        title: "Vikram aur Betaal (1985)",
+        description: "King Vikramaditya carries a corpse possessed by the spirit Betaal, who poses a riddle each episode. A beloved Doordarshan mythological-folk series that mesmerised a generation. Arun Govil as Vikram before he became Rama.",
+        type: "series",
+        category: "Mythology Folk",
+        language: "Hindi",
+        year: 1985,
+        duration: "25 min/ep",
+        rating: 8.5,
+        videoUrl: "https://archive.org/embed/VikramaaurBetaal1985",
+        thumbnailUrl: "https://archive.org/services/img/VikramaaurBetaal1985",
+        featured: false,
+        trending: true,
+        status: "published",
+        views: 27000,
+        likes: 22000
+      },
+      {
+        title: "Buniyaad (1986)",
+        description: "India's most celebrated family saga: the Haveli Ram family from Partition 1947 to the 1980s. Directed by Ramesh Sippy, written by Manohar Shyam Joshi. The first major prime-time serial on Doordarshan. A landmark in Indian television history.",
+        type: "series",
+        category: "Family Saga",
+        language: "Hindi",
+        year: 1986,
+        duration: "50 min/ep",
+        rating: 8.8,
+        videoUrl: "https://archive.org/embed/Buniyaad1986",
+        thumbnailUrl: "https://archive.org/services/img/Buniyaad1986",
+        featured: true,
+        trending: false,
+        status: "published",
+        views: 31000,
+        likes: 26000
+      },
+      {
+        title: "Hum Log (1984)",
+        description: "India's first soap opera: the Rastogi family's everyday struggles. 156 episodes, 50 million viewers per episode. Changed the landscape of Indian television forever. Ashok Kumar as the narrator brought gravitas to this pioneering social drama.",
+        type: "series",
+        category: "Social Drama",
+        language: "Hindi",
+        year: 1984,
+        duration: "23 min/ep",
+        rating: 8.3,
+        videoUrl: "https://archive.org/embed/HumLog1984",
+        thumbnailUrl: "https://archive.org/services/img/HumLog1984",
+        featured: false,
+        trending: false,
+        status: "published",
+        views: 18000,
+        likes: 14500
+      },
+      {
+        title: "Tenali Rama (1988)",
+        description: "The witty tales of Tenali Rama, court jester of Emperor Krishnadevaraya. Each episode showcases clever solutions to impossible problems. A beloved Tamil/Telugu DD series that taught life lessons through humor and intelligence.",
+        type: "series",
+        category: "Historical Comedy",
+        language: "Tamil",
+        year: 1988,
+        duration: "25 min/ep",
+        rating: 8.1,
+        videoUrl: "https://archive.org/embed/TenaliRama1988TamilSeries",
+        thumbnailUrl: "https://archive.org/services/img/TenaliRama1988TamilSeries",
+        featured: false,
+        trending: true,
+        status: "published",
+        views: 23000,
+        likes: 19000
+      },
+      {
+        title: "Circus (1989)",
+        description: "Shah Rukh Khan's television debut: a young trainee at a traveling circus discovers friendships and dreams. Directed by Aziz Mirza. The launch pad for the King of Bollywood. Renuka Shahane co-stars in this heartwarming drama.",
+        type: "series",
+        category: "Drama",
+        language: "Hindi",
+        year: 1989,
+        duration: "45 min/ep",
+        rating: 8.4,
+        videoUrl: "https://archive.org/embed/Circus1989DoordarshantvsSerialShahrukhKhan",
+        thumbnailUrl: "https://archive.org/services/img/Circus1989DoordarshantvsSerialShahrukhKhan",
+        featured: true,
+        trending: true,
+        status: "published",
+        views: 44000,
+        likes: 38000
+      },
+      {
+        title: "Nukkad (1986)",
+        description: "Ensemble drama about everyday lives of people at a Delhi street corner. Two seasons of raw honesty, humor and empathy. One of Doordarshan's most beloved and enduring series. Kundan Shah and Saeed Mirza's masterpiece of realist television.",
+        type: "series",
+        category: "Social Drama",
+        language: "Hindi",
+        year: 1986,
+        duration: "25 min/ep",
+        rating: 8.6,
+        videoUrl: "https://archive.org/embed/Nukkad1986Season1",
+        thumbnailUrl: "https://archive.org/services/img/Nukkad1986Season1",
+        featured: false,
+        trending: false,
+        status: "published",
+        views: 19500,
+        likes: 16200
+      },
+      // DOCUMENTARIES (10) — All public domain
                 // ================================================
                 {
                     title: 'Gandhi — Archival Documentary (1962)',
