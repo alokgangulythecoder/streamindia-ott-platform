@@ -149,6 +149,19 @@ const settingsSchema = new mongoose.Schema({
     updatedAt: { type: Date, default: Date.now }
 });
 
+const contactSchema = new mongoose.Schema({
+    name: { type: String, required: true, trim: true, maxlength: 100 },
+    email: { type: String, required: true, trim: true, lowercase: true },
+    subject: { type: String, required: true, trim: true, maxlength: 200 },
+    message: { type: String, required: true, trim: true, maxlength: 2000 },
+    status: { type: String, enum: ['new', 'read', 'replied', 'archived'], default: 'new' },
+    ip: { type: String },
+    userAgent: { type: String },
+    createdAt: { type: Date, default: Date.now },
+    repliedAt: { type: Date },
+    notes: { type: String }
+});
+
 const Admin = mongoose.model('Admin', adminSchema);
 // ADD USER MODEL WITH OTHER MODELS
 const User = mongoose.model('User', userSchema);
@@ -156,6 +169,7 @@ const Content = mongoose.model('Content', contentSchema);
 const Navigation = mongoose.model('Navigation', navigationSchema);
 const Advertisement = mongoose.model('Advertisement', advertisementSchema);
 const Settings = mongoose.model('Settings', settingsSchema);
+const Contact = mongoose.model('Contact', contactSchema);
 
 // ========================================
 // AUTH MIDDLEWARE
@@ -353,6 +367,234 @@ app.get('/api/users/me', authMiddleware, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
         res.json({ success: true, user });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// ========================================
+// CONTACT FORM ROUTES
+// ========================================
+
+// Rate limiting storage (in-memory - use Redis in production)
+const contactSubmissions = new Map();
+
+// Clean up old entries every hour
+setInterval(() => {
+    const oneHourAgo = Date.now() - (60 * 60 * 1000);
+    for (const [ip, timestamp] of contactSubmissions.entries()) {
+        if (timestamp < oneHourAgo) {
+            contactSubmissions.delete(ip);
+        }
+    }
+}, 60 * 60 * 1000);
+
+// Submit contact form
+app.post('/api/contact', async (req, res) => {
+    try {
+        const { name, email, subject, message } = req.body;
+        
+        // Get client IP
+        const clientIp = req.headers['x-forwarded-for']?.split(',')[0].trim() || 
+                        req.socket.remoteAddress || 
+                        'unknown';
+
+        // Rate limiting: 1 submission per IP per hour
+        const lastSubmission = contactSubmissions.get(clientIp);
+        const oneHourAgo = Date.now() - (60 * 60 * 1000);
+        
+        if (lastSubmission && lastSubmission > oneHourAgo) {
+            return res.status(429).json({
+                success: false,
+                error: 'Too many requests. Please wait an hour before submitting again.'
+            });
+        }
+
+        // Validation
+        if (!name || !email || !subject || !message) {
+            return res.status(400).json({
+                success: false,
+                error: 'All fields are required'
+            });
+        }
+
+        // Length validation
+        if (name.length < 2 || name.length > 100) {
+            return res.status(400).json({
+                success: false,
+                error: 'Name must be between 2 and 100 characters'
+            });
+        }
+
+        if (subject.length < 3 || subject.length > 200) {
+            return res.status(400).json({
+                success: false,
+                error: 'Subject must be between 3 and 200 characters'
+            });
+        }
+
+        if (message.length < 10 || message.length > 2000) {
+            return res.status(400).json({
+                success: false,
+                error: 'Message must be between 10 and 2000 characters'
+            });
+        }
+
+        // Email format validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+            return res.status(400).json({
+                success: false,
+                error: 'Invalid email address'
+            });
+        }
+
+        // Spam detection: Check for suspicious patterns
+        const spamPatterns = [
+            /viagra/i,
+            /cialis/i,
+            /pharmacy/i,
+            /casino/i,
+            /lottery/i,
+            /bitcoin/i,
+            /crypto/i,
+            /invest now/i,
+            /click here/i,
+            /buy now/i,
+            /<script/i,
+            /<iframe/i
+        ];
+
+        const combinedText = `${name} ${subject} ${message}`.toLowerCase();
+        const isSpam = spamPatterns.some(pattern => pattern.test(combinedText));
+
+        if (isSpam) {
+            console.log('Spam detected:', { name, email, subject });
+            // Silently reject spam
+            return res.status(400).json({
+                success: false,
+                error: 'Your message could not be sent. Please contact us directly.'
+            });
+        }
+
+        // Create contact submission
+        const contact = await Contact.create({
+            name: name.trim(),
+            email: email.trim().toLowerCase(),
+            subject: subject.trim(),
+            message: message.trim(),
+            ip: clientIp,
+            userAgent: req.headers['user-agent'] || 'unknown',
+            status: 'new'
+        });
+
+        // Update rate limiting
+        contactSubmissions.set(clientIp, Date.now());
+
+        console.log('✅ New contact submission:', { 
+            id: contact._id, 
+            name: contact.name, 
+            email: contact.email,
+            ip: clientIp
+        });
+
+        res.status(201).json({
+            success: true,
+            message: 'Thank you for your message! We will get back to you soon.',
+            id: contact._id
+        });
+
+    } catch (error) {
+        console.error('❌ Contact submission error:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Failed to submit your message. Please try again later.'
+        });
+    }
+});
+
+// Get all contact submissions (admin only)
+app.get('/api/contact', authMiddleware, async (req, res) => {
+    try {
+        const { status, page = 1, limit = 50 } = req.query;
+        const query = {};
+        
+        if (status && status !== 'all') {
+            query.status = status;
+        }
+
+        const contacts = await Contact.find(query)
+            .sort({ createdAt: -1 })
+            .skip((page - 1) * limit)
+            .limit(parseInt(limit));
+
+        const total = await Contact.countDocuments(query);
+
+        res.json({
+            success: true,
+            contacts,
+            pagination: {
+                page: parseInt(page),
+                limit: parseInt(limit),
+                total,
+                pages: Math.ceil(total / limit)
+            }
+        });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Get single contact submission (admin only)
+app.get('/api/contact/:id', authMiddleware, async (req, res) => {
+    try {
+        const contact = await Contact.findById(req.params.id);
+        if (!contact) {
+            return res.status(404).json({ success: false, error: 'Contact not found' });
+        }
+
+        // Mark as read if status is 'new'
+        if (contact.status === 'new') {
+            contact.status = 'read';
+            await contact.save();
+        }
+
+        res.json({ success: true, contact });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Update contact status (admin only)
+app.put('/api/contact/:id', authMiddleware, async (req, res) => {
+    try {
+        const { status, notes } = req.body;
+        const contact = await Contact.findById(req.params.id);
+        
+        if (!contact) {
+            return res.status(404).json({ success: false, error: 'Contact not found' });
+        }
+
+        if (status) contact.status = status;
+        if (notes !== undefined) contact.notes = notes;
+        if (status === 'replied') contact.repliedAt = new Date();
+
+        await contact.save();
+
+        res.json({ success: true, contact });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+});
+
+// Delete contact submission (admin only)
+app.delete('/api/contact/:id', authMiddleware, async (req, res) => {
+    try {
+        const contact = await Contact.findByIdAndDelete(req.params.id);
+        if (!contact) {
+            return res.status(404).json({ success: false, error: 'Contact not found' });
+        }
+        res.json({ success: true, message: 'Contact deleted' });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
