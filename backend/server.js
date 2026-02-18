@@ -398,7 +398,7 @@ app.post('/api/admin/login', async (req, res) => {
 
 app.get('/api/content', async (req, res) => {
     try {
-        const { category, type, status, search, page = 1, limit = 20 } = req.query;
+        const { category, type, status, search, page = 1, limit = 100 } = req.query;
         const query = {};
         if (category) query.category = category;
         if (type) query.type = type;
