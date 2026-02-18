@@ -1,157 +1,948 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Frequently Asked Questions - ClassicFlims</title>
-    <meta name="description" content="Common questions and answers about ClassicFlims">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Unbounded:wght@400;600;800&display=swap" rel="stylesheet">
-    <style>
-        * {{ margin: 0; padding: 0; box-sizing: border-box; }}
-        :root {{
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="FAQ - Frequently Asked Questions - ClassicFlims Premium Classical Content Streaming">
+  <title>FAQ - Frequently Asked Questions - ClassicFlims</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Unbounded:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
             --primary-bg: #0a0a0f;
             --secondary-bg: #141419;
             --card-bg: #1a1a24;
             --accent-primary: #ff3366;
             --accent-secondary: #7c3aed;
+            --accent-gold: #fbbf24;
             --text-primary: #ffffff;
             --text-secondary: #a0a0b8;
             --border-color: #2a2a3a;
-        }}
-        body {{ font-family: 'Plus Jakarta Sans', sans-serif; background: var(--primary-bg); color: var(--text-primary); line-height: 1.8; min-height: 100vh; }}
-        .navbar {{ background: rgba(10, 10, 15, 0.98); padding: 1.5rem 4rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }}
-        .logo {{ font-family: 'Unbounded', sans-serif; font-size: 2rem; font-weight: 800; background: linear-gradient(135deg, #ff3366 0%, #7c3aed 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; text-decoration: none; }}
-        .back-btn {{ padding: 0.75rem 1.5rem; background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); text-decoration: none; font-weight: 600; transition: all 0.3s ease; }}
-        .back-btn:hover {{ background: rgba(255, 255, 255, 0.15); transform: translateX(-3px); }}
-        .container {{ max-width: 900px; margin: 0 auto; padding: 4rem 2rem; }}
-        h1 {{ font-family: 'Unbounded', sans-serif; font-size: 3rem; margin-bottom: 1.5rem; background: linear-gradient(135deg, #ff3366 0%, #7c3aed 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }}
-        h2 {{ font-family: 'Unbounded', sans-serif; font-size: 1.8rem; margin-top: 2.5rem; margin-bottom: 1rem; color: var(--text-primary); }}
-        h3 {{ font-size: 1.3rem; margin-top: 2rem; margin-bottom: 0.75rem; color: var(--accent-primary); }}
-        p {{ margin-bottom: 1.25rem; color: var(--text-secondary); font-size: 1.05rem; }}
-        ul, ol {{ margin-left: 2rem; margin-bottom: 1.5rem; color: var(--text-secondary); }}
-        li {{ margin-bottom: 0.75rem; }}
-        strong {{ color: var(--text-primary); font-weight: 600; }}
-        a {{ color: var(--accent-primary); text-decoration: none; }}
-        a:hover {{ text-decoration: underline; }}
-        .info-box {{ background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 1.5rem; margin: 2rem 0; }}
-        .contact-info {{ background: var(--card-bg); border-left: 4px solid var(--accent-primary); padding: 1.5rem; margin: 1.5rem 0; border-radius: 4px; }}
-        .form-group {{ margin-bottom: 1.5rem; }}
-        label {{ display: block; margin-bottom: 0.5rem; color: var(--text-primary); font-weight: 600; }}
-        input, textarea {{ width: 100%; padding: 0.85rem; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; color: var(--text-primary); font-family: inherit; font-size: 1rem; }}
-        input:focus, textarea:focus {{ outline: none; border-color: var(--accent-primary); }}
-        textarea {{ min-height: 150px; resize: vertical; }}
-        button {{ background: linear-gradient(135deg, #ff3366 0%, #7c3aed 100%); color: white; padding: 1rem 2rem; border: none; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; }}
-        button:hover {{ transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255, 51, 102, 0.3); }}
-        .footer {{ background: var(--secondary-bg); padding: 3rem 2rem; margin-top: 4rem; text-align: center; border-top: 1px solid var(--border-color); color: var(--text-secondary); }}
-        @media (max-width: 768px) {{
-            .navbar {{ padding: 1rem 1.5rem; }}
-            .logo {{ font-size: 1.5rem; }}
-            .container {{ padding: 2rem 1.5rem; }}
-            h1 {{ font-size: 2rem; }}
-            h2 {{ font-size: 1.5rem; }}
-        }}
+            --focus-ring: #ff3366;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--primary-bg);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        *:focus {
+            outline: 3px solid var(--focus-ring);
+            outline-offset: 4px;
+        }
+
+        .app-container {
+            width: 100%;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .bg-ambience {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.15;
+            pointer-events: none;
+        }
+
+        .bg-ambience::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 20%, rgba(255, 51, 102, 0.3) 0%, transparent 50%),
+                        radial-gradient(circle at 70% 60%, rgba(124, 58, 237, 0.2) 0%, transparent 50%),
+                        radial-gradient(circle at 50% 80%, rgba(251, 191, 36, 0.15) 0%, transparent 50%);
+            animation: ambience-float 20s ease-in-out infinite;
+        }
+
+        @keyframes ambience-float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(50px, -50px) rotate(5deg); }
+            66% { transform: translate(-50px, 50px) rotate(-5deg); }
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background: linear-gradient(180deg, rgba(10, 10, 15, 0.95) 0%, rgba(10, 10, 15, 0) 100%);
+            backdrop-filter: blur(20px);
+            padding: 2rem 4rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background: rgba(10, 10, 15, 0.98);
+            padding: 1.5rem 4rem;
+        }
+
+        .logo {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ff3366 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.05em;
+            cursor: pointer;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 3rem;
+            list-style: none;
+        }
+
+        .nav-item {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            cursor: pointer;
+            position: relative;
+            transition: color 0.3s ease;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: var(--text-primary);
+        }
+
+        .nav-item::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 80%;
+            height: 3px;
+            background: linear-gradient(135deg, #ff3366 0%, #7c3aed 100%);
+            border-radius: 2px;
+            transition: transform 0.3s ease;
+        }
+
+        .nav-item.active::after,
+        .nav-item:hover::after {
+            transform: translateX(-50%) scaleX(1);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 1.5rem;
+            align-items: center;
+        }
+
+        .search-icon,
+        .profile-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--card-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.3rem;
+        }
+
+        .search-icon:hover,
+        .profile-icon:hover {
+            background: var(--accent-primary);
+            transform: scale(1.1);
+        }
+
+        .hero-section {
+            position: relative;
+            height: 95vh;
+            padding-top: 8rem;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 4rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 51, 102, 0.15);
+            border: 2px solid var(--accent-primary);
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            width: fit-content;
+            margin-bottom: 2rem;
+        }
+
+        .hero-title {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            max-width: 900px;
+        }
+
+        .hero-description {
+            font-size: 1.4rem;
+            color: var(--text-secondary);
+            max-width: 700px;
+            margin-bottom: 3rem;
+            line-height: 1.8;
+        }
+
+        .hero-actions {
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        .btn {
+            padding: 1.2rem 3rem;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff3366 0%, #7c3aed 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(255, 51, 102, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 51, 102, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-3px);
+        }
+
+        .content-section {
+            position: relative;
+            z-index: 10;
+            padding: 4rem 4rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .section-title {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .view-all {
+            color: var(--accent-primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.1rem;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+        }
+
+        .view-all:hover {
+            background: rgba(255, 51, 102, 0.1);
+            transform: translateX(5px);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .content-card {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--card-bg);
+            aspect-ratio: 2/3;
+        }
+
+        .content-card:hover {
+            transform: translateY(-15px) scale(1.03);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+
+        .content-card:hover .card-image {
+            transform: scale(1.1);
+        }
+
+        .card-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 2rem;
+            background: linear-gradient(0deg, rgba(10, 10, 15, 0.95) 0%, transparent 100%);
+            transform: translateY(20px);
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+
+        .content-card:hover .card-overlay {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .card-title {
+            font-weight: 700;
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-meta {
+            display: flex;
+            gap: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.8rem;
+        }
+
+        .card-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            background: var(--accent-primary);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            z-index: 10;
+        }
+
+        .card-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .card-actions {
+            display: flex;
+            gap: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .card-btn {
+            flex: 1;
+            padding: 0.8rem;
+            border-radius: 8px;
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .card-btn-play {
+            background: white;
+            color: var(--primary-bg);
+        }
+
+        .card-btn-play:hover {
+            background: var(--accent-primary);
+            color: white;
+        }
+
+        .card-btn-info {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card-btn-info:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .player-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .player-container {
+            width: 100%;
+            max-width: 1400px;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .player-close {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 100;
+            transition: all 0.3s ease;
+        }
+
+        .player-close:hover {
+            background: var(--accent-primary);
+            transform: rotate(90deg);
+        }
+
+        .player-content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-size: 3rem;
+            font-weight: 700;
+        }
+
+        .footer {
+            background: var(--secondary-bg);
+            padding: 4rem;
+            margin-top: 6rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+        }
+
+        .footer-section h3 {
+            font-family: 'Unbounded', sans-serif;
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-primary);
+        }
+
+        .footer-bottom {
+            max-width: 1400px;
+            margin: 3rem auto 0;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .ad-banner {
+            margin: 2rem 0;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .ad-banner img {
+            width: 100%;
+            display: block;
+        }
+
+        .loading-message {
+            text-align: center;
+            padding: 4rem;
+            font-size: 1.5rem;
+        }
+
+        .no-content-message {
+            text-align: center;
+            padding: 4rem;
+        }
+
+        .no-content-message h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .no-content-message p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        /* Page subheader (Movies / Series / Live heading) */
+        .page-subheader {
+            padding: 8rem 4rem 0;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Prevent iOS input zoom (inputs stay 16px font) */
+        input, select, textarea {
+            font-size: 16px !important;
+        }
+
+        /* Smooth scrolling */
+        html { scroll-behavior: smooth; }
+
+        /* =============================================
+           MOBILE HAMBURGER MENU
+        ============================================= */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.6rem;
+            cursor: pointer;
+            padding: 0.4rem;
+            line-height: 1;
+        }
+
+        .mobile-menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: var(--primary-bg);
+            z-index: 2000;
+            flex-direction: column;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+        .mobile-menu-overlay.open { display: flex; }
+
+        .mobile-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2.5rem;
+        }
+        .mobile-menu-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
+        .mobile-nav-item {
+            font-size: 1.4rem;
+            font-weight: 600;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .mobile-nav-item:active { color: var(--accent-primary); }
+        .mobile-auth-row {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .mobile-auth-row button {
+            flex: 1;
+            padding: 0.9rem;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        /* =============================================
+           TABLET  (max 1024px)
+        ============================================= */
+        @media (max-width: 1024px) {
+            .navbar { padding: 1.2rem 2rem; }
+            .navbar.scrolled { padding: 1rem 2rem; }
+            .logo { font-size: 2rem; }
+            .hero-title { font-size: 3.8rem; }
+            .content-section { padding: 3rem 2rem; }
+            .content-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; }
+            .section-title { font-size: 1.8rem; }
+        }
+
+        /* =============================================
+           MOBILE  (max 768px) — phones & small tablets
+        ============================================= */
+        @media (max-width: 768px) {
+            /* NAV */
+            .navbar {
+                padding: 0.9rem 1.2rem;
+                -webkit-backdrop-filter: blur(20px);
+            }
+            .navbar.scrolled { padding: 0.75rem 1.2rem; }
+            .logo { font-size: 1.5rem; letter-spacing: -0.03em; }
+            .nav-menu { display: none; }
+            .nav-actions { gap: 0.6rem; }
+            .nav-actions > button { display: none; } /* hide login/signup — in mobile menu */
+            .search-icon, .profile-icon {
+                width: 40px; height: 40px;
+                border-radius: 10px;
+                font-size: 1.1rem;
+            }
+            .mobile-menu-btn { display: block; }
+
+            /* HERO */
+            .hero-section {
+                height: auto;
+                min-height: 85vh;
+                padding-top: 5rem;
+                padding-bottom: 3rem;
+                display: flex;
+                align-items: center;
+            }
+            .hero-content {
+                padding: 0 1.2rem;
+                height: auto;
+            }
+            .hero-badge {
+                font-size: 0.7rem;
+                padding: 0.5rem 1rem;
+                margin-bottom: 1rem;
+                letter-spacing: 0.06em;
+            }
+            .hero-title {
+                font-size: 2rem;
+                line-height: 1.15;
+                margin-bottom: 1rem;
+                max-width: 100%;
+            }
+            .hero-description {
+                font-size: 0.95rem;
+                margin-bottom: 1.8rem;
+                max-width: 100%;
+                line-height: 1.7;
+            }
+            .hero-actions {
+                flex-direction: column;
+                gap: 0.8rem;
+                align-items: stretch;
+            }
+            .btn {
+                padding: 0.95rem 1.5rem;
+                font-size: 1rem;
+                justify-content: center;
+                border-radius: 10px;
+            }
+
+            /* CONTENT */
+            .content-section { padding: 1.5rem 1rem; }
+            .section-header { margin-bottom: 1.2rem; }
+            .section-title { font-size: 1.25rem; }
+            .view-all { font-size: 0.85rem; padding: 0.5rem 0.8rem; }
+            .content-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+                margin-bottom: 2rem;
+            }
+
+            /* CARDS — always show overlay on mobile (no hover) */
+            .content-card { border-radius: 10px; }
+            .content-card:hover {
+                transform: none;
+                box-shadow: none;
+            }
+            .card-overlay {
+                transform: translateY(0);
+                opacity: 1;
+                background: linear-gradient(0deg, rgba(10,10,15,0.98) 0%, rgba(10,10,15,0.4) 60%, transparent 100%);
+                padding: 0.8rem;
+            }
+            .card-title { font-size: 0.85rem; margin-bottom: 0.2rem; }
+            .card-meta { font-size: 0.7rem; gap: 0.4rem; margin-bottom: 0.3rem; }
+            .card-rating { font-size: 0.7rem; }
+            .card-badge { font-size: 0.6rem; padding: 0.25rem 0.5rem; top: 0.5rem; right: 0.5rem; }
+            .card-actions { gap: 0.4rem; margin-top: 0.5rem; }
+            .card-btn { padding: 0.55rem 0.3rem; font-size: 0.75rem; border-radius: 6px; }
+
+            /* PLAYER */
+            .player-modal { padding: 0; }
+            .player-container {
+                border-radius: 0;
+                max-width: 100%;
+                width: 100%;
+            }
+            .player-close {
+                top: 0.75rem; right: 0.75rem;
+                width: 38px; height: 38px;
+                font-size: 1.1rem;
+            }
+
+            /* PAGE SUBHEADER */
+            .page-subheader { padding: 5.5rem 1.2rem 1rem; }
+            .page-subheader h1 { font-size: 1.6rem; }
+
+            /* FOOTER */
+            .footer {
+                padding: 2.5rem 1.2rem 1.5rem;
+                margin-top: 3rem;
+            }
+            .footer-content {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 2rem;
+            }
+            .footer-section h3 { font-size: 1rem; margin-bottom: 0.8rem; }
+            .footer-links li { margin-bottom: 0.5rem; }
+            .footer-links a { font-size: 0.85rem; }
+            .footer-bottom { margin-top: 1.5rem; font-size: 0.8rem; }
+
+            /* LOADING / EMPTY */
+            .loading-message { padding: 3rem 1rem; font-size: 1.1rem; }
+            .no-content-message { padding: 3rem 1rem; }
+            .no-content-message h2 { font-size: 1.4rem; }
+        }
+
+        /* =============================================
+           SMALL PHONES  (max 390px)  iPhone SE, older Androids
+        ============================================= */
+        @media (max-width: 390px) {
+            .logo { font-size: 1.25rem; }
+            .hero-title { font-size: 1.7rem; }
+            .hero-description { font-size: 0.9rem; }
+            .content-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.6rem;
+            }
+            .card-title { font-size: 0.78rem; }
+            .footer-content { grid-template-columns: 1fr; gap: 1.5rem; }
+        }
+
+        /* =============================================
+           SAFE AREAS — iPhone notch / home indicator
+        ============================================= */
+        @supports (padding: max(0px)) {
+            .navbar {
+                padding-left: max(1.2rem, env(safe-area-inset-left));
+                padding-right: max(1.2rem, env(safe-area-inset-right));
+            }
+            .footer {
+                padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+            }
+        }
+
+        /* =============================================
+           TOUCH — remove hover effects on touch devices
+        ============================================= */
+        @media (hover: none) {
+            .content-card:hover { transform: none; box-shadow: none; }
+            .btn:hover { transform: none; }
+            .nav-item:hover::after { transform: translateX(-50%) scaleX(0); }
+        }
     </style>
 </head>
 <body>
+  <div class="app-container">
+    <div class="bg-ambience"></div>
     <nav class="navbar">
-        <a href="index.html" class="logo">ClassicFlims</a>
-        <a href="index.html" class="back-btn">← Back to Home</a>
+      <div class="logo" onclick="window.location.href='index.html'" style="cursor:pointer">ClassicFlims</div>
+      <ul class="nav-menu">
+        <li class="nav-item" onclick="window.location.href='index.html'">🏠 Home</li>
+        <li class="nav-item" onclick="window.location.href='index.html#movies'">🎬 Movies</li>
+        <li class="nav-item" onclick="window.location.href='index.html#series'">📺 Series</li>
+        <li class="nav-item" onclick="window.location.href='index.html#live'">📡 Live</li>
+      </ul>
+      <div class="nav-actions">
+        <button onclick="window.location.href='index.html'" style="background:linear-gradient(135deg,#ff3366,#7c3aed);border:none;color:white;padding:0.6rem 1.5rem;border-radius:8px;cursor:pointer;font-weight:700;font-size:0.95rem;font-family:inherit">← Back</button>
+      </div>
+      <button class="mobile-menu-btn" onclick="document.querySelector('.mobile-menu-overlay').classList.add('open')">☰</button>
     </nav>
-    <div class="container">
+    <div class="mobile-menu-overlay">
+      <div class="mobile-menu-header">
+        <div class="logo">ClassicFlims</div>
+        <button class="mobile-menu-close" onclick="this.closest('.mobile-menu-overlay').classList.remove('open')">✕</button>
+      </div>
+      <div class="mobile-nav-item" onclick="window.location.href='index.html'">🏠 Home</div>
+      <div class="mobile-nav-item" onclick="window.location.href='index.html#movies'">🎬 Movies</div>
+      <div class="mobile-nav-item" onclick="window.location.href='index.html#series'">📺 Series</div>
+      <div class="mobile-nav-item" onclick="window.location.href='index.html#live'">📡 Live</div>
+    </div>
+    <div style="padding-top:120px;min-height:70vh">
+      <div style="max-width:1200px;margin:0 auto;padding:2rem 1.5rem">
+        <h1 style="font-family:Unbounded,sans-serif;font-size:2.5rem;margin-bottom:1.5rem;background:linear-gradient(135deg,#ff3366,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Frequently Asked Questions</h1>
+        
+<p style="font-size:1.2rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem">
+Frequently asked questions about ClassicFlims.
+</p>
 
-<h1>Frequently Asked Questions</h1>
+<div style="background:var(--card-bg);padding:1.5rem;border-radius:12px;margin-bottom:1rem;border-left:4px solid var(--accent-primary)">
+  <h3 style="color:var(--text-primary);margin-bottom:0.8rem">❓ What is ClassicFlims?</h3>
+  <p style="color:var(--text-secondary);line-height:1.8">ClassicFlims is a streaming platform dedicated to classic movies, TV series, documentaries, and live performances from the golden age of entertainment.</p>
+</div>
 
-<p>Here are answers to the most common questions about ClassicFlims. If you don't find what you're looking for, visit our <a href="help-center.html">Help Center</a> or <a href="contact.html">contact us</a>.</p>
+<div style="background:var(--card-bg);padding:1.5rem;border-radius:12px;margin-bottom:1rem;border-left:4px solid var(--accent-secondary)">
+  <h3 style="color:var(--text-primary);margin-bottom:0.8rem">💰 Is there a subscription fee?</h3>
+  <p style="color:var(--text-secondary);line-height:1.8">No, all public domain content on ClassicFlims is completely free to watch. Simply create an account and start streaming.</p>
+</div>
 
-<h2>General Questions</h2>
+<div style="background:var(--card-bg);padding:1.5rem;border-radius:12px;margin-bottom:1rem;border-left:4px solid var(--accent-primary)">
+  <h3 style="color:var(--text-primary);margin-bottom:0.8rem">📱 Can I watch on mobile devices?</h3>
+  <p style="color:var(--text-secondary);line-height:1.8">Yes! ClassicFlims is fully responsive and works on smartphones, tablets, laptops, and desktop computers.</p>
+</div>
 
-<h3>What is ClassicFlims?</h3>
-<p>ClassicFlims is a free streaming platform dedicated to classic movies from the golden age of cinema. We offer a curated collection of public domain films that anyone can watch online.</p>
+<div style="background:var(--card-bg);padding:1.5rem;border-radius:12px;margin-bottom:1rem;border-left:4px solid var(--accent-secondary)">
+  <h3 style="color:var(--text-primary);margin-bottom:0.8rem">🎬 What kind of content do you have?</h3>
+  <p style="color:var(--text-secondary);line-height:1.8">We feature classic Hindi cinema (1940s-1960s), iconic Doordarshan serials, classical music concerts, and historical documentaries - all in public domain.</p>
+</div>
 
-<h3>Is ClassicFlims really free?</h3>
-<p>Yes, ClassicFlims is completely free. We focus on public domain films where copyright has expired, making them available to everyone at no cost. You do not need a subscription or payment to watch movies.</p>
+<div style="background:var(--card-bg);padding:1.5rem;border-radius:12px;margin-bottom:1rem;border-left:4px solid var(--accent-primary)">
+  <h3 style="color:var(--text-primary);margin-bottom:0.8rem">📥 Can I download videos?</h3>
+  <p style="color:var(--text-secondary);line-height:1.8">Currently, we only offer streaming. All content is hosted on Archive.org, which allows downloads through their platform.</p>
+</div>
 
-<h3>Do I need an account to watch movies?</h3>
-<p>You can browse our collection without an account, but creating a free account allows you to save favorites, continue watching where you left off, and receive personalized recommendations.</p>
+<div style="background:var(--card-bg);padding:1.5rem;border-radius:12px;margin-bottom:1rem;border-left:4px solid var(--accent-secondary)">
+  <h3 style="color:var(--text-primary);margin-bottom:0.8rem">🌍 Is ClassicFlims available worldwide?</h3>
+  <p style="color:var(--text-secondary);line-height:1.8">Yes, our platform is accessible globally. However, streaming quality depends on your internet connection speed.</p>
+</div>
 
-<h2>Content Questions</h2>
+<div style="background:var(--card-bg);padding:1.5rem;border-radius:12px;margin-bottom:1rem;border-left:4px solid var(--accent-primary)">
+  <h3 style="color:var(--text-primary);margin-bottom:0.8rem">🔒 Is my data safe?</h3>
+  <p style="color:var(--text-secondary);line-height:1.8">Yes, we take privacy seriously. Read our <a href="privacy-policy.html" style="color:var(--accent-primary)">Privacy Policy</a> for details on how we protect your information.</p>
+</div>
 
-<h3>What kind of movies do you have?</h3>
-<p>Our library includes classic films from the early 1900s to the 1960s, including silent films, film noir, westerns, comedies, dramas, and musicals. All films are in the public domain.</p>
+<div style="background:var(--card-bg);padding:1.5rem;border-radius:12px;margin-bottom:1rem;border-left:4px solid var(--accent-secondary)">
+  <h3 style="color:var(--text-primary);margin-bottom:0.8rem">➕ How often is new content added?</h3>
+  <p style="color:var(--text-secondary);line-height:1.8">We regularly add newly discovered public domain classics. Check back often or follow us for updates on new additions.</p>
+</div>
 
-<h3>How often do you add new movies?</h3>
-<p>We add new classic films to our library regularly. Follow us or check back often to see the latest additions.</p>
+<div style="background:var(--card-bg);padding:1.5rem;border-radius:12px;margin-bottom:1rem;border-left:4px solid var(--accent-primary)">
+  <h3 style="color:var(--text-primary);margin-bottom:0.8rem">💬 How can I request content?</h3>
+  <p style="color:var(--text-secondary);line-height:1.8">Use our <a href="contact.html" style="color:var(--accent-primary)">contact form</a> to suggest classics you'd like to see on our platform.</p>
+</div>
 
-<h3>Can I download movies to watch offline?</h3>
-<p>Currently, we only offer online streaming. Downloading movies for offline viewing is not available at this time.</p>
+<div style="text-align:center;margin-top:3rem;padding:2rem;background:linear-gradient(135deg,rgba(255,51,102,0.1),rgba(124,58,237,0.1));border-radius:12px;border:1px solid var(--border-color)">
+  <h3 style="font-size:1.5rem;margin-bottom:1rem">Have more questions?</h3>
+  <p style="color:var(--text-secondary);margin-bottom:1.5rem">Check our <a href="help-center.html" style="color:var(--accent-primary)">Help Center</a> or <a href="contact.html" style="color:var(--accent-primary)">contact us</a> directly.</p>
+</div>
 
-<h3>Why can't I find a specific movie?</h3>
-<p>We only offer films that are in the public domain. Many classic films are still under copyright and cannot be included in our library. If you have a request, you can send it to us and we will check if the film can be added.</p>
-
-<h2>Account Questions</h2>
-
-<h3>How do I create an account?</h3>
-<p>Click the Sign Up button in the top right corner, enter your name, email, and password, then click Create Account. You will receive a confirmation email.</p>
-
-<h3>I forgot my password. What should I do?</h3>
-<p>Click the Login button, then click Forgot Password. Enter your email address and we will send you a link to reset your password.</p>
-
-<h3>Can I change my email address?</h3>
-<p>Yes, you can update your email address in your Account Settings. Log in, click on your profile icon, and select Account Settings.</p>
-
-<h3>How do I delete my account?</h3>
-<p>If you wish to delete your account, please contact us at <a href="mailto:support@classicflims.com">support@classicflims.com</a> and we will process your request.</p>
-
-<h2>Technical Questions</h2>
-
-<h3>What devices can I use to watch ClassicFlims?</h3>
-<p>You can watch ClassicFlims on any device with a modern web browser, including computers, laptops, tablets, and smartphones.</p>
-
-<h3>The video is buffering or not playing. What should I do?</h3>
-<p>Try these steps:</p>
-<ul>
-    <li>Check that you have a stable internet connection</li>
-    <li>Refresh the page</li>
-    <li>Clear your browser cache and cookies</li>
-    <li>Try a different browser</li>
-    <li>Restart your device</li>
-</ul>
-
-<h3>What internet speed do I need?</h3>
-<p>We recommend at least 5 Mbps for smooth streaming. For best quality, a connection of 10 Mbps or higher is ideal.</p>
-
-<h3>Does ClassicFlims have subtitles?</h3>
-<p>Some of our films include subtitles or closed captions. We are working to add subtitles to more titles in our library.</p>
-
-<h2>Legal and Privacy</h2>
-
-<h3>Are these movies legal to watch?</h3>
-<p>Yes, all movies on ClassicFlims are in the public domain, meaning their copyright has expired or they were never copyrighted. It is completely legal to watch and share these films.</p>
-
-<h3>How do you use my personal information?</h3>
-<p>We take your privacy seriously. Please read our <a href="privacy-policy.html">Privacy Policy</a> to learn how we collect, use, and protect your information.</p>
-
-<h3>Do you share my data with third parties?</h3>
-<p>We do not sell your personal information. We only share data with service providers who help us operate the platform, and only as needed. See our <a href="privacy-policy.html">Privacy Policy</a> for details.</p>
-
-<h2>Other Questions</h2>
-
-<h3>Can I share movies with friends?</h3>
-<p>Yes, you can share links to any movie on ClassicFlims with friends and family. Simply copy the URL from your browser and send it to them.</p>
-
-<h3>How can I support ClassicFlims?</h3>
-<p>The best way to support us is to use our platform, share it with friends, and provide feedback. If you have suggestions for improving ClassicFlims, we would love to hear from you.</p>
-
-<h3>Do you have a mobile app?</h3>
-<p>We do not have a dedicated mobile app at this time, but our website is fully mobile-friendly and works great on smartphones and tablets.</p>
-
-<h2>Still Have Questions?</h2>
-
-<p>If your question is not answered here, please visit our <a href="help-center.html">Help Center</a> or <a href="contact.html">contact our support team</a>. We are happy to help.</p>
-
+      </div>
     </div>
     <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3>About ClassicFlims</h3>
+          <ul class="footer-links">
+            <li><a href="about-us.html">About Us</a></li>
+            <li><a href="contact.html">Contact</a></li>
+            <li><a href="terms-of-service.html">Terms of Service</a></li>
+            <li><a href="privacy-policy.html">Privacy Policy</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Browse</h3>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#movies">Movies</a></li>
+            <li><a href="index.html#series">Series</a></li>
+          </ul>
+        </div>
+        <div class="footer-section">
+          <h3>Support</h3>
+          <ul class="footer-links">
+            <li><a href="help-center.html">Help Center</a></li>
+            <li><a href="faq.html">FAQ</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
         <p>© 2026 ClassicFlims. All rights reserved.</p>
+      </div>
     </footer>
+  </div>
 </body>
 </html>
