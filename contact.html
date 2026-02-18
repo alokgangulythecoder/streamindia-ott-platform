@@ -24,6 +24,8 @@
             --text-secondary: #a0a0b8;
             --border-color: #2a2a3a;
             --focus-ring: #ff3366;
+            --success: #10b981;
+            --error: #ef4444;
         }
 
         body {
@@ -129,378 +131,256 @@
             color: var(--text-primary);
         }
 
-        .nav-item::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 50%;
-            transform: translateX(-50%) scaleX(0);
-            width: 80%;
-            height: 3px;
-            background: linear-gradient(135deg, #ff3366 0%, #7c3aed 100%);
-            border-radius: 2px;
-            transition: transform 0.3s ease;
-        }
-
-        .nav-item.active::after,
-        .nav-item:hover::after {
-            transform: translateX(-50%) scaleX(1);
-        }
-
-        .nav-actions {
-            display: flex;
-            gap: 1.5rem;
-            align-items: center;
-        }
-
-        .search-icon,
-        .profile-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            background: var(--card-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1.3rem;
-        }
-
-        .search-icon:hover,
-        .profile-icon:hover {
-            background: var(--accent-primary);
-            transform: scale(1.1);
-        }
-
-        .hero-section {
-            position: relative;
-            height: 95vh;
-            padding-top: 8rem;
-            overflow: hidden;
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 10;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 4rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            height: 100%;
-        }
-
-        .hero-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            background: rgba(255, 51, 102, 0.15);
-            border: 2px solid var(--accent-primary);
-            padding: 0.8rem 1.5rem;
-            border-radius: 50px;
-            font-size: 0.95rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            width: fit-content;
-            margin-bottom: 2rem;
-        }
-
-        .hero-title {
-            font-family: 'Unbounded', sans-serif;
-            font-size: 5rem;
-            font-weight: 800;
-            line-height: 1.1;
-            margin-bottom: 1.5rem;
-            max-width: 900px;
-        }
-
-        .hero-description {
-            font-size: 1.4rem;
-            color: var(--text-secondary);
-            max-width: 700px;
-            margin-bottom: 3rem;
-            line-height: 1.8;
-        }
-
-        .hero-actions {
-            display: flex;
-            gap: 1.5rem;
-        }
-
-        .btn {
-            padding: 1.2rem 3rem;
-            border-radius: 12px;
-            font-size: 1.2rem;
-            font-weight: 700;
+        .mobile-menu-btn {
+            display: none;
+            background: none;
             border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #ff3366 0%, #7c3aed 100%);
             color: white;
-            box-shadow: 0 10px 30px rgba(255, 51, 102, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(255, 51, 102, 0.5);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.15);
-            transform: translateY(-3px);
-        }
-
-        .content-section {
-            position: relative;
-            z-index: 10;
-            padding: 4rem 4rem;
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2.5rem;
-        }
-
-        .section-title {
-            font-family: 'Unbounded', sans-serif;
-            font-size: 2.2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-        }
-
-        .view-all {
-            color: var(--accent-primary);
-            font-weight: 600;
+            font-size: 1.6rem;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1.1rem;
-            padding: 0.8rem 1.5rem;
-            border-radius: 8px;
         }
 
-        .view-all:hover {
-            background: rgba(255, 51, 102, 0.1);
-            transform: translateX(5px);
-        }
-
-        .content-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 2rem;
-            margin-bottom: 4rem;
-        }
-
-        .content-card {
-            position: relative;
-            border-radius: 16px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            background: var(--card-bg);
-            aspect-ratio: 2/3;
-        }
-
-        .content-card:hover {
-            transform: translateY(-15px) scale(1.03);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-            z-index: 100;
-        }
-
-        .card-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.4s ease;
-        }
-
-        .content-card:hover .card-image {
-            transform: scale(1.1);
-        }
-
-        .card-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            padding: 2rem;
-            background: linear-gradient(0deg, rgba(10, 10, 15, 0.95) 0%, transparent 100%);
-            transform: translateY(20px);
-            opacity: 0;
-            transition: all 0.4s ease;
-        }
-
-        .content-card:hover .card-overlay {
-            transform: translateY(0);
-            opacity: 1;
-        }
-
-        .card-title {
-            font-weight: 700;
-            font-size: 1.3rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .card-meta {
-            display: flex;
-            gap: 1rem;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.8rem;
-        }
-
-        .card-badge {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            padding: 0.5rem 1rem;
-            background: var(--accent-primary);
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            z-index: 10;
-        }
-
-        .card-rating {
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
-        }
-
-        .card-actions {
-            display: flex;
-            gap: 0.8rem;
-            margin-top: 1rem;
-        }
-
-        .card-btn {
-            flex: 1;
-            padding: 0.8rem;
-            border-radius: 8px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.9rem;
-        }
-
-        .card-btn-play {
-            background: white;
-            color: var(--primary-bg);
-        }
-
-        .card-btn-play:hover {
-            background: var(--accent-primary);
-            color: white;
-        }
-
-        .card-btn-info {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .card-btn-info:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-
-        .player-modal {
+        .mobile-menu-overlay {
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.95);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: var(--primary-bg);
+            z-index: 2000;
+            flex-direction: column;
             padding: 2rem;
         }
 
-        .player-container {
-            width: 100%;
-            max-width: 1400px;
-            aspect-ratio: 16/9;
-            background: #000;
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
+        .mobile-menu-overlay.open {
+            display: flex;
         }
 
-        .player-close {
-            position: absolute;
-            top: 2rem;
-            right: 2rem;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+        .mobile-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .mobile-menu-close {
+            background: none;
             border: none;
             color: white;
-            font-size: 1.5rem;
+            font-size: 2rem;
             cursor: pointer;
-            z-index: 100;
+        }
+
+        .mobile-nav-item {
+            font-size: 1.4rem;
+            font-weight: 600;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            color: var(--text-secondary);
+        }
+
+        /* FORM STYLES */
+        .form-container {
+            max-width: 650px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-top: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.9rem 1.1rem;
+            background: var(--primary-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-family: inherit;
             transition: all 0.3s ease;
         }
 
-        .player-close:hover {
-            background: var(--accent-primary);
-            transform: rotate(90deg);
+        .form-control:focus {
+            border-color: var(--accent-primary);
+            background: var(--secondary-bg);
         }
 
-        .player-content {
+        textarea.form-control {
+            resize: vertical;
+            min-height: 140px;
+        }
+
+        .submit-btn {
             width: 100%;
-            height: 100%;
+            padding: 1.1rem 2.5rem;
+            background: linear-gradient(135deg, #ff3366, #7c3aed);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255, 51, 102, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .submit-btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        @keyframes spin {
+            to { transform: translateY(-50%) rotate(360deg); }
+        }
+
+        /* ALERT MESSAGES */
+        .alert {
+            padding: 1rem 1.25rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            font-weight: 500;
+            display: none;
+        }
+
+        .alert.show {
+            display: block;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--error);
+            border: 1px solid var(--error);
+        }
+
+        /* HONEYPOT - Hidden field for bots */
+        .honeypot {
+            position: absolute;
+            left: -9999px;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* CONTACT INFO SECTION */
+        .contact-info {
+            margin-top: 3rem;
+            padding-top: 2.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .contact-info h2 {
+            font-size: 1.75rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-primary);
+            font-family: 'Unbounded', sans-serif;
+        }
+
+        .info-item {
             display: flex;
             align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            font-size: 3rem;
-            font-weight: 700;
+            gap: 1rem;
+            padding: 1rem;
+            background: var(--card-bg);
+            border-radius: 10px;
+            margin-bottom: 1rem;
+        }
+
+        .info-icon {
+            font-size: 1.8rem;
+        }
+
+        .info-text {
+            flex: 1;
+        }
+
+        .info-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.2rem;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .info-value a {
+            color: var(--accent-primary);
+            text-decoration: none;
+        }
+
+        .info-value a:hover {
+            text-decoration: underline;
         }
 
         .footer {
             background: var(--secondary-bg);
-            padding: 4rem;
-            margin-top: 6rem;
-            border-top: 1px solid var(--border-color);
+            padding: 3rem 2rem 2rem;
+            margin-top: 5rem;
         }
 
         .footer-content {
             max-width: 1400px;
             margin: 0 auto;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 3rem;
         }
 
         .footer-section h3 {
-            font-family: 'Unbounded', sans-serif;
-            font-size: 1.3rem;
-            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+            margin-bottom: 1.2rem;
+            color: var(--text-primary);
         }
 
         .footer-links {
@@ -508,7 +388,7 @@
         }
 
         .footer-links li {
-            margin-bottom: 0.8rem;
+            margin-bottom: 0.75rem;
         }
 
         .footer-links a {
@@ -518,317 +398,61 @@
         }
 
         .footer-links a:hover {
-            color: var(--text-primary);
+            color: var(--accent-primary);
         }
 
         .footer-bottom {
-            max-width: 1400px;
-            margin: 3rem auto 0;
+            text-align: center;
+            margin-top: 2.5rem;
             padding-top: 2rem;
             border-top: 1px solid var(--border-color);
-            text-align: center;
             color: var(--text-secondary);
+            font-size: 0.9rem;
         }
 
-        .ad-banner {
-            margin: 2rem 0;
-            border-radius: 12px;
-            overflow: hidden;
-        }
-
-        .ad-banner img {
-            width: 100%;
-            display: block;
-        }
-
-        .loading-message {
-            text-align: center;
-            padding: 4rem;
-            font-size: 1.5rem;
-        }
-
-        .no-content-message {
-            text-align: center;
-            padding: 4rem;
-        }
-
-        .no-content-message h2 {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-        }
-
-        .no-content-message p {
-            color: var(--text-secondary);
-            margin-bottom: 2rem;
-        }
-
-        /* Page subheader (Movies / Series / Live heading) */
-        .page-subheader {
-            padding: 8rem 4rem 0;
-            max-width: 1600px;
-            margin: 0 auto;
-        }
-
-        /* Prevent iOS input zoom (inputs stay 16px font) */
-        input, select, textarea {
-            font-size: 16px !important;
-        }
-
-        /* Smooth scrolling */
-        html { scroll-behavior: smooth; }
-
-        /* =============================================
-           MOBILE HAMBURGER MENU
-        ============================================= */
-        .mobile-menu-btn {
-            display: none;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.6rem;
-            cursor: pointer;
-            padding: 0.4rem;
-            line-height: 1;
-        }
-
-        .mobile-menu-overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: var(--primary-bg);
-            z-index: 2000;
-            flex-direction: column;
-            padding: 2rem;
-            overflow-y: auto;
-        }
-        .mobile-menu-overlay.open { display: flex; }
-
-        .mobile-menu-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2.5rem;
-        }
-        .mobile-menu-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.8rem;
-            cursor: pointer;
-        }
-        .mobile-nav-item {
-            font-size: 1.4rem;
-            font-weight: 600;
-            padding: 1rem 0;
-            border-bottom: 1px solid var(--border-color);
-            cursor: pointer;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-        }
-        .mobile-nav-item:active { color: var(--accent-primary); }
-        .mobile-auth-row {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-        .mobile-auth-row button {
-            flex: 1;
-            padding: 0.9rem;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 700;
-            cursor: pointer;
-            font-family: inherit;
-        }
-
-        /* =============================================
-           TABLET  (max 1024px)
-        ============================================= */
+        /* RESPONSIVE */
         @media (max-width: 1024px) {
-            .navbar { padding: 1.2rem 2rem; }
-            .navbar.scrolled { padding: 1rem 2rem; }
+            .navbar { padding: 1.5rem 2rem; }
+            .nav-menu { gap: 2rem; }
             .logo { font-size: 2rem; }
-            .hero-title { font-size: 3.8rem; }
-            .content-section { padding: 3rem 2rem; }
-            .content-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.5rem; }
-            .section-title { font-size: 1.8rem; }
         }
 
-        /* =============================================
-           MOBILE  (max 768px) — phones & small tablets
-        ============================================= */
         @media (max-width: 768px) {
-            /* NAV */
             .navbar {
                 padding: 0.9rem 1.2rem;
-                -webkit-backdrop-filter: blur(20px);
             }
-            .navbar.scrolled { padding: 0.75rem 1.2rem; }
-            .logo { font-size: 1.5rem; letter-spacing: -0.03em; }
-            .nav-menu { display: none; }
-            .nav-actions { gap: 0.6rem; }
-            .nav-actions > button { display: none; } /* hide login/signup — in mobile menu */
-            .search-icon, .profile-icon {
-                width: 40px; height: 40px;
-                border-radius: 10px;
-                font-size: 1.1rem;
+            .logo {
+                font-size: 1.5rem;
             }
-            .mobile-menu-btn { display: block; }
-
-            /* HERO */
-            .hero-section {
-                height: auto;
-                min-height: 85vh;
-                padding-top: 5rem;
-                padding-bottom: 3rem;
-                display: flex;
-                align-items: center;
+            .nav-menu {
+                display: none;
             }
-            .hero-content {
-                padding: 0 1.2rem;
-                height: auto;
+            .nav-actions {
+                display: none;
             }
-            .hero-badge {
-                font-size: 0.7rem;
-                padding: 0.5rem 1rem;
-                margin-bottom: 1rem;
-                letter-spacing: 0.06em;
+            .mobile-menu-btn {
+                display: block;
             }
-            .hero-title {
-                font-size: 2rem;
-                line-height: 1.15;
-                margin-bottom: 1rem;
-                max-width: 100%;
-            }
-            .hero-description {
-                font-size: 0.95rem;
-                margin-bottom: 1.8rem;
-                max-width: 100%;
-                line-height: 1.7;
-            }
-            .hero-actions {
-                flex-direction: column;
-                gap: 0.8rem;
-                align-items: stretch;
-            }
-            .btn {
-                padding: 0.95rem 1.5rem;
-                font-size: 1rem;
-                justify-content: center;
-                border-radius: 10px;
-            }
-
-            /* CONTENT */
-            .content-section { padding: 1.5rem 1rem; }
-            .section-header { margin-bottom: 1.2rem; }
-            .section-title { font-size: 1.25rem; }
-            .view-all { font-size: 0.85rem; padding: 0.5rem 0.8rem; }
-            .content-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.75rem;
-                margin-bottom: 2rem;
-            }
-
-            /* CARDS — always show overlay on mobile (no hover) */
-            .content-card { border-radius: 10px; }
-            .content-card:hover {
-                transform: none;
-                box-shadow: none;
-            }
-            .card-overlay {
-                transform: translateY(0);
-                opacity: 1;
-                background: linear-gradient(0deg, rgba(10,10,15,0.98) 0%, rgba(10,10,15,0.4) 60%, transparent 100%);
-                padding: 0.8rem;
-            }
-            .card-title { font-size: 0.85rem; margin-bottom: 0.2rem; }
-            .card-meta { font-size: 0.7rem; gap: 0.4rem; margin-bottom: 0.3rem; }
-            .card-rating { font-size: 0.7rem; }
-            .card-badge { font-size: 0.6rem; padding: 0.25rem 0.5rem; top: 0.5rem; right: 0.5rem; }
-            .card-actions { gap: 0.4rem; margin-top: 0.5rem; }
-            .card-btn { padding: 0.55rem 0.3rem; font-size: 0.75rem; border-radius: 6px; }
-
-            /* PLAYER */
-            .player-modal { padding: 0; }
-            .player-container {
-                border-radius: 0;
-                max-width: 100%;
-                width: 100%;
-            }
-            .player-close {
-                top: 0.75rem; right: 0.75rem;
-                width: 38px; height: 38px;
-                font-size: 1.1rem;
-            }
-
-            /* PAGE SUBHEADER */
-            .page-subheader { padding: 5.5rem 1.2rem 1rem; }
-            .page-subheader h1 { font-size: 1.6rem; }
-
-            /* FOOTER */
-            .footer {
-                padding: 2.5rem 1.2rem 1.5rem;
-                margin-top: 3rem;
+            .form-container {
+                padding: 1.5rem;
             }
             .footer-content {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 2rem;
             }
-            .footer-section h3 { font-size: 1rem; margin-bottom: 0.8rem; }
-            .footer-links li { margin-bottom: 0.5rem; }
-            .footer-links a { font-size: 0.85rem; }
-            .footer-bottom { margin-top: 1.5rem; font-size: 0.8rem; }
-
-            /* LOADING / EMPTY */
-            .loading-message { padding: 3rem 1rem; font-size: 1.1rem; }
-            .no-content-message { padding: 3rem 1rem; }
-            .no-content-message h2 { font-size: 1.4rem; }
         }
 
-        /* =============================================
-           SMALL PHONES  (max 390px)  iPhone SE, older Androids
-        ============================================= */
         @media (max-width: 390px) {
             .logo { font-size: 1.25rem; }
-            .hero-title { font-size: 1.7rem; }
-            .hero-description { font-size: 0.9rem; }
-            .content-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 0.6rem;
-            }
-            .card-title { font-size: 0.78rem; }
-            .footer-content { grid-template-columns: 1fr; gap: 1.5rem; }
-        }
-
-        /* =============================================
-           SAFE AREAS — iPhone notch / home indicator
-        ============================================= */
-        @supports (padding: max(0px)) {
-            .navbar {
-                padding-left: max(1.2rem, env(safe-area-inset-left));
-                padding-right: max(1.2rem, env(safe-area-inset-right));
-            }
-            .footer {
-                padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
-            }
-        }
-
-        /* =============================================
-           TOUCH — remove hover effects on touch devices
-        ============================================= */
-        @media (hover: none) {
-            .content-card:hover { transform: none; box-shadow: none; }
-            .btn:hover { transform: none; }
-            .nav-item:hover::after { transform: translateX(-50%) scaleX(0); }
+            .footer-content { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
   <div class="app-container">
     <div class="bg-ambience"></div>
+    
+    <!-- Navbar -->
     <nav class="navbar">
       <div class="logo" onclick="window.location.href='index.html'" style="cursor:pointer">ClassicFlims</div>
       <ul class="nav-menu">
@@ -842,6 +466,8 @@
       </div>
       <button class="mobile-menu-btn" onclick="document.querySelector('.mobile-menu-overlay').classList.add('open')">☰</button>
     </nav>
+
+    <!-- Mobile Menu -->
     <div class="mobile-menu-overlay">
       <div class="mobile-menu-header">
         <div class="logo">ClassicFlims</div>
@@ -852,50 +478,89 @@
       <div class="mobile-nav-item" onclick="window.location.href='index.html#series'">📺 Series</div>
       <div class="mobile-nav-item" onclick="window.location.href='index.html#live'">📡 Live</div>
     </div>
+
+    <!-- Main Content -->
     <div style="padding-top:120px;min-height:70vh">
       <div style="max-width:1200px;margin:0 auto;padding:2rem 1.5rem">
-        <h1 style="font-family:Unbounded,sans-serif;font-size:2.5rem;margin-bottom:1.5rem;background:linear-gradient(135deg,#ff3366,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Contact Us</h1>
+        <h1 style="font-family:Unbounded,sans-serif;font-size:2.5rem;margin-bottom:1rem;background:linear-gradient(135deg,#ff3366,#7c3aed);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Contact Us</h1>
         
-<p style="font-size:1.2rem;color:var(--text-secondary);line-height:1.8;margin-bottom:2rem">
-We'd love to hear from you. Send us a message and we'll respond as soon as possible.
-</p>
+        <p style="font-size:1.15rem;color:var(--text-secondary);line-height:1.8;margin-bottom:1rem">
+          We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+        </p>
 
-<form onsubmit="alert('Thank you for your message! We will get back to you soon.'); return false;" style="max-width:600px">
-  <div style="margin-bottom:1.5rem">
-    <label style="display:block;margin-bottom:0.5rem;font-weight:600;color:var(--text-primary)">Name *</label>
-    <input type="text" required style="width:100%;padding:0.8rem;background:var(--card-bg);border:1px solid var(--border-color);border-radius:8px;color:white;font-size:1rem;font-family:inherit">
-  </div>
+        <!-- Alert Messages -->
+        <div id="alertSuccess" class="alert alert-success">
+          ✓ Thank you! Your message has been sent successfully. We'll get back to you soon.
+        </div>
+        <div id="alertError" class="alert alert-error">
+          ✗ <span id="errorMessage">Something went wrong. Please try again.</span>
+        </div>
 
-  <div style="margin-bottom:1.5rem">
-    <label style="display:block;margin-bottom:0.5rem;font-weight:600;color:var(--text-primary)">Email *</label>
-    <input type="email" required style="width:100%;padding:0.8rem;background:var(--card-bg);border:1px solid var(--border-color);border-radius:8px;color:white;font-size:1rem;font-family:inherit">
-  </div>
+        <!-- Contact Form -->
+        <div class="form-container">
+          <form id="contactForm">
+            <!-- Honeypot field (hidden from humans, visible to bots) -->
+            <input type="text" name="website" class="honeypot" tabindex="-1" autocomplete="off">
 
-  <div style="margin-bottom:1.5rem">
-    <label style="display:block;margin-bottom:0.5rem;font-weight:600;color:var(--text-primary)">Subject *</label>
-    <input type="text" required style="width:100%;padding:0.8rem;background:var(--card-bg);border:1px solid var(--border-color);border-radius:8px;color:white;font-size:1rem;font-family:inherit">
-  </div>
+            <div class="form-group">
+              <label for="name">Name *</label>
+              <input type="text" id="name" name="name" class="form-control" required minlength="2" maxlength="100">
+            </div>
 
-  <div style="margin-bottom:1.5rem">
-    <label style="display:block;margin-bottom:0.5rem;font-weight:600;color:var(--text-primary)">Message *</label>
-    <textarea required rows="6" style="width:100%;padding:0.8rem;background:var(--card-bg);border:1px solid var(--border-color);border-radius:8px;color:white;font-size:1rem;font-family:inherit;resize:vertical"></textarea>
-  </div>
+            <div class="form-group">
+              <label for="email">Email *</label>
+              <input type="email" id="email" name="email" class="form-control" required>
+            </div>
 
-  <button type="submit" style="padding:1rem 2.5rem;background:linear-gradient(135deg,#ff3366,#7c3aed);border:none;border-radius:10px;color:white;font-size:1.1rem;font-weight:700;cursor:pointer;font-family:inherit;transition:transform 0.3s" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
-    Send Message
-  </button>
-</form>
+            <div class="form-group">
+              <label for="subject">Subject *</label>
+              <input type="text" id="subject" name="subject" class="form-control" required minlength="3" maxlength="200">
+            </div>
 
-<div style="margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border-color)">
-  <h2 style="font-size:1.5rem;margin-bottom:1rem;color:var(--text-primary)">Other Ways to Reach Us</h2>
-  <p style="color:var(--text-secondary);line-height:2">
-    📧 Email: support@classicflims.com<br>
-    🌐 Website: www.classicflims.com
-  </p>
-</div>
+            <div class="form-group">
+              <label for="message">Message *</label>
+              <textarea id="message" name="message" class="form-control" required minlength="10" maxlength="2000"></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn" class="submit-btn">
+              Send Message
+            </button>
+          </form>
+        </div>
+
+        <!-- Contact Info -->
+        <div class="contact-info">
+          <h2>Other Ways to Reach Us</h2>
+          
+          <div class="info-item">
+            <div class="info-icon">📧</div>
+            <div class="info-text">
+              <div class="info-label">Email</div>
+              <div class="info-value"><a href="mailto:contact@classicflims.com">contact@classicflims.com</a></div>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-icon">🌐</div>
+            <div class="info-text">
+              <div class="info-label">Website</div>
+              <div class="info-value"><a href="https://www.classicflims.com" target="_blank">www.classicflims.com</a></div>
+            </div>
+          </div>
+
+          <div class="info-item">
+            <div class="info-icon">⏰</div>
+            <div class="info-text">
+              <div class="info-label">Response Time</div>
+              <div class="info-value">We typically respond within 24-48 hours</div>
+            </div>
+          </div>
+        </div>
 
       </div>
     </div>
+
+    <!-- Footer -->
     <footer class="footer">
       <div class="footer-content">
         <div class="footer-section">
@@ -924,9 +589,110 @@ We'd love to hear from you. Send us a message and we'll respond as soon as possi
         </div>
       </div>
       <div class="footer-bottom">
-        <p>© 2026 ClassicFlims. All rights reserved.</p>
+        © 2024 ClassicFlims. All rights reserved.
       </div>
     </footer>
   </div>
+
+  <script>
+    // API Configuration
+    const API_URL = window.location.hostname === 'localhost'
+      ? 'http://localhost:3000/api'
+      : 'https://your-domain.com/api'; // Update with your production URL
+
+    // Form submission handler
+    document.getElementById('contactForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const submitBtn = document.getElementById('submitBtn');
+      const successAlert = document.getElementById('alertSuccess');
+      const errorAlert = document.getElementById('alertError');
+      const errorMessage = document.getElementById('errorMessage');
+
+      // Hide alerts
+      successAlert.classList.remove('show');
+      errorAlert.classList.remove('show');
+
+      // Check honeypot (bot detection)
+      const honeypot = document.querySelector('input[name="website"]').value;
+      if (honeypot) {
+        // Bot detected - silently fail
+        console.log('Bot detected');
+        return;
+      }
+
+      // Get form data
+      const formData = {
+        name: document.getElementById('name').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        subject: document.getElementById('subject').value.trim(),
+        message: document.getElementById('message').value.trim(),
+        timestamp: new Date().toISOString()
+      };
+
+      // Client-side validation
+      if (formData.name.length < 2 || formData.name.length > 100) {
+        errorMessage.textContent = 'Name must be between 2 and 100 characters.';
+        errorAlert.classList.add('show');
+        return;
+      }
+
+      if (formData.message.length < 10 || formData.message.length > 2000) {
+        errorMessage.textContent = 'Message must be between 10 and 2000 characters.';
+        errorAlert.classList.add('show');
+        return;
+      }
+
+      // Disable submit button and show loading
+      submitBtn.disabled = true;
+      submitBtn.classList.add('loading');
+      submitBtn.textContent = 'Sending...';
+
+      try {
+        const response = await fetch(`${API_URL}/contact`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(formData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          // Success
+          successAlert.classList.add('show');
+          document.getElementById('contactForm').reset();
+          
+          // Scroll to success message
+          successAlert.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          // Error from server
+          errorMessage.textContent = data.error || 'Failed to send message. Please try again.';
+          errorAlert.classList.add('show');
+        }
+
+      } catch (error) {
+        console.error('Error:', error);
+        errorMessage.textContent = 'Network error. Please check your connection and try again.';
+        errorAlert.classList.add('show');
+      } finally {
+        // Re-enable submit button
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('loading');
+        submitBtn.textContent = 'Send Message';
+      }
+    });
+
+    // Navbar scroll effect
+    window.addEventListener('scroll', () => {
+      const navbar = document.querySelector('.navbar');
+      if (window.scrollY > 50) {
+        navbar.classList.add('scrolled');
+      } else {
+        navbar.classList.remove('scrolled');
+      }
+    });
+  </script>
 </body>
 </html>
