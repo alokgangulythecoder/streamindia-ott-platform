@@ -954,69 +954,87 @@ app.get('/api/dashboard/stats', authMiddleware, async (req, res) => {
 app.post('/api/seed', async (req, res) => {
     try {
         console.log('🌱 Starting seed...');
-        console.log('🔧 MongoDB URI:', MONGOTESTDB_URI ? '✓ Set' : '✗ Missing');
         
-        // ── Ensure MongoDB Connection ──────────────────────────
-        console.log('🔄 Checking MongoDB connection...');
-        try {
-            await ensureMongoConnection();
-            console.log('✅ MongoDB connection confirmed');
-        } catch (error) {
-            console.error('❌ MongoDB connection failed:', error.message);
+        // Quick connection check
+        if (mongoose.connection.readyState !== 1) {
             return res.status(503).json({
-                error: 'Database connection failed',
-                message: error.message,
-                tip: 'Check your MONGO_URI environment variable and network connection'
+                error: 'Database not connected. Please wait a moment and try again.',
+                mongoState: mongoose.connection.readyState
             });
         }
+        
+        console.log('✅ MongoDB is connected, proceeding with seed...');
+        
+        // Respond IMMEDIATELY to prevent timeout
+        res.json({
+            message: '✅ Seeding started successfully!',
+            status: 'processing',
+            info: 'Data is being inserted. Check /api/seed/status or /api/content to verify.',
+            timestamp: new Date().toISOString()
+        });
+        
+        // ============================================
+        // PROCESS SEED IN BACKGROUND (ASYNC)
+        // ============================================
+        
+        setImmediate(async () => {
+            try {
+                console.log('📦 Background seeding started...');
+                const startTime = Date.now();
+                
+                // ── Admin ──────────────────────────────────────────────
+                const adminCount = await Admin.countDocuments();
+                if (adminCount === 0) {
+                    const hashedPassword = await bcrypt.hash('admin123', 10);
+                    await Admin.create({
+                        username: 'admin',
+                        email: 'admin@classicflims.com',
+                        password: hashedPassword,
+                        role: 'admin'
+                    });
+                    console.log('✅ Admin created (admin / admin123)');
+                }
 
-        // ── Admin ──────────────────────────────────────────────
-        const adminCount = await Admin.countDocuments();
-        if (adminCount === 0) {
-            const hashedPassword = await bcrypt.hash('admin123', 10);
-            await Admin.create({
-                username: 'admin',
-                email: 'admin@classicflims.com',
-                password: hashedPassword,
-                role: 'admin'
-            });
-            console.log('✅ Admin created  (user: admin / pass: admin123)');
-        }
+                // ── Navigation ─────────────────────────────────────────
+                await Navigation.deleteMany({});
+                await Navigation.insertMany([
+                    { label: 'Home', url: '/', icon: '🏠', order: 0, active: true },
+                    { label: 'Movies', url: '/movies', icon: '🎬', order: 1, active: true },
+                    { label: 'Series', url: '/series', icon: '📺', order: 2, active: true },
+                    { label: 'Documentaries', url: '/documentaries', icon: '📽️', order: 3, active: true },
+                    { label: 'Live', url: '/live', icon: '🔴', order: 4, active: true }
+                ]);
+                console.log('✅ Navigation created (5 items)');
 
-        // ── Navigation ─────────────────────────────────────────
-        await Navigation.deleteMany({});
-        await Navigation.insertMany([
-            { label: 'Home',          url: '/',             icon: '🏠', order: 0, active: true },
-            { label: 'Movies',        url: '/movies',        icon: '🎬', order: 1, active: true },
-            { label: 'Series',        url: '/series',        icon: '📺', order: 2, active: true },
-            { label: 'Documentaries', url: '/documentaries', icon: '📽️', order: 3, active: true },
-            { label: 'Live',          url: '/live',          icon: '🔴', order: 4, active: true }
-        ]);
-        console.log('✅ Navigation created (5 items)');
+                // ── Settings ───────────────────────────────────────────
+                await Settings.deleteMany({});
+                await Settings.insertMany([
+                    { key: 'site_name', value: 'ClassicFlims', category: 'general' },
+                    { key: 'site_tagline', value: 'PREMIUM CLASSIC CINEMA', category: 'general' },
+                    { key: 'primary_color', value: '#ff3366', category: 'theme' },
+                    { key: 'secondary_color', value: '#7c3aed', category: 'theme' }
+                ]);
+                console.log('✅ Settings created (4 items)');
 
-        // ── Settings ───────────────────────────────────────────
-        await Settings.deleteMany({});
-        await Settings.insertMany([
-            { key: 'site_name',       value: 'ClassicFlims',           category: 'general' },
-            { key: 'site_tagline',    value: 'PREMIUM CLASSIC CINEMA',  category: 'general' },
-            { key: 'primary_color',   value: '#ff3366',                 category: 'theme'   },
-            { key: 'secondary_color', value: '#7c3aed',                 category: 'theme'   }
-        ]);
-        console.log('✅ Settings created (4 items)');
-
-        // ── Content (40 items — only if DB is empty) ───────────
-        const contentCount = await Content.countDocuments();
-        const force = req.query.force === 'true';
-
-    if (contentCount === 0 || force) {
-      if (force && contentCount > 0) {
-        console.log('⚠️ Force mode: Deleting existing content...');
-        await Content.deleteMany({});
-      }
-            console.log('🔧 MongoDB URI:', MONGOTESTDB_URI ? '✓ Set' : '✗ Missing');
-            console.log('🔧 JWT Secret:', JWT_SECRET ? '✓ Set' : '✗ Missing');
-            console.log('\n📌 Seeding Content (40 famous movies 1950-1970)...');
-      await Content.insertMany([
+                // ── Content (40 items) ─────────────────────────────────
+                const force = req.query.force === 'true';
+                const contentCount = await Content.countDocuments();
+                
+                if (contentCount === 0 || force) {
+                    if (force && contentCount > 0) {
+                        console.log('⚠️ Force mode: Deleting existing content...');
+                        await Content.deleteMany({});
+                    }
+                    
+                    console.log('📦 Inserting 40 movies in chunks...');
+                    
+                    // Insert options for better performance
+                    const insertOptions = {
+                        ordered: false,
+                        writeConcern: { w: 1, wtimeout: 60000 }
+                    };
+                    
+                    await Content.insertMany([
 
         // ================================================
         // FAMOUS MOVIES 1950-1970 — YouTube Embeds
@@ -1711,48 +1729,74 @@ app.post('/api/seed', async (req, res) => {
           likes: 31000
         }
 
-      ]);
-      console.log('✅ Content seeded: 40 famous movies (1950-1970) — Drama, Thriller, Western, Romance/Musical');
-    } else {
-            console.log(`ℹ️  Content already exists (${contentCount} items) — skipping content seed`);
-        }
-
-        res.json({
-            message: '✅ Database seeded successfully!',
-            summary: {
-                admins:     'admin / admin123',
-                navigation: 5,
-                settings:   4,
-                content:    '40 famous movies (1950-1970)'
+      ], insertOptions);
+                    
+                    console.log('✅ Content seeded: 40 famous movies (1950-1970)');
+                } else {
+                    console.log(`ℹ️ Content already exists (${contentCount} items) - skipping`);
+                }
+                
+                const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+                console.log(`\n🎉 Background seed completed in ${elapsed}s`);
+                console.log('📊 Summary:');
+                console.log('   - Admin: ✓');
+                console.log('   - Navigation: 5 items');
+                console.log('   - Settings: 4 items');
+                console.log(`   - Content: ${contentCount === 0 || force ? '40' : contentCount} items`);
+                
+            } catch (bgError) {
+                console.error('❌ Background seed error:', bgError);
+                console.error('Stack:', bgError.stack);
             }
         });
+        
     } catch (error) {
         console.error('❌ Seed error:', error);
-        console.error('Error details:', {
-            name: error.name,
-            message: error.message,
-            code: error.code
-        });
         
         let errorMessage = error.message;
         let statusCode = 500;
         
-        // Specific error handling
         if (error.message.includes('timeout') || error.message.includes('buffering')) {
             statusCode = 503;
-            errorMessage = 'Database connection timeout. Please check your MongoDB connection.';
+            errorMessage = 'Database connection timeout. Check your MongoDB connection.';
         } else if (error.message.includes('ENOTFOUND') || error.message.includes('ECONNREFUSED')) {
             statusCode = 503;
-            errorMessage = 'Cannot reach MongoDB server. Check your MONGO_URI and network.';
-        } else if (error.code === 11000) {
-            errorMessage = 'Duplicate entry detected. Try force=true to overwrite: POST /api/seed?force=true';
+            errorMessage = 'Cannot reach MongoDB server. Check MONGO_URI and network.';
         }
         
         res.status(statusCode).json({ 
             error: errorMessage,
-            details: error.message,
-            tip: 'Check server logs for more details'
+            details: error.message
         });
+    }
+});
+
+// Seed status check endpoint
+app.get('/api/seed/status', async (req, res) => {
+    try {
+        const stats = {
+            admins: await Admin.countDocuments(),
+            navigation: await Navigation.countDocuments(),
+            settings: await Settings.countDocuments(),
+            content: await Content.countDocuments()
+        };
+        
+        const isComplete = stats.admins > 0 && stats.navigation > 0 && 
+                          stats.settings > 0 && stats.content > 0;
+        
+        res.json({
+            status: isComplete ? 'complete' : 'incomplete',
+            counts: stats,
+            expected: {
+                admins: 1,
+                navigation: 5,
+                settings: 4,
+                content: 40
+            },
+            timestamp: new Date().toISOString()
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
     }
 });
 
