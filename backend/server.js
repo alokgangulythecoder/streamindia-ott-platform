@@ -950,21 +950,21 @@ app.post('/api/seed', async (req, res) => {
     "likes": 28500
   },
           {
-          title: "12 Angry Men (1957)",
-          description: "Sidney Lumet's masterpiece. A jury deliberates the fate of a young man accused of murder. One dissenting juror slowly convinces others to reconsider. Henry Fonda leads an ensemble cast in this claustrophobic courtroom drama. 96% on Rotten Tomatoes. AFI's #2 Courtroom Drama.",
-          type: "movie",
-          category: "Drama",
-          language: "English",
-          year: 1957,
-          duration: "96 min",
-          rating: 9.0,
-          videoUrl: "https://www.youtube.com/embed/TEN-2uTi2c0",
-          thumbnailUrl: "https://img.youtube.com/vi/TEN-2uTi2c0/maxresdefault.jpg",
-          featured: true,
-          trending: true,
-          status: "published",
-          views: 125000,
-          likes: 118000
+          "title": "12 Angry Men (1957)",
+          "description": "Sidney Lumet's masterpiece. A jury deliberates the fate of a young man accused of murder. One dissenting juror slowly convinces others to reconsider. Henry Fonda leads an ensemble cast in this claustrophobic courtroom drama. 96% on Rotten Tomatoes. AFI's #2 Courtroom Drama.",
+          "type": "movie",
+          "category": "Drama",
+          "language": "English",
+          "year": 1957,
+          "duration": "96 min",
+          "rating": 9.0,
+          "videoUrl": "https://www.youtube.com/embed/TEN-2uTi2c0",
+          "thumbnailUrl": "https://img.youtube.com/vi/TEN-2uTi2c0/maxresdefault.jpg",
+          "featured": true,
+          "trending": true,
+          "status": "published",
+          "views": 125000,
+          "likes": 118000
         
           }
             ]);
