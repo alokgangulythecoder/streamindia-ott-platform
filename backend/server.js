@@ -926,13 +926,15 @@ app.post('/api/seed', async (req, res) => {
       }
             console.log('🔧 MongoDB URI:', MONGOTESTDB_URI ? '✓ Set' : '✗ Missing');
             console.log('🔧 JWT Secret:', JWT_SECRET ? '✓ Set' : '✗ Missing');
-            console.log('\n📌 Seeding Content (70 items)...');
+            console.log('\n📌 Seeding Content (40 famous movies 1950-1970)...');
       await Content.insertMany([
 
-                // ================================================
-                // MOVIES — Indian public-domain on archive.org
-                // ================================================
-   // DRAMA MOVIES (10 items)
+        // ================================================
+        // FAMOUS MOVIES 1950-1970 — YouTube Embeds
+        // 40 items: 10 Drama + 10 Thriller + 10 Western + 10 Romance/Musical
+        // ================================================
+
+        // DRAMA MOVIES (10 items)
         {
           title: "12 Angry Men (1957)",
           description: "Sidney Lumet's masterpiece. A jury deliberates the fate of a young man accused of murder. One dissenting juror slowly convinces others to reconsider. Henry Fonda leads an ensemble cast in this claustrophobic courtroom drama. 96% on Rotten Tomatoes. AFI's #2 Courtroom Drama.",
@@ -1620,9 +1622,9 @@ app.post('/api/seed', async (req, res) => {
           likes: 31000
         }
 
-            ]);
-            console.log('✅ Content created: 40 items (10 movies + 10 series + 10 documentaries + 10 live)');
-        } else {
+      ]);
+      console.log('✅ Content seeded: 40 famous movies (1950-1970) — Drama, Thriller, Western, Romance/Musical');
+    } else {
             console.log(`ℹ️  Content already exists (${contentCount} items) — skipping content seed`);
         }
 
@@ -1632,7 +1634,7 @@ app.post('/api/seed', async (req, res) => {
                 admins:     'admin / admin123',
                 navigation: 5,
                 settings:   4,
-                content:    '40 items — 10 movies, 10 series, 10 documentaries, 10 live'
+                content:    '40 famous movies (1950-1970)'
             }
         });
     } catch (error) {
