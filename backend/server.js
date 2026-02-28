@@ -47,7 +47,7 @@ app.use((req, res, next) => {
 // ENVIRONMENT VARIABLES
 // ========================================
 
-const MONGOTESTDB_URI = process.env.MONGO_URI;
+const MONGOTESTDB_URI = process.env.MONGODB_URI;
  
 const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-change-me';
 
