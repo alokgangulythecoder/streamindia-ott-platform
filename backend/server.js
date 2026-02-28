@@ -920,10 +920,10 @@ app.post('/api/seed', async (req, res) => {
         const force = req.query.force === 'true';
 
     if (contentCount === 0 || force) {
-      if (force && contentCount > 0) {
-        console.log('⚠️ Force mode: Deleting existing content...');
+     // if (force && contentCount > 0) {
+   //     console.log('⚠️ Force mode: Deleting existing content...');
         await Content.deleteMany({});
-      }
+   //   }
             console.log('🔧 MongoDB URI:', MONGOTESTDB_URI ? '✓ Set' : '✗ Missing');
             console.log('🔧 JWT Secret:', JWT_SECRET ? '✓ Set' : '✗ Missing');
             console.log('\n📌 Seeding Content (70 items)...');
