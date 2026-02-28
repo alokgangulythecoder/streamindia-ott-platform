@@ -966,7 +966,7 @@ app.post('/api/seed', async (req, res) => {
           views: 125000,
           likes: 118000
         
-
+          }
             ]);
             console.log('✅ Content created: 40 items (10 movies + 10 series + 10 documentaries + 10 live)');
         } else {
