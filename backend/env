@@ -5,7 +5,6 @@ PORT=3000
 NODE_ENV=production
 
 # Database Configuration
-MONGO_URI=mongodb+srv://admin:alok12345@cluster0.ld2zdtw.mongodb.net/?appName=Cluster0/test?retryWrites=true&w=majority
 DBNAME=test
 
 # JWT Secret (CHANGE THIS IN PRODUCTION!)
