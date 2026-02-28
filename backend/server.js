@@ -58,19 +58,67 @@ console.log('🔧 JWT Secret:', JWT_SECRET ? '✓ Set' : '✗ Missing');
 // MONGODB CONNECTION
 // ========================================
 
+let isMongoConnected = false;
+
 if (MONGOTESTDB_URI) {
     console.log('🔄 Connecting to MongoDB...');
-    mongoose.connect(MONGOTESTDB_URI)
+    mongoose.connect(MONGOTESTDB_URI, {
+        serverSelectionTimeoutMS: 30000, // 30 seconds timeout
+        socketTimeoutMS: 45000,
+    })
         .then(() => {
+            isMongoConnected = true;
             console.log('✅ MongoDB Connected');
             console.log('📊 Database:', mongoose.connection.name);
         })
         .catch((error) => {
             console.error('❌ MongoDB Error:', error.message);
-            // Don't exit - let server start anyway
+            console.error('💡 Tip: Check your MONGO_URI in .env file');
         });
+    
+    // Handle connection errors after initial connection
+    mongoose.connection.on('error', (err) => {
+        console.error('❌ MongoDB connection error:', err);
+        isMongoConnected = false;
+    });
+    
+    mongoose.connection.on('disconnected', () => {
+        console.warn('⚠️  MongoDB disconnected');
+        isMongoConnected = false;
+    });
+    
+    mongoose.connection.on('reconnected', () => {
+        console.log('✅ MongoDB reconnected');
+        isMongoConnected = true;
+    });
 } else {
     console.warn('⚠️  No MongoDB URI - running without database');
+}
+
+// Helper function to ensure MongoDB is connected
+async function ensureMongoConnection() {
+    if (!MONGOTESTDB_URI) {
+        throw new Error('MongoDB URI not configured');
+    }
+    
+    // If already connected, return immediately
+    if (mongoose.connection.readyState === 1) {
+        return true;
+    }
+    
+    // Wait for connection with timeout
+    const timeout = 30000; // 30 seconds
+    const startTime = Date.now();
+    
+    while (mongoose.connection.readyState !== 1) {
+        if (Date.now() - startTime > timeout) {
+            throw new Error('MongoDB connection timeout. Please check your MONGO_URI and network connection.');
+        }
+        // Wait 100ms before checking again
+        await new Promise(resolve => setTimeout(resolve, 100));
+    }
+    
+    return true;
 }
 
 // ========================================
@@ -212,14 +260,41 @@ app.get('/', (req, res) => {
     });
 });
 
-app.get('/health', (req, res) => {
-    res.json({ 
-        status: 'ok',
+app.get('/health', async (req, res) => {
+    const dbState = mongoose.connection.readyState;
+    const dbStatus = {
+        0: 'disconnected',
+        1: 'connected',
+        2: 'connecting',
+        3: 'disconnecting'
+    };
+    
+    const health = {
+        status: dbState === 1 ? 'ok' : 'degraded',
         timestamp: new Date().toISOString(),
         uptime: process.uptime(),
-        database: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-        port: PORT
-    });
+        database: {
+            status: dbStatus[dbState] || 'unknown',
+            connected: dbState === 1,
+            name: mongoose.connection.name || 'N/A'
+        },
+        port: PORT,
+        mongoUri: MONGOTESTDB_URI ? 'configured' : 'missing'
+    };
+    
+    // Try a simple DB operation if connected
+    if (dbState === 1) {
+        try {
+            await mongoose.connection.db.admin().ping();
+            health.database.ping = 'success';
+        } catch (error) {
+            health.database.ping = 'failed';
+            health.database.error = error.message;
+        }
+    }
+    
+    const statusCode = dbState === 1 ? 200 : 503;
+    res.status(statusCode).json(health);
 });
 
 // ========================================
@@ -880,6 +955,20 @@ app.post('/api/seed', async (req, res) => {
     try {
         console.log('🌱 Starting seed...');
         console.log('🔧 MongoDB URI:', MONGOTESTDB_URI ? '✓ Set' : '✗ Missing');
+        
+        // ── Ensure MongoDB Connection ──────────────────────────
+        console.log('🔄 Checking MongoDB connection...');
+        try {
+            await ensureMongoConnection();
+            console.log('✅ MongoDB connection confirmed');
+        } catch (error) {
+            console.error('❌ MongoDB connection failed:', error.message);
+            return res.status(503).json({
+                error: 'Database connection failed',
+                message: error.message,
+                tip: 'Check your MONGO_URI environment variable and network connection'
+            });
+        }
 
         // ── Admin ──────────────────────────────────────────────
         const adminCount = await Admin.countDocuments();
@@ -1639,7 +1728,31 @@ app.post('/api/seed', async (req, res) => {
         });
     } catch (error) {
         console.error('❌ Seed error:', error);
-        res.status(500).json({ error: error.message });
+        console.error('Error details:', {
+            name: error.name,
+            message: error.message,
+            code: error.code
+        });
+        
+        let errorMessage = error.message;
+        let statusCode = 500;
+        
+        // Specific error handling
+        if (error.message.includes('timeout') || error.message.includes('buffering')) {
+            statusCode = 503;
+            errorMessage = 'Database connection timeout. Please check your MongoDB connection.';
+        } else if (error.message.includes('ENOTFOUND') || error.message.includes('ECONNREFUSED')) {
+            statusCode = 503;
+            errorMessage = 'Cannot reach MongoDB server. Check your MONGO_URI and network.';
+        } else if (error.code === 11000) {
+            errorMessage = 'Duplicate entry detected. Try force=true to overwrite: POST /api/seed?force=true';
+        }
+        
+        res.status(statusCode).json({ 
+            error: errorMessage,
+            details: error.message,
+            tip: 'Check server logs for more details'
+        });
     }
 });
 
